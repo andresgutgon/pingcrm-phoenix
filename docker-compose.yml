@@ -1,10 +1,4 @@
 services:
-  mailpit:
-    image: axllent/mailpit
-    container_name: coffee_mailpit
-    ports:
-      - 1025:1025
-      - 8025:8025
   web:
     build:
       context: .
@@ -13,8 +7,8 @@ services:
       - "4004:4004"
     volumes:
       - .:/app
-      - deps_cache:/app/deps
-      - node_modules_cache:/app/assets/node_modules
+      - ./deps:/app/deps
+      - ./assets/node_modules:/app/assets/node_modules
     depends_on:
       - db
       - mailpit
@@ -32,6 +26,7 @@ services:
 
     stdin_open: true
     tty: true
+
   db:
     image: postgres:16
     environment:
@@ -40,11 +35,13 @@ services:
     volumes:
       - ./docker/init-db.sh:/docker-entrypoint-initdb.d/init-db.sh
       - ./docker/pgdata:/var/lib/postgresql/data
-      - deps_cache:/app/deps
-      - node_modules_cache:/app/assets/node_modules
     ports:
       - "5436:5436"
 
-volumes:
-  deps_cache:
-  node_modules_cache:
+  # Trap emails on development
+  mailpit:
+    image: axllent/mailpit
+    container_name: coffee_mailpit
+    ports:
+      - 1025:1025
+      - 8025:8025

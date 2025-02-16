@@ -1,13 +1,53 @@
 {
-  "name": "assets",
+  "name": "coffee",
   "version": "1.0.0",
-  "description": "",
-  "main": "index.js",
+  "description": "Bring people together to collaborate and create in cafés and coworking spaces.",
+  "keywords": [
+    "phoenix",
+    "elixir",
+    "tailwindcss",
+    "typescript"
+  ],
+  "author": "Andrés Gutiérrez",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "dev:client": "node --experimental-strip-types scripts/build.ts --watch",
+    "dev:server": "node --experimental-strip-types scripts/build.ts --watch --ssr",
+    "tc": "tsc --noEmit",
+    "lint": "eslint js/",
+    "prettier": "prettier --write js/**/*.{ts,tsx}"
   },
-  "keywords": [],
-  "author": "",
-  "license": "ISC",
-  "packageManager": "pnpm@9.12.2"
+  "packageManager": "pnpm@9.12.2",
+  "type": "module",
+  "dependencies": {
+    "@inertiajs/react": "^2.0.3",
+    "axios": "^1.7.9",
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0"
+  },
+  "devDependencies": {
+    "@eslint/js": "^9.13.0",
+    "@inertiajs/core": "^2.0.3",
+    "@tailwindcss/forms": "^0.5.10",
+    "@tailwindcss/typography": "^0.5.15",
+    "@types/phoenix": "^1.6.5",
+    "@types/react": "19",
+    "@types/react-dom": "19",
+    "autoprefixer": "10.4.20",
+    "esbuild": "0.23.1",
+    "esbuild-copy-static-files": "0.1.0",
+    "esbuild-style-plugin": "^1.6.3",
+    "eslint": "^9.13.0",
+    "eslint-config-prettier": "^9.1.0",
+    "eslint-plugin-prettier": "^5.2.1",
+    "eslint-plugin-promise": "^7.1.0",
+    "globals": "^15.11.0",
+    "jsdom": "^25.0.1",
+    "postcss": "8.4.41",
+    "prettier": "3.3.3",
+    "tailwindcss": "3.4.10",
+    "tailwindcss-animate": "^1.0.7",
+    "typescript": "^5.7.0",
+    "typescript-eslint": "^8.11.0",
+    "vitest": "^2.1.4"
+  }
 }

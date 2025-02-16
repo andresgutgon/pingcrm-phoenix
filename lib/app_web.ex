@@ -42,6 +42,7 @@ defmodule AppWeb do
         formats: [:html, :json],
         layouts: [html: AppWeb.Layouts]
 
+      import Inertia.Controller
       use Gettext, backend: AppWeb.Gettext
 
       import Plug.Conn
@@ -50,32 +51,14 @@ defmodule AppWeb do
     end
   end
 
-  def live_view do
-    quote do
-      use Phoenix.LiveView,
-        layout: {AppWeb.Layouts, :app}
-
-      unquote(html_helpers())
-    end
-  end
-
-  def live_component do
-    quote do
-      use Phoenix.LiveComponent
-
-      unquote(html_helpers())
-    end
-  end
-
   def html do
     quote do
       use Phoenix.Component
+      import Inertia.HTML
 
-      # Import convenience functions from controllers
       import Phoenix.Controller,
         only: [get_csrf_token: 0, view_module: 1, view_template: 1]
 
-      # Include general helpers for rendering HTML
       unquote(html_helpers())
     end
   end
@@ -87,13 +70,9 @@ defmodule AppWeb do
 
       # HTML escaping functionality
       import Phoenix.HTML
-      # Core UI components
-      import AppWeb.CoreComponents
 
-      # Shortcut for generating JS commands
       alias Phoenix.LiveView.JS
 
-      # Routes generation with the ~p sigil
       unquote(verified_routes())
     end
   end
