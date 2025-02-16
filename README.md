@@ -1,5 +1,5 @@
 # Coffee Pitch
-Help people connect for potential collaborations in cafes and coworking spaces.
+Bring people together to collaborate and create in cafés and coworking spaces.
 
 
 ## Install deps in development
