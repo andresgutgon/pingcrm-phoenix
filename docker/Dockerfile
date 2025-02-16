@@ -11,30 +11,27 @@ RUN apt-get update && \
 RUN curl -sL https://deb.nodesource.com/setup_22.x | bash - && \
     apt-get install -y nodejs
 
-ADD . /app
-RUN mix local.rebar --force && \
-    mix local.hex --force
-
 RUN corepack enable
 ENV PNPM_HOME="/pnpm"
 ENV PATH="$PNPM_HOME:$PATH"
 
 WORKDIR /app
 
-# Only for new Phoenix projects
-# RUN mix archive.install --force hex phx_new 1.7.19
-
-FROM base AS dev
-
-WORKDIR /app
-
+# Copy mix files first to leverage Docker caching
 COPY mix.exs mix.lock ./
-RUN mix deps.get --force
+RUN mix local.rebar --force && \
+    mix local.hex --force && \
+    mix deps.get --only dev
 
+# Copy only the assets package files
 COPY assets/package.json assets/pnpm-lock.yaml ./assets/
 RUN pnpm install --prefix ./assets
 
+# Copy the remaining files
 COPY . .
+
+# Only for new Phoenix projects
+# RUN mix archive.install --force hex phx_new 1.7.19
 
 ARG MAILPIT_SMTP_HOST=mailpit
 ENV MAILPIT_SMTP_HOST=${MAILPIT_SMTP_HOST}
@@ -44,3 +41,4 @@ ENV MAILPIT_SMTP_PORT=${MAILPIT_SMTP_PORT}
 EXPOSE 4004
 
 CMD ["mix", "phx.server"]
+
