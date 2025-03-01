@@ -25,8 +25,8 @@ config :app, AppWeb.Endpoint,
   debug_errors: true,
   secret_key_base: "ZJdhzfq3sIfPMX0r8n2Uz3DkjMpObkvG/HtPvIgqZ6tkeryuPXV/2hwNQFxU7LQ5",
   watchers: [
-    esbuild: {Esbuild, :install_and_run, [:app, ~w(--sourcemap=inline --watch)]},
-    tailwind: {Tailwind, :install_and_run, [:app, ~w(--watch)]}
+    pnpm: ["run", "dev:client", cd: Path.expand("../assets", __DIR__)],
+    pnpm: ["run", "dev:server", cd: Path.expand("../assets", __DIR__)],
   ]
 
 config :app, App.Mailer,

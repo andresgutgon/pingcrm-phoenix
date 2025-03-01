@@ -1,4 +1,4 @@
-defmodule AppWeb.PageControllerTest do
+defmodule AppWeb.HomeControllerTest do
   use AppWeb.ConnCase
 
   test "GET /", %{conn: conn} do
