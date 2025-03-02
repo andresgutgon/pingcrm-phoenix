@@ -5,14 +5,17 @@ services:
       dockerfile: docker/Dockerfile
     ports:
       - "4004:4004"
+      - "5173:5173"
     volumes:
       - .:/app
       - ./deps:/app/deps
-      - ./assets/node_modules:/app/assets/node_modules
+      - node_modules_container:/app/assets/node_modules
+      - /Users/andres/code/opensource/inertia-phoenix:/inertia-phoenix
     depends_on:
       - db
       - mailpit
     environment:
+      - CHOKIDAR_USEPOLLING=true # Fix for file watching in Docker
       - MAILPIT_SMTP_HOST=coffee_mailpit
       - MAILPIT_SMTP_PORT=1025
       - PORT=4004
@@ -36,7 +39,7 @@ services:
       - ./docker/init-db.sh:/docker-entrypoint-initdb.d/init-db.sh
       - ./docker/pgdata:/var/lib/postgresql/data
     ports:
-      - "5436:5436"
+      - "5436:5432"
 
   # Trap emails on development
   mailpit:
@@ -45,3 +48,6 @@ services:
     ports:
       - 1025:1025
       - 8025:8025
+volumes:
+  # Having this volume keep inside node_modules independent of the host
+  node_modules_container:

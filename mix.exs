@@ -38,8 +38,6 @@ defmodule App.MixProject do
       {:ecto_sql, "~> 3.10"},
       {:postgrex, ">= 0.0.0"},
       {:phoenix_html, "~> 4.1"},
-      {:phoenix_live_reload, "~> 1.2", only: :dev},
-      {:phoenix_live_view, "~> 1.0.0"},
       {:floki, ">= 0.30.0", only: :test},
       {:phoenix_live_dashboard, "~> 0.8.3"},
       {:swoosh, "~> 1.5"},
@@ -52,7 +50,8 @@ defmodule App.MixProject do
       {:dns_cluster, "~> 0.1.1"},
       {:bandit, "~> 1.5"},
       {:mix_test_watch, "~> 1.0", only: [:dev, :test], runtime: false},
-      {:inertia, "~> 2.2.0"}
+      # {:inertia, "~> 2.3.0"}
+      {:inertia, path: "/inertia-phoenix"}
     ]
   end
 
@@ -68,15 +67,8 @@ defmodule App.MixProject do
       "ecto.setup": ["ecto.create", "ecto.migrate", "run priv/repo/seeds.exs"],
       "ecto.reset": ["ecto.drop", "ecto.setup"],
       test: ["ecto.create --quiet", "ecto.migrate --quiet", "test"],
-      # FIX This now that tailwind and JS are run in a custom Esbuild
-      "assets.setup": ["tailwind.install --if-missing", "esbuild.install --if-missing"],
-      "assets.build": ["tailwind app", "esbuild app", "esbuild ssr"],
-      "assets.deploy": [
-        "tailwind app --minify",
-        "esbuild app --minify",
-        "esbuild ssr",
-        "phx.digest"
-      ]
+      "assets.build": ["pnpm run build"],
+      "assets.deploy": ["pnpm run build", "phx.digest"]
     ]
   end
 end

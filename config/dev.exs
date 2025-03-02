@@ -3,7 +3,10 @@ import Config
 config :app, App.Repo,
   username: "coffee",
   password: "secret",
+  # Running in the host this has to be the IP address of the container
   hostname: "db",
+  # Por from the host is exposed as 5432
+  # port: 5432,
   database: "coffee_pitch_development",
   stacktrace: true,
   show_sensitive_data_on_connection_error: true,
@@ -25,8 +28,7 @@ config :app, AppWeb.Endpoint,
   debug_errors: true,
   secret_key_base: "ZJdhzfq3sIfPMX0r8n2Uz3DkjMpObkvG/HtPvIgqZ6tkeryuPXV/2hwNQFxU7LQ5",
   watchers: [
-    pnpm: ["run", "dev:client", cd: Path.expand("../assets", __DIR__)],
-    pnpm: ["run", "dev:server", cd: Path.expand("../assets", __DIR__)],
+    pnpm: ["run", "dev", cd: Path.expand("../assets", __DIR__)],
   ]
 
 config :app, App.Mailer,
@@ -60,16 +62,6 @@ config :app, App.Mailer,
 # If desired, both `http:` and `https:` keys can be
 # configured to run both http and https servers on
 # different ports.
-
-# Watch static and templates for browser reloading.
-config :app, AppWeb.Endpoint,
-  live_reload: [
-    patterns: [
-      ~r"priv/static/(?!uploads/).*(js|css|png|jpeg|jpg|gif|svg)$",
-      ~r"priv/gettext/.*(po)$",
-      ~r"lib/app_web/(controllers|live|components)/.*(ex|heex)$"
-    ]
-  ]
 
 # Enable dev routes for dashboard and mailbox
 config :app, dev_routes: true

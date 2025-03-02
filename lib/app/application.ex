@@ -13,8 +13,10 @@ defmodule App.Application do
       {DNSCluster, query: Application.get_env(:app, :dns_cluster_query) || :ignore},
       {Phoenix.PubSub, name: App.PubSub},
       {Finch, name: App.Finch},
-
-      {Inertia.SSR, path: Path.join([Application.app_dir(:app), "priv"])},
+      {Inertia.SSR,
+       path: Path.join([Application.app_dir(:app), "priv", "ssr-js"]),
+       esm: true,
+       esm_cache_busting: Mix.env() != :prod},
       AppWeb.Endpoint
     ]
 

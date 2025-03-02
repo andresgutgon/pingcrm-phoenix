@@ -24,8 +24,6 @@ config :app, AppWeb.Endpoint,
 # at the `config/runtime.exs`.
 config :app, App.Mailer, adapter: Swoosh.Adapters.Local
 
-# config/config.exs
-
 config :inertia,
   endpoint: AppWeb.Endpoint,
   static_paths: ["/assets/app.js"],
