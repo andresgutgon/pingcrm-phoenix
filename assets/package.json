@@ -1,5 +1,5 @@
 {
-  "name": "coffee",
+  "name": "pingcrm-phoenix-react",
   "version": "1.0.0",
   "private": true,
   "description": "PingCRM inertia.js example with Phoenix and TailwindCSS",

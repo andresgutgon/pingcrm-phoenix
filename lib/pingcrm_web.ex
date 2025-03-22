@@ -1,12 +1,12 @@
-defmodule AppWeb do
+defmodule PingcrmWeb do
   @moduledoc """
   The entrypoint for defining your web interface, such
   as controllers, components, channels, and so on.
 
   This can be used in your application as:
 
-      use AppWeb, :controller
-      use AppWeb, :html
+      use PingcrmWeb, :controller
+      use PingcrmWeb, :html
 
   The definitions below will be executed for every controller,
   component, etc, so keep them short and clean, focused
@@ -40,9 +40,9 @@ defmodule AppWeb do
     quote do
       use Phoenix.Controller,
         formats: [:html, :json],
-        layouts: [html: AppWeb.Layouts]
+        layouts: [html: PingcrmWeb.Layouts]
 
-      use Gettext, backend: AppWeb.Gettext
+      use Gettext, backend: PingcrmWeb.Gettext
 
       import Plug.Conn
 
@@ -66,7 +66,7 @@ defmodule AppWeb do
   defp html_helpers do
     quote do
       # Translation
-      use Gettext, backend: AppWeb.Gettext
+      use Gettext, backend: PingcrmWeb.Gettext
 
       # HTML escaping functionality
       import Phoenix.HTML
@@ -80,9 +80,9 @@ defmodule AppWeb do
   def verified_routes do
     quote do
       use Phoenix.VerifiedRoutes,
-        endpoint: AppWeb.Endpoint,
-        router: AppWeb.Router,
-        statics: AppWeb.static_paths()
+        endpoint: PingcrmWeb.Endpoint,
+        router: PingcrmWeb.Router,
+        statics: PingcrmWeb.static_paths()
     end
   end
 

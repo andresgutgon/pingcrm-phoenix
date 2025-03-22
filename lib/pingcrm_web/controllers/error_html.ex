@@ -1,17 +1,17 @@
-defmodule AppWeb.ErrorHTML do
+defmodule PingcrmWeb.ErrorHTML do
   @moduledoc """
   This module is invoked by your endpoint in case of errors on HTML requests.
 
   See config/config.exs.
   """
-  use AppWeb, :html
+  use PingcrmWeb, :html
 
   # If you want to customize your error pages,
   # uncomment the embed_templates/1 call below
   # and add pages to the error directory:
   #
-  #   * lib/app_web/controllers/error_html/404.html.heex
-  #   * lib/app_web/controllers/error_html/500.html.heex
+  #   * lib/pingcrm_web/controllers/error_html/404.html.heex
+  #   * lib/pingcrm_web/controllers/error_html/500.html.heex
   #
   # embed_templates "error_html/*"
 

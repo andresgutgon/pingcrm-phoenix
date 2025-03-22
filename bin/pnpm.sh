@@ -10,5 +10,5 @@ if [ $# -eq 0 ]; then
   exit 1
 fi
 
-COMMAND="cd /app/assets && pnpm $@"
+COMMAND="cd /pingcrm/assets && pnpm $@"
 docker-compose exec web sh -c "$COMMAND"

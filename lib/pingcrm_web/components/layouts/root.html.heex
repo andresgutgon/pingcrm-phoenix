@@ -20,8 +20,10 @@
       <script type="module" src="http://localhost:5173/@vite/client"></script>
       <script type="module" src="http://localhost:5173/js/app.tsx"></script>
     <% else %>
-      <!-- Production render CSS from manifest -->
-      <script type="module" crossorigin defer phx-track-static src={Vite.Manifest.client_bundle()}>
+      <%= for css <- Vite.Manifest.css_files() do %>
+        <link rel="stylesheet" phx-track-static href={css} />
+      <% end %>
+      <script type="module" crossorigin defer phx-track-static src={Vite.Manifest.js_bundle()}>
       </script>
     <% end %>
   </head>

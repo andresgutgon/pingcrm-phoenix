@@ -1,5 +1,5 @@
-defmodule App.Repo do
+defmodule Pingcrm.Repo do
   use Ecto.Repo,
-    otp_app: :app,
+    otp_app: :pingcrm,
     adapter: Ecto.Adapters.Postgres
 end

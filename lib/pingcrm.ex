@@ -1,4 +1,4 @@
-defmodule App do
+defmodule Pingcrm do
   @moduledoc """
   App keeps the contexts that define your domain
   and business logic.

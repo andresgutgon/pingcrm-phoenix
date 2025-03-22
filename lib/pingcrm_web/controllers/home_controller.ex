@@ -1,5 +1,5 @@
-defmodule AppWeb.HomeController do
-  use AppWeb, :controller
+defmodule PingcrmWeb.HomeController do
+  use PingcrmWeb, :controller
 
   def index(conn, _params) do
     ssr = true

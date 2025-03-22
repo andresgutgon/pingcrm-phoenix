@@ -1,5 +1,5 @@
-defmodule AppWeb.HomeControllerTest do
-  use AppWeb.ConnCase
+defmodule PingcrmWeb.HomeControllerTest do
+  use PingcrmWeb.ConnCase
 
   test "GET /", %{conn: conn} do
     conn = get(conn, ~p"/")

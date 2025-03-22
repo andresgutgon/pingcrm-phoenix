@@ -1,6 +1,6 @@
-# Coffee Pitch
-Bring people together to collaborate and create in cafés and coworking spaces.
-
+# Ping CRM
+This [InertiaJS's official example](https://inertiajs.com/demo-application)
+built with Elixir, InertiaJS and React.
 
 ## Install deps in development
 Elixir is run inside a docker container. To install the dependencies run the following command:

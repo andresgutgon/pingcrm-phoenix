@@ -5,7 +5,7 @@ defmodule Vite do
   def manifest_file, do: "priv/static/assets/vite_manifest.json"
   def cache_key, do: {:vite, "vite_manifest"}
   def default_env, do: :dev
-  def endpoint, do: AppWeb.Endpoint
+  def endpoint, do: PingcrmWeb.Endpoint
 
   defmodule PhxManifestReader do
     @moduledoc """
@@ -29,7 +29,7 @@ defmodule Vite do
 
     @spec current_env() :: atom()
     def current_env do
-      Application.get_env(:app, :env, Vite.default_env())
+      Application.get_env(:pingcrm, :env, Vite.default_env())
     end
 
     @spec do_read(atom()) :: map()
@@ -81,8 +81,16 @@ defmodule Vite do
     @spec read() :: map()
     def read, do: PhxManifestReader.read()
 
-    @spec client_bundle() :: String.t()
-    def client_bundle, do: get_file(@app_file)
+    @spec js_bundle() :: String.t()
+    def js_bundle, do: get_file(@app_file)
+
+    @spec css_files() :: [String.t()]
+    def css_files do
+      read()
+      |> get_in([@app_file, "css"])
+      |> List.wrap()
+      |> Enum.map(&prepend_slash/1)
+    end
 
     @spec get_file(String.t()) :: String.t()
     def get_file(file) do

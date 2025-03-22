@@ -3,20 +3,21 @@ services:
     build:
       context: .
       dockerfile: docker/Dockerfile
+      target: dev
     ports:
       - "4004:4004"
       - "5173:5173"
     volumes:
-      - .:/app
-      - ./deps:/app/deps
-      - node_modules_container:/app/assets/node_modules
+      - .:/pingcrm
+      - ./deps:/pingcrm/deps
+      - node_modules_container:/pingcrm/assets/node_modules
       - /Users/andres/code/opensource/inertia-phoenix:/inertia-phoenix
     depends_on:
       - db
       - mailpit
     environment:
       - CHOKIDAR_USEPOLLING=true # Fix for file watching in Docker
-      - MAILPIT_SMTP_HOST=coffee_mailpit
+      - MAILPIT_SMTP_HOST=pingcrm_mailpit
       - MAILPIT_SMTP_PORT=1025
       - PORT=4004
     # require IEx
@@ -29,25 +30,36 @@ services:
 
     stdin_open: true
     tty: true
+    networks:
+      - pingcrm_network
 
   db:
     image: postgres:16
     environment:
-      - "POSTGRES_USER=coffee"
+      - "POSTGRES_USER=pingcrm"
       - "POSTGRES_PASSWORD=secret"
     volumes:
       - ./docker/init-db.sh:/docker-entrypoint-initdb.d/init-db.sh
       - ./docker/pgdata:/var/lib/postgresql/data
     ports:
       - "5436:5432"
+    networks:
+      - pingcrm_network
 
   # Trap emails on development
   mailpit:
     image: axllent/mailpit
-    container_name: coffee_mailpit
+    container_name: pingcrm_mailpit
     ports:
       - 1025:1025
       - 8025:8025
+    networks:
+      - pingcrm_network
 volumes:
   # Having this volume keep inside node_modules independent of the host
   node_modules_container:
+
+networks:
+  pingcrm_network:
+    name: pingcrm_network
+    driver: bridge
