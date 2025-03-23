@@ -1,17 +1,26 @@
 {
-  "name": "coffee",
+  "name": "pingcrm-phoenix-react",
   "version": "1.0.0",
-  "description": "Bring people together to collaborate and create in cafés and coworking spaces.",
+  "private": true,
+  "description": "PingCRM inertia.js example with Phoenix and TailwindCSS",
   "keywords": [
     "phoenix",
     "elixir",
     "tailwindcss",
-    "typescript"
+    "typescript",
+    "vite"
   ],
   "author": "Andrés Gutiérrez",
   "scripts": {
-    "dev:client": "node --experimental-strip-types scripts/build.ts --watch",
-    "dev:server": "node --experimental-strip-types scripts/build.ts --watch --ssr",
+    "css": "tailwindcss --input=css/app.css --output=../priv/static/assets/app.css",
+    "css:dev": "pnpm run css --watch",
+    "js:client:dev": "NODE_ENV=development vite --host 0.0.0.0 --mode development",
+    "js:server:dev": "NODE_ENV=development VITE_SSR=true vite build --watch --mode development --ssr",
+    "dev": "concurrently -k -n js:client,js:server,css -c cyan,magenta,green \"pnpm run js:client:dev\" \"pnpm run js:server:dev\" \"pnpm run css:dev\"",
+    "css:prod": "pnpm run css --minify",
+    "js:client:prod": "NODE_ENV=production vite build --mode production",
+    "js:server:prod": "NODE_ENV=production VITE_SSR=true vite build --mode production",
+    "build": "pnpm run css:prod && pnpm run js:client:prod && pnpm run js:server:prod",
     "tc": "tsc --noEmit",
     "lint": "eslint js/",
     "prettier": "prettier --write js/**/*.{ts,tsx}"
@@ -32,14 +41,15 @@
     "@types/phoenix": "^1.6.5",
     "@types/react": "19",
     "@types/react-dom": "19",
+    "@vitejs/plugin-react": "^4.3.4",
     "autoprefixer": "10.4.20",
-    "esbuild": "0.23.1",
-    "esbuild-copy-static-files": "0.1.0",
-    "esbuild-style-plugin": "^1.6.3",
+    "concurrently": "^9.1.2",
     "eslint": "^9.13.0",
     "eslint-config-prettier": "^9.1.0",
     "eslint-plugin-prettier": "^5.2.1",
     "eslint-plugin-promise": "^7.1.0",
+    "eslint-plugin-react-hooks": "^5.2.0",
+    "eslint-plugin-react-refresh": "^0.4.19",
     "globals": "^15.11.0",
     "jsdom": "^25.0.1",
     "postcss": "8.4.41",
@@ -48,6 +58,7 @@
     "tailwindcss-animate": "^1.0.7",
     "typescript": "^5.7.0",
     "typescript-eslint": "^8.11.0",
+    "vite": "^6.2.0",
     "vitest": "^2.1.4"
   }
 }

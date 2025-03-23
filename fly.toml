@@ -1,0 +1,34 @@
+# fly.toml app configuration file generated for pingcrm-phoenix on 2025-03-23T18:21:30+01:00
+#
+# See https://fly.io/docs/reference/configuration/ for information about how to use this file.
+#
+app = 'pingcrm-phoenix'
+primary_region = 'mad'
+kill_signal = 'SIGTERM'
+
+[build]
+dockerfile = "docker/Dockerfile"
+
+# This does not work. Deploy fails
+# [deploy]
+#   release_command = '/app/bin/migrate'
+
+[env]
+  PHX_HOST = 'pingcrm-phoenix.fly.dev'
+  PORT = '8080'
+
+[http_service]
+  internal_port = 8080
+  force_https = true
+  auto_stop_machines = 'stop'
+  auto_start_machines = true
+  min_machines_running = 0
+  processes = ['app']
+
+  [http_service.concurrency]
+    type = 'connections'
+    hard_limit = 1000
+    soft_limit = 1000
+
+[[vm]]
+  size = 'shared-cpu-1x'

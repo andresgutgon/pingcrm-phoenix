@@ -1,10 +1,13 @@
 import Config
 
-config :app, App.Repo,
-  username: "coffee",
+config :pingcrm, Pingcrm.Repo,
+  username: "pingcrm",
   password: "secret",
+  # Running in the host this has to be the IP address of the container
   hostname: "db",
-  database: "coffee_pitch_development",
+  # Por from the host is exposed as 5432
+  # port: 5432,
+  database: "pingcrm_development",
   stacktrace: true,
   show_sensitive_data_on_connection_error: true,
   pool_size: 10
@@ -15,7 +18,7 @@ config :app, App.Repo,
 # The watchers configuration can be used to run external
 # watchers to your application. For example, we can use it
 # to bundle .js and .css sources.
-config :app, AppWeb.Endpoint,
+config :pingcrm, PingcrmWeb.Endpoint,
   # Bind to 0.0.0.0 to expose the server to the docker host machine.
   # This makes make the service accessible from any network interface.
   # Change to `ip: {127, 0, 0, 1}` to allow access only from the server machine.
@@ -25,11 +28,10 @@ config :app, AppWeb.Endpoint,
   debug_errors: true,
   secret_key_base: "ZJdhzfq3sIfPMX0r8n2Uz3DkjMpObkvG/HtPvIgqZ6tkeryuPXV/2hwNQFxU7LQ5",
   watchers: [
-    pnpm: ["run", "dev:client", cd: Path.expand("../assets", __DIR__)],
-    pnpm: ["run", "dev:server", cd: Path.expand("../assets", __DIR__)],
+    pnpm: ["run", "dev", cd: Path.expand("../assets", __DIR__)],
   ]
 
-config :app, App.Mailer,
+config :pingcrm, Pingcrm.Mailer,
   adapter: Swoosh.Adapters.SMTP,
   smtp_host: System.get_env("MAILPIT_SMTP_HOST") || "mailpit",
   smtp_port: String.to_integer(System.get_env("MAILPIT_SMTP_PORT") || "1025"),
@@ -61,18 +63,8 @@ config :app, App.Mailer,
 # configured to run both http and https servers on
 # different ports.
 
-# Watch static and templates for browser reloading.
-config :app, AppWeb.Endpoint,
-  live_reload: [
-    patterns: [
-      ~r"priv/static/(?!uploads/).*(js|css|png|jpeg|jpg|gif|svg)$",
-      ~r"priv/gettext/.*(po)$",
-      ~r"lib/app_web/(controllers|live|components)/.*(ex|heex)$"
-    ]
-  ]
-
 # Enable dev routes for dashboard and mailbox
-config :app, dev_routes: true
+config :pingcrm, dev_routes: true
 
 # Do not include metadata nor timestamps in development logs
 config :logger, :console, format: "[$level] $message\n"

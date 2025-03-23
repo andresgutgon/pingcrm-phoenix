@@ -1,9 +1,9 @@
-defmodule App.MixProject do
+defmodule Pingcrm.MixProject do
   use Mix.Project
 
   def project do
     [
-      app: :app,
+      app: :pingcrm,
       version: "0.1.0",
       elixir: "~> 1.14",
       elixirc_paths: elixirc_paths(Mix.env()),
@@ -18,7 +18,7 @@ defmodule App.MixProject do
   # Type `mix help compile.app` for more information.
   def application do
     [
-      mod: {App.Application, []},
+      mod: {Pingcrm.Application, []},
       extra_applications: [:logger, :runtime_tools]
     ]
   end
@@ -38,8 +38,6 @@ defmodule App.MixProject do
       {:ecto_sql, "~> 3.10"},
       {:postgrex, ">= 0.0.0"},
       {:phoenix_html, "~> 4.1"},
-      {:phoenix_live_reload, "~> 1.2", only: :dev},
-      {:phoenix_live_view, "~> 1.0.0"},
       {:floki, ">= 0.30.0", only: :test},
       {:phoenix_live_dashboard, "~> 0.8.3"},
       {:swoosh, "~> 1.5"},
@@ -52,7 +50,12 @@ defmodule App.MixProject do
       {:dns_cluster, "~> 0.1.1"},
       {:bandit, "~> 1.5"},
       {:mix_test_watch, "~> 1.0", only: [:dev, :test], runtime: false},
-      {:inertia, "~> 2.2.0"}
+      # {:inertia, "~> 2.3.0"}
+      # This for changing the code of inertia during development.
+      # {:inertia, path: "/inertia-phoenix"}
+      {:inertia,
+       git: "https://github.com/andresgutgon/inertia-phoenix.git",
+       branch: "feature/add-esm-module-option"}
     ]
   end
 
@@ -68,15 +71,8 @@ defmodule App.MixProject do
       "ecto.setup": ["ecto.create", "ecto.migrate", "run priv/repo/seeds.exs"],
       "ecto.reset": ["ecto.drop", "ecto.setup"],
       test: ["ecto.create --quiet", "ecto.migrate --quiet", "test"],
-      # FIX This now that tailwind and JS are run in a custom Esbuild
-      "assets.setup": ["tailwind.install --if-missing", "esbuild.install --if-missing"],
-      "assets.build": ["tailwind app", "esbuild app", "esbuild ssr"],
-      "assets.deploy": [
-        "tailwind app --minify",
-        "esbuild app --minify",
-        "esbuild ssr",
-        "phx.digest"
-      ]
+      "assets.build": ["cmd pnpm --dir assets run build"],
+      "assets.deploy": ["cmd pnpm --dir assets run build", "phx.digest"]
     ]
   end
 end

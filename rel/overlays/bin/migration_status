@@ -1,0 +1,13 @@
+#!/bin/sh
+set -e
+
+cd -P -- "$(dirname -- "$0")"
+
+MODE=${1:-default}
+
+if [ "$MODE" = "data" ]; then
+  exec ./pingcrm eval "Pingcrm.Release.migration_status(:data)"
+else
+  exec ./pingcrm eval "Pingcrm.Release.migration_status(:default)"
+fi
+

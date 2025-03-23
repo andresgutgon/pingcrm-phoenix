@@ -1,18 +1,18 @@
 import Config
 
-config :app,
-  ecto_repos: [App.Repo],
+config :pingcrm,
+  ecto_repos: [Pingcrm.Repo],
   generators: [timestamp_type: :utc_datetime]
 
 # Configures the endpoint
-config :app, AppWeb.Endpoint,
+config :pingcrm, PingcrmWeb.Endpoint,
   url: [host: "localhost"],
   adapter: Bandit.PhoenixAdapter,
   render_errors: [
-    formats: [html: AppWeb.ErrorHTML, json: AppWeb.ErrorJSON],
+    formats: [html: PingcrmWeb.ErrorHTML, json: PingcrmWeb.ErrorJSON],
     layout: false
   ],
-  pubsub_server: App.PubSub,
+  pubsub_server: Pingcrm.PubSub,
   live_view: [signing_salt: "zsXRpt9Y"]
 
 # Configures the mailer
@@ -22,12 +22,10 @@ config :app, AppWeb.Endpoint,
 #
 # For production it's recommended to configure a different adapter
 # at the `config/runtime.exs`.
-config :app, App.Mailer, adapter: Swoosh.Adapters.Local
-
-# config/config.exs
+config :pingcrm, Pingcrm.Mailer, adapter: Swoosh.Adapters.Local
 
 config :inertia,
-  endpoint: AppWeb.Endpoint,
+  endpoint: PingcrmWeb.Endpoint,
   static_paths: ["/assets/app.js"],
   default_version: "1",
   camelize_props: true,
