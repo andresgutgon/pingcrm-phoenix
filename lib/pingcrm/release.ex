@@ -6,60 +6,63 @@ defmodule Pingcrm.Release do
   @app :pingcrm
 
   @doc """
-  Print the migration status for configured Repos' migrations.
+  Print migration status for the given type: :default or :data.
   """
-  def migration_status do
-    for repo <- repos(), do: print_migrations_for(repo)
-  end
-
-  def migrate(opts \\ [all: true]) do
+  def migration_status(type \\ :default) do
     load_app()
 
     for repo <- repos() do
-      {:ok, _, _} = Ecto.Migrator.with_repo(repo, &Ecto.Migrator.run(&1, :up, opts))
+      path = migrations_path(repo, type)
+
+      {:ok, repo_status, _} =
+        Ecto.Migrator.with_repo(repo, &Ecto.Migrator.migrations(&1, path), mode: :temporary)
+
+      print_migration_status(repo, repo_status)
     end
   end
 
-  def rollback(repo, version) do
-    load_app()
-    {:ok, _, _} = Ecto.Migrator.with_repo(repo, &Ecto.Migrator.run(&1, :down, to: version))
+  def migrate(opts \\ [all: true]) do
+    migrate_type(:default, opts)
   end
 
-  defp print_migrations_for(repo) do
-    paths = repo_migrations_path(repo)
+  def migrate_data(opts \\ [all: true]) do
+    migrate_type(:data, opts)
+  end
 
-    {:ok, repo_status, _} =
-      Ecto.Migrator.with_repo(repo, &Ecto.Migrator.migrations(&1, paths), mode: :temporary)
+  def rollback(repo, version, type \\ :default) do
+    load_app()
+    path = migrations_path(repo, type)
+    {:ok, _, _} = Ecto.Migrator.with_repo(repo, &Ecto.Migrator.run(&1, path, :down, to: version))
+  end
 
+  defp migrate_type(type, opts) do
+    load_app()
+
+    for repo <- repos() do
+      path = migrations_path(repo, type)
+      {:ok, _, _} = Ecto.Migrator.with_repo(repo, &Ecto.Migrator.run(&1, path, :up, opts))
+    end
+  end
+
+  defp migrations_path(repo, :default), do: Ecto.Migrator.migrations_path(repo, "migrations")
+  defp migrations_path(repo, :data), do: Ecto.Migrator.migrations_path(repo, "data_migrations")
+
+  defp print_migration_status(repo, status) do
     IO.puts(
       """
       Repo: #{inspect(repo)}
       Status   Migration ID   Migration Name
       --------------------------------------------------
       """ <>
-        Enum.map_join(repo_status, "\n", fn {status, number, description} ->
-          "  #{pad(status, 10)}#{pad(number, 16)}#{description}"
+        Enum.map_join(status, "\n", fn {stat, num, name} ->
+          "  #{pad(stat, 10)}#{pad(num, 16)}#{name}"
         end) <> "\n"
     )
   end
 
-  defp repo_migrations_path(repo) do
-    config = repo.config()
-    priv = config[:priv] || "priv/#{repo |> Module.split() |> List.last() |> Macro.underscore()}"
-    config |> Keyword.fetch!(:otp_app) |> Application.app_dir() |> Path.join(priv)
-  end
+  defp pad(content, size), do: to_string(content) |> String.pad_trailing(size)
 
-  defp pad(content, pad) do
-    content
-    |> to_string
-    |> String.pad_trailing(pad)
-  end
+  defp repos, do: Application.fetch_env!(@app, :ecto_repos)
 
-  defp repos do
-    Application.fetch_env!(@app, :ecto_repos)
-  end
-
-  defp load_app do
-    Application.load(@app)
-  end
+  defp load_app, do: Application.load(@app)
 end
