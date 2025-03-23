@@ -18,6 +18,7 @@ defmodule PingcrmWeb.HomeController do
       %{
         id: n.id,
         name: n.name,
+        age: n.age,
         gender: n.gender,
         year: n.year,
         movie: n.movie,

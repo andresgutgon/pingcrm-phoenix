@@ -7,6 +7,7 @@ type Nomination = {
   year: number
   movie: string
   won: boolean
+  age: number
 }
 type Props = PageProps & {
   nominations: Nomination[]
@@ -20,6 +21,7 @@ export default function HomePage({ nominations }: Props) {
             <thead>
               <tr className='bg-pink-100 text-xs text-pink-800 font-semibold uppercase tracking-wider shadow-sm rounded-t-xl'>
                 <th className='px-4 py-3 text-left rounded-tl-xl'>Name</th>
+                <th className='px-4 py-3 text-left'>Age</th>
                 <th className='px-4 py-3 text-left'>Gender</th>
                 <th className='px-4 py-3 text-left'>Movie</th>
                 <th className='px-4 py-3 text-left'>Year</th>
@@ -32,6 +34,7 @@ export default function HomePage({ nominations }: Props) {
                   <td className='px-4 py-3 font-medium text-gray-900'>
                     {nom.name}
                   </td>
+                  <td className='px-4 py-3 text-gray-600'>{nom.age}</td>
                   <td className='px-4 py-3 text-gray-600'>{nom.gender}</td>
                   <td className='px-4 py-3 text-gray-600'>{nom.movie}</td>
                   <td className='px-4 py-3 text-gray-600'>{nom.year}</td>

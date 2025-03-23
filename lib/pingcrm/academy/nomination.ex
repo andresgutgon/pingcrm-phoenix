@@ -4,6 +4,7 @@ defmodule Pingcrm.Academy.Nomination do
 
   schema "nominations" do
     field :name, :string
+    field :age, :integer
     field :year, :integer
     field :movie, :string
     field :won, :boolean, default: false
