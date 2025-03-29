@@ -2,12 +2,14 @@ import path from 'node:path'
 import type { ConfigEnv, UserConfig } from 'vite'
 import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
+import tailwindcss from '@tailwindcss/vite'
 import { symlinkNodeModulesPlugin } from './vite/symlinkPlugin'
 const isSSR = process.env.VITE_SSR === 'true'
 
 const ALIAS = {
   '@': path.resolve(__dirname, './js'),
 }
+const PLUGINS = [react(), tailwindcss()]
 export default defineConfig(({ mode }: ConfigEnv) => {
   const isProd = mode === 'production'
   const isDev = mode === 'development'
@@ -23,7 +25,7 @@ export default defineConfig(({ mode }: ConfigEnv) => {
 
   if (isSSR) {
     const config: UserConfig = {
-      plugins: [react(), ...(isProd ? [] : [symlinkNodeModulesPlugin()])],
+      plugins: [...PLUGINS, ...(isProd ? [] : [symlinkNodeModulesPlugin()])],
       resolve: { alias: ALIAS },
       build: {
         ssr: true,
@@ -49,7 +51,7 @@ export default defineConfig(({ mode }: ConfigEnv) => {
   } else {
     return {
       publicDir: 'static',
-      plugins: [react()],
+      plugins: PLUGINS,
       resolve: { alias: ALIAS },
       build: {
         target: 'esnext',
