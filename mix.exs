@@ -51,11 +51,12 @@ defmodule Pingcrm.MixProject do
       {:bandit, "~> 1.5"},
       {:mix_test_watch, "~> 1.0", only: [:dev, :test], runtime: false},
       # {:inertia, "~> 2.3.0"}
-      # This for changing the code of inertia during development.
-      # {:inertia, path: "/inertia-phoenix"}
       {:inertia,
        git: "https://github.com/andresgutgon/inertia-phoenix.git",
-       branch: "feature/add-esm-module-option"}
+       branch: "feature/inertia-vitejs-integration"},
+      {:vitex,
+       git: "https://github.com/andresgutgon/vitex.git",
+       ref: "a12b2209fde3206f40a71f6dbfb7a5935f81f746"}
     ]
   end
 

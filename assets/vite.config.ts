@@ -1,78 +1,47 @@
-import path from 'node:path'
-import type { ConfigEnv, UserConfig } from 'vite'
-import { defineConfig } from 'vite'
+import { resolve } from 'node:path'
+import { defineConfig, type ConfigEnv } from 'vite'
 import react from '@vitejs/plugin-react'
 import tailwindcss from '@tailwindcss/vite'
-import { symlinkNodeModulesPlugin } from './vite/symlinkPlugin'
-const isSSR = process.env.VITE_SSR === 'true'
+import vitexPlugin from '../deps/vitex/priv/vitejs/vitePlugin.js'
 
-const ALIAS = {
-  '@': path.resolve(__dirname, './js'),
-}
-const PLUGINS = [react(), tailwindcss()]
+const isSSR = process.env.VITE_SSR === 'true'
+const input: Record<string, string> = isSSR
+  ? { ssr: './js/ssr.tsx' }
+  : { app: './js/app.tsx' }
+
 export default defineConfig(({ mode }: ConfigEnv) => {
   const isProd = mode === 'production'
   const isDev = mode === 'development'
-
-  if (isDev) {
-    // Terminate the watcher when Phoenix quits
-    process.stdin.on('close', () => {
-      process.exit(0)
-    })
-
-    process.stdin.resume()
-  }
-
-  if (isSSR) {
-    const config: UserConfig = {
-      plugins: [...PLUGINS, ...(isProd ? [] : [symlinkNodeModulesPlugin()])],
-      resolve: { alias: ALIAS },
-      build: {
-        ssr: true,
-        outDir: '../priv/ssr-js',
-        emptyOutDir: true,
-        sourcemap: isDev ? 'inline' : false,
-        minify: isProd,
-        rollupOptions: {
-          external: ['fonts/*', 'images/*'],
-          input: {
-            ssr: './js/ssr.tsx',
-          },
-          output: {
-            entryFileNames: '[name].mjs',
-            chunkFileNames: 'assets/[name]-[hash].mjs',
-            format: 'esm',
-          },
+  return {
+    publicDir: 'static',
+    plugins: [
+      react(),
+      tailwindcss(),
+      vitexPlugin({ inertiaSSREntrypoint: './js/ssr.tsx' }),
+    ],
+    resolve: {
+      alias: {
+        '@': resolve(__dirname, './js'),
+      },
+    },
+    build: {
+      target: 'esnext',
+      sourcemap: isDev && !isSSR,
+      minify: isProd && !isSSR,
+      ssr: isSSR,
+      emptyOutDir: isSSR,
+      polyfillDynamicImport: !isSSR,
+      outDir: isSSR ? '../priv/ssr-js' : '../priv/static',
+      manifest: !isSSR ? 'assets/vite_manifest.json' : false,
+      rollupOptions: {
+        external: ['fonts/*', 'images/*'],
+        input,
+        output: {
+          entryFileNames: isSSR ? '[name].js' : 'assets/[name].[hash].js',
+          chunkFileNames: 'assets/[name].[hash].js',
+          assetFileNames: 'assets/[name].[hash][extname]',
         },
       },
-    }
-
-    return config
-  } else {
-    return {
-      publicDir: 'static',
-      plugins: PLUGINS,
-      resolve: { alias: ALIAS },
-      build: {
-        target: 'esnext',
-        emptyOutDir: false,
-        polyfillDynamicImport: true,
-        outDir: '../priv/static',
-        sourcemap: isDev,
-        manifest: 'assets/vite_manifest.json',
-        minify: !isDev,
-        rollupOptions: {
-          input: {
-            app: './js/app.tsx',
-          },
-          output: {
-            entryFileNames: 'assets/[name].[hash].js',
-            chunkFileNames: 'assets/[name].[hash].js',
-            assetFileNames: 'assets/[name].[hash][extname]',
-          },
-          external: ['fonts/*', 'images/*'],
-        },
-      },
-    }
+    },
   }
 })

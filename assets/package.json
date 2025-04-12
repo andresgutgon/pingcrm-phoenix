@@ -1,5 +1,6 @@
 {
   "name": "pingcrm-phoenix-react",
+  "author": "Andrés Gutiérrez",
   "version": "1.0.0",
   "private": true,
   "description": "PingCRM inertia.js example with Phoenix and TailwindCSS",
@@ -10,11 +11,8 @@
     "typescript",
     "vite"
   ],
-  "author": "Andrés Gutiérrez",
   "scripts": {
-    "js:client:dev": "NODE_ENV=development vite --host 0.0.0.0 --mode development",
-    "js:server:dev": "NODE_ENV=development VITE_SSR=true vite build --watch --mode development --ssr",
-    "dev": "concurrently -k -n js:client,js:server -c cyan,magenta \"pnpm run js:client:dev\" \"pnpm run js:server:dev\"",
+    "dev": "NODE_ENV=development vite --host 0.0.0.0 --mode development",
     "js:client:prod": "NODE_ENV=production vite build --mode production",
     "js:server:prod": "NODE_ENV=production VITE_SSR=true vite build --mode production",
     "build": "pnpm run js:client:prod && pnpm run js:server:prod",
@@ -42,7 +40,6 @@
     "@types/react-dom": "19",
     "@vitejs/plugin-react": "^4.3.4",
     "autoprefixer": "10.4.20",
-    "concurrently": "^9.1.2",
     "eslint": "^9.13.0",
     "eslint-config-prettier": "^9.1.0",
     "eslint-plugin-prettier": "^5.2.1",

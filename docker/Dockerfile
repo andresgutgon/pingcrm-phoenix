@@ -119,4 +119,3 @@ COPY --from=builder /${APP_NAME}/assets/node_modules   ./lib/${RELEASE_DIR}/priv
 USER nobody
 
 CMD ["bin/server"]
-
