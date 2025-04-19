@@ -20,8 +20,7 @@ defmodule PingcrmWeb.Router do
   scope "/", PingcrmWeb do
     pipe_through :browser
 
-    get "/", HomeController, :index
-    get "/nominations/:id", HomeController, :show
+    get "/", DashboardController, :index
   end
 
   if Application.compile_env(:pingcrm, :dev_routes) do

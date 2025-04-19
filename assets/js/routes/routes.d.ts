@@ -14,7 +14,6 @@ type QueryParams = Record<string, QueryParam | QueryParam[]>;
 
 type RouteParams = {
   "index": Record<string, never>;
-  "nominations.show": {id: string | number};
   "dev.dashboard.css-:md5.css": {md5: string | number};
   "dev.dashboard.js-:md5.js": {md5: string | number};
   "dev.dashboard.home": Record<string, never>;
@@ -23,7 +22,7 @@ type RouteParams = {
   "dev.mailbox": Record<string, never>
 }
 
-type RouteName = "index" | "nominations.show" | "dev.dashboard.css-:md5.css" | "dev.dashboard.js-:md5.js" | "dev.dashboard.home" | "dev.dashboard.page" | "dev.dashboard.page" | "dev.mailbox";
+type RouteName = "index" | "dev.dashboard.css-:md5.css" | "dev.dashboard.js-:md5.js" | "dev.dashboard.home" | "dev.dashboard.page" | "dev.dashboard.page" | "dev.mailbox";
 
 type RouteParamsWithQuery<T extends Record<string, any>> = T & {
   _query?: QueryParams;
@@ -36,8 +35,7 @@ type RoutePathConfig = {
       "/dev/dashboard/:page": {page: string | number};
       "/dev/dashboard/css-:md5": {md5: string | number};
       "/dev/dashboard/js-:md5": {md5: string | number};
-      "/dev/mailbox": Record<string, never>;
-      "/nominations/:id": {id: string | number}
+      "/dev/mailbox": Record<string, never>
 }
 
 type RoutePath = keyof RoutePathConfig;
