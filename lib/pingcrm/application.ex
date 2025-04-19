@@ -5,14 +5,21 @@ defmodule Pingcrm.Application do
 
   @impl true
   def start(_type, _args) do
+    dev_mode = Application.get_env(:pingcrm, :dev_mode)
+
     children = [
       PingcrmWeb.Telemetry,
       Pingcrm.Repo,
       {DNSCluster, query: Application.get_env(:pingcrm, :dns_cluster_query) || :ignore},
       {Phoenix.PubSub, name: Pingcrm.PubSub},
       {Finch, name: Pingcrm.Finch},
-      {Inertia.SSR, Application.fetch_env!(:pingcrm, Inertia.SSR)},
-      PingcrmWeb.Endpoint
+      PingcrmWeb.Endpoint,
+      {Vitex,
+       dev_mode: dev_mode,
+       endpoint: PingcrmWeb.Endpoint,
+       js_framework: :react,
+       manifest_name: "vite_manifest"},
+      {Inertia.SSR, Application.fetch_env!(:pingcrm, Inertia.SSR)}
     ]
 
     # See https://hexdocs.pm/elixir/Supervisor.html

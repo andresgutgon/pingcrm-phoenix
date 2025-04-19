@@ -30,7 +30,7 @@ config :inertia,
   default_version: "1",
   camelize_props: true,
   history: [encrypt: false],
-  ssr: false, # Configured by route where we need/want SSR
+  ssr: false,
   raise_on_ssr_failure: config_env() != :prod
 
 # Configures Elixir's Logger

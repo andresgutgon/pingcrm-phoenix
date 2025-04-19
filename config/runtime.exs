@@ -22,12 +22,15 @@ if System.get_env("PHX_SERVER") do
   config :pingcrm, PingcrmWeb.Endpoint, server: true
 end
 
+env = config_env()
+dev_mode = env == :dev
+config :pingcrm, :dev_mode, dev_mode
 config :pingcrm, Inertia.SSR,
   path: Path.join([Application.app_dir(:pingcrm), "priv", "ssr-js"]),
-  esm: true,
-  esm_cache_busting: config_env() != :prod
+  ssr_adapter: Vitex.inertia_ssr_adapter(dev_mode: dev_mode),
+  esm: true
 
-if config_env() == :prod do
+if env == :prod do
   database_url =
     System.get_env("DATABASE_URL") ||
       raise """

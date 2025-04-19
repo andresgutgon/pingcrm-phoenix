@@ -60,6 +60,7 @@ defmodule PingcrmWeb do
 
       unquote(html_helpers())
       import Inertia.HTML
+      import Vitex.HTML
     end
   end
 

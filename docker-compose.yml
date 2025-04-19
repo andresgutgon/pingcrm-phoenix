@@ -63,3 +63,4 @@ networks:
   pingcrm_network:
     name: pingcrm_network
     driver: bridge
+    external: true
