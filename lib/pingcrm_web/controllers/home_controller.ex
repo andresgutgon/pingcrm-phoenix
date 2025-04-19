@@ -12,18 +12,30 @@ defmodule PingcrmWeb.HomeController do
     |> render_inertia("HomePage", ssr: ssr)
   end
 
+  def show(conn, %{"id" => id}) do
+    nomination = Academy.get_nomination!(id) |> nomination()
+
+    conn
+    |> assign_prop(:nomination, nomination)
+    |> render_inertia("NominationPage")
+  end
+
   defp nominations() do
     Academy.list_nominations()
-    |> Enum.map(fn n ->
-      %{
-        id: n.id,
-        name: n.name,
-        age: n.age,
-        gender: n.gender,
-        year: n.year,
-        movie: n.movie,
-        won: n.won
-      }
+    |> Enum.map(fn db_nomination ->
+      nomination(db_nomination)
     end)
+  end
+
+  defp nomination(n) do
+    %{
+      id: n.id,
+      name: n.name,
+      age: n.age,
+      gender: n.gender,
+      year: n.year,
+      movie: n.movie,
+      won: n.won
+    }
   end
 end

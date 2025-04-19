@@ -50,13 +50,14 @@ defmodule Pingcrm.MixProject do
       {:dns_cluster, "~> 0.1.1"},
       {:bandit, "~> 1.5"},
       {:mix_test_watch, "~> 1.0", only: [:dev, :test], runtime: false},
-      # {:inertia, "~> 2.3.0"}
+      {:routes,
+       git: "https://github.com/andresgutgon/routes",
+       branch: "fix/make-routes-esm-and-ssr-compatible"},
       {:inertia,
        git: "https://github.com/andresgutgon/inertia-phoenix.git",
        branch: "feature/inertia-vitejs-integration"},
-      {:vitex,
-       git: "https://github.com/andresgutgon/vitex.git",
-       ref: "a12b2209fde3206f40a71f6dbfb7a5935f81f746"}
+      # Publish in hex once this is merged: https://github.com/inertiajs/inertia-phoenix/pull/44
+      {:vitex, git: "https://github.com/andresgutgon/vitex.git", branch: "main"}
     ]
   end
 

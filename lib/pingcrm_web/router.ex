@@ -1,5 +1,6 @@
 defmodule PingcrmWeb.Router do
   use PingcrmWeb, :router
+  use Routes
 
   pipeline :browser do
     plug :accepts, ["html"]
@@ -20,6 +21,7 @@ defmodule PingcrmWeb.Router do
     pipe_through :browser
 
     get "/", HomeController, :index
+    get "/nominations/:id", HomeController, :show
   end
 
   if Application.compile_env(:pingcrm, :dev_routes) do
