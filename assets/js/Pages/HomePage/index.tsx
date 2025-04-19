@@ -1,17 +1,10 @@
-import { PageProps } from '../../types'
+import { Link } from '@/components/Link'
+import { Nomination, PageProps } from '@/types'
 
-type Nomination = {
-  id: number
-  name: string
-  gender: string
-  year: number
-  movie: string
-  won: boolean
-  age: number
-}
 type Props = PageProps & {
   nominations: Nomination[]
 }
+
 export default function HomePage({ nominations }: Props) {
   return (
     <div className='min-h-screen p-6'>
@@ -20,7 +13,8 @@ export default function HomePage({ nominations }: Props) {
           <table className='w-full text-left border-collapse'>
             <thead>
               <tr className='bg-pink-100 text-xs text-pink-800 font-semibold uppercase tracking-wider shadow-xs rounded-t-xl'>
-                <th className='px-4 py-3 text-left rounded-tl-xl'>Name</th>
+                <th className='px-4 py-3 text-left rounded-tl-xl'>#</th>
+                <th className='px-4 py-3 text-left'>Name</th>
                 <th className='px-4 py-3 text-left'>Age</th>
                 <th className='px-4 py-3 text-left'>Gender</th>
                 <th className='px-4 py-3 text-left'>Movie</th>
@@ -31,6 +25,11 @@ export default function HomePage({ nominations }: Props) {
             <tbody className='bg-white divide-y divide-gray-100'>
               {nominations.map((nom) => (
                 <tr key={nom.id} className='hover:bg-gray-50'>
+                  <td className='px-4 py-3 text-gray-600'>
+                    <Link to='/nominations/:id' params={{ id: nom.id }}>
+                      {nom.id}
+                    </Link>
+                  </td>
                   <td className='px-4 py-3 font-medium text-gray-900'>
                     {nom.name}
                   </td>

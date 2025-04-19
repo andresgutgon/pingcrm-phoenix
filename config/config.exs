@@ -33,6 +33,11 @@ config :inertia,
   ssr: false,
   raise_on_ssr_failure: config_env() != :prod
 
+config :routes,
+  router: PingcrmWeb.Router,
+  typescript: true,
+  routes_path: "assets/js/routes"
+
 # Configures Elixir's Logger
 config :logger, :console,
   format: "$time $metadata[$level] $message\n",
