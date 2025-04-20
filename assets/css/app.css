@@ -1,4 +1,8 @@
 @import 'tailwindcss';
+@import './components/buttons.css';
+
+/* Only *.html.heex file used */
+@source "../../lib/pingcrm_web/components/layouts/root.html.heex";
 
 /* This file is for your main application CSS */
 
@@ -6,6 +10,8 @@
 
 @theme {
   --color-brand: #fd4f00;
+  --font-sans: Cerebri Sans, ui-sans-serif, system-ui, sans-serif,
+    'Apple Color Emoji', 'Segoe UI Emoji', Segoe UI Symbol, 'Noto Color Emoji';
 }
 
 /*

@@ -9,7 +9,8 @@ defmodule Pingcrm.MixProject do
       elixirc_paths: elixirc_paths(Mix.env()),
       start_permanent: Mix.env() == :prod,
       aliases: aliases(),
-      deps: deps()
+      deps: deps(),
+      listeners: [Phoenix.CodeReloader],
     ]
   end
 
@@ -23,7 +24,6 @@ defmodule Pingcrm.MixProject do
     ]
   end
 
-  # Specifies which paths to compile per environment.
   defp elixirc_paths(:test), do: ["lib", "test/support"]
   defp elixirc_paths(_), do: ["lib"]
 
@@ -33,13 +33,12 @@ defmodule Pingcrm.MixProject do
   defp deps do
     [
       {:bcrypt_elixir, "~> 3.0"},
-      {:phoenix, "~> 1.7.19"},
-      {:phoenix_ecto, "~> 4.5"},
-      {:ecto_sql, "~> 3.10"},
+      {:phoenix, "~> 1.8.0-rc.1", override: true},
+      {:phoenix_ecto, "~> 4.6"},
+      {:phoenix_html, "~> 4.2.1"},
+      {:ecto_sql, "~> 3.12"},
       {:postgrex, ">= 0.0.0"},
-      {:phoenix_html, "~> 4.1"},
       {:floki, ">= 0.30.0", only: :test},
-      {:phoenix_live_dashboard, "~> 0.8.3"},
       {:swoosh, "~> 1.5"},
       {:gen_smtp, "~> 1.2"},
       {:finch, "~> 0.13"},
@@ -53,10 +52,10 @@ defmodule Pingcrm.MixProject do
       {:routes,
        git: "https://github.com/andresgutgon/routes",
        branch: "fix/make-routes-esm-and-ssr-compatible"},
+      # {:inertia, path: "/inertia-phoenix", override: true},
       {:inertia,
        git: "https://github.com/andresgutgon/inertia-phoenix.git",
        branch: "feature/inertia-vitejs-integration"},
-      # Publish in hex once this is merged: https://github.com/inertiajs/inertia-phoenix/pull/44
       {:vitex, git: "https://github.com/andresgutgon/vitex.git", branch: "main"}
     ]
   end

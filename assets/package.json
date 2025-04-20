@@ -25,6 +25,8 @@
   "dependencies": {
     "@inertiajs/react": "^2.0.3",
     "axios": "^1.7.9",
+    "classnames": "^2.5.1",
+    "lucide-react": "^0.501.0",
     "react": "^19.0.0",
     "react-dom": "^19.0.0"
   },

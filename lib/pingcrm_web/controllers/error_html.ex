@@ -1,24 +1,70 @@
-defmodule PingcrmWeb.ErrorHTML do
-  @moduledoc """
-  This module is invoked by your endpoint in case of errors on HTML requests.
+require Logger
 
-  See config/config.exs.
-  """
+defmodule PingcrmWeb.ErrorHTML do
+  @moduledoc false
+
+  @titles %{
+    503 => "503: Service Unavailable",
+    500 => "500: Server Error",
+    404 => "404: Page Not Found my friend",
+    403 => "403: Forbidden"
+  }
+
+  @descriptions %{
+    503 => "Sorry, we are doing some maintenance. Please check back soon.",
+    500 => "Whoops, something went wrong on our servers.",
+    404 => "Sorry, the page you are looking for could not be found.",
+    403 => "Sorry, you are forbidden from accessing this page."
+  }
+
   use PingcrmWeb, :html
 
-  # If you want to customize your error pages,
-  # uncomment the embed_templates/1 call below
-  # and add pages to the error directory:
-  #
-  #   * lib/pingcrm_web/controllers/error_html/404.html.heex
-  #   * lib/pingcrm_web/controllers/error_html/500.html.heex
-  #
-  # embed_templates "error_html/*"
+  def render(_template, %{conn: conn} = assigns) do
+    status = Map.get(assigns, :status) || Plug.Exception.status(conn.reason)
 
-  # The default is to render a plain text page based on
-  # the template name. For example, "404.html" becomes
-  # "Not Found".
-  def render(template, _assigns) do
-    Phoenix.Controller.status_message_from_template(template)
+    meta = meta_for(status)
+    {:ok, %{"body" => body, "head" => head}} =
+      Inertia.SSR.call(%{
+        component: "ErrorPage",
+        props: %{
+          status: status,
+          title: meta.title,
+          description: meta.description,
+          ssr: true
+        },
+        url: request_path(conn.request_path, conn.query_string),
+        version: "1",
+        encryptHistory: false,
+        clearHistory: false
+      })
+
+    Phoenix.HTML.raw(
+      Phoenix.Template.render_to_iodata(
+        PingcrmWeb.Layouts,
+        "root",
+        "html",
+        %{
+          conn: conn,
+          inner_content: Phoenix.HTML.raw(body),
+          inertia_head: head,
+          page_title: meta.title,
+        }
+      )
+    )
   end
+
+  defp meta_for(status) when is_integer(status) do
+    %{
+      title: Map.get(@titles, status, "#{status}: Unknown Error"),
+      description: Map.get(@descriptions, status, "An unexpected error occurred.")
+    }
+  end
+
+  # Extracted from Inertia.Controller
+  defp request_path(path, qs) do
+    IO.iodata_to_binary([path, request_url_qs(qs)])
+  end
+
+  defp request_url_qs(""), do: ""
+  defp request_url_qs(qs), do: [??, qs]
 end

@@ -1,16 +1,34 @@
 <!DOCTYPE html>
-<html lang="en" class="[scrollbar-gutter:stable]">
+<html lang="en">
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml">
     <meta name="csrf-token" content={get_csrf_token()} />
     <.inertia_title>
       {assigns[:page_title]}
     </.inertia_title>
     <.inertia_head content={@inertia_head} />
+
+    <%= if dev_mode?() do %>
+      <style>
+        /* Prevents flash of unstyled content in development */
+        body { visibility: hidden; }
+      </style>
+    <% end %>
+
     <.vitex_assets js={["js/app.tsx"]} preload />
   </head>
-  <body class="bg-white">
+  <body class="bg-white text-gray-700">
     {@inner_content}
+
+    <%= if dev_mode?() do %>
+      <script>
+        /* Prevents flash of unstyled content in development */
+        document.addEventListener("DOMContentLoaded", () => {
+          document.body.style.visibility = 'visible';
+        });
+      </script>
+    <% end %>
   </body>
 </html>
