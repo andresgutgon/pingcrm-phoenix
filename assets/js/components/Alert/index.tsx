@@ -9,6 +9,7 @@ export type AlertProps = {
   action?: ReactNode
   onClose?: () => void
   variant?: 'success' | 'error' | 'warning' | 'info'
+  dataTestRef?: string
 }
 
 const COLOR = {
@@ -24,6 +25,7 @@ export default function Alert({
   message,
   variant,
   onClose,
+  dataTestRef
 }: AlertProps) {
   const iconComponent = {
     info: <Check size={20} />,
@@ -34,8 +36,9 @@ export default function Alert({
 
   return (
     <div
+      data-test={dataTestRef}
       className={cn(
-        'px-4 mb-8 flex items-center justify-between rounded max-w-3xl',
+        'px-4 flex items-center justify-between rounded max-w-3xl',
         {
           'bg-blue-100 text-blue-800': variant === 'info',
           'bg-green-500 text-white': variant === 'success',

@@ -5,8 +5,6 @@ defmodule PingcrmWeb.UserAuthTest do
   alias Pingcrm.Accounts.Scope
   alias PingcrmWeb.UserAuth
 
-  import Pingcrm.AccountsFixtures
-
   @remember_me_cookie "_pingcrm_web_user_remember_me"
   @remember_me_cookie_max_age 60 * 60 * 24 * 14
 
@@ -16,7 +14,7 @@ defmodule PingcrmWeb.UserAuthTest do
       |> Map.replace!(:secret_key_base, PingcrmWeb.Endpoint.config(:secret_key_base))
       |> init_test_session(%{})
 
-    %{user: %{user_fixture() | authenticated_at: DateTime.utc_now(:second)}, conn: conn}
+    %{user: %{account_owner() | authenticated_at: DateTime.utc_now(:second)}, conn: conn}
   end
 
   describe "log_in_user/3" do
@@ -46,7 +44,7 @@ defmodule PingcrmWeb.UserAuthTest do
       conn: conn,
       user: user
     } do
-      other_user = user_fixture()
+      other_user = account_owner()
 
       conn =
         conn
@@ -130,6 +128,7 @@ defmodule PingcrmWeb.UserAuthTest do
 
       assert conn.assigns.current_scope.user.id == user.id
       assert conn.assigns.current_scope.user.authenticated_at == user.authenticated_at
+      assert conn.assigns.current_scope.user.account.name == user.account.name
       assert get_session(conn, :user_token) == user_token
     end
 
@@ -210,7 +209,7 @@ defmodule PingcrmWeb.UserAuthTest do
         |> assign(:current_scope, Scope.for_user(user))
         |> UserAuth.require_sudo_mode([])
 
-      assert redirected_to(conn) == ~p"/users/log-in"
+      assert redirected_to(conn) == ~p"/login"
 
       assert Phoenix.Flash.get(conn.assigns.flash, :error) ==
                "You must re-authenticate to access this page."
@@ -248,7 +247,7 @@ defmodule PingcrmWeb.UserAuthTest do
       conn = conn |> fetch_flash() |> UserAuth.require_authenticated_user([])
       assert conn.halted
 
-      assert redirected_to(conn) == ~p"/users/log-in"
+      assert redirected_to(conn) == ~p"/login"
 
       assert Phoenix.Flash.get(conn.assigns.flash, :error) ==
                "You must log in to access this page."

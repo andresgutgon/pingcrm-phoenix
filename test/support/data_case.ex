@@ -14,6 +14,7 @@ defmodule Pingcrm.DataCase do
   this option is not recommended for other databases.
   """
 
+  alias Ecto.Adapters.SQL.Sandbox
   use ExUnit.CaseTemplate
 
   using do
@@ -25,6 +26,7 @@ defmodule Pingcrm.DataCase do
       import Ecto.Changeset
       import Ecto.Query
       import Pingcrm.DataCase
+      import Pingcrm.Factory
     end
   end
 

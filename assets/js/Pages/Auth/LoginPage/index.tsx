@@ -7,6 +7,7 @@ import TextInput from '@/components/Form/TextInput'
 import FieldGroup from '@/components/Form/FieldGroup'
 import { CheckboxInput } from '@/components/Form/CheckboxInput'
 import Routes from '@/routes/routes'
+import FlashedMessages from '@/components/Messages/FlashMessages'
 
 export default function LoginPage() {
   const { data, setData, errors, post, processing } = useForm<{
@@ -29,14 +30,15 @@ export default function LoginPage() {
     <div className='flex items-center justify-center min-h-screen p-6 bg-indigo-800'>
       <Head title='Login' />
 
-      <div className='w-full max-w-md'>
+      <div className='w-full max-w-md flex flex-col gap-y-8'>
         <Logo
           className='block w-full max-w-xs mx-auto text-white fill-current'
           height={50}
         />
+        <FlashedMessages />
         <form
           onSubmit={handleSubmit}
-          className='mt-8 overflow-hidden bg-white rounded-lg shadow-xl'
+          className='overflow-hidden bg-white rounded-lg shadow-xl '
         >
           <div className='px-10 py-12'>
             <h1 className='text-3xl font-bold text-center'>Welcome Back!</h1>

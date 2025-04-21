@@ -24,11 +24,13 @@ end
 
 env = config_env()
 dev_mode = env == :dev
+test_dev_mode = config_env() == :test and System.get_env("CI") != "true"
 config :pingcrm, :dev_mode, dev_mode
+config :pingcrm, :test_dev_mode, test_dev_mode
 
 config :pingcrm, Inertia.SSR,
   path: Path.join([Application.app_dir(:pingcrm), "priv", "ssr-js"]),
-  ssr_adapter: Vitex.inertia_ssr_adapter(dev_mode: dev_mode),
+  ssr_adapter: Vitex.inertia_ssr_adapter(dev_mode: dev_mode or test_dev_mode),
   esm: true
 
 if env == :prod do

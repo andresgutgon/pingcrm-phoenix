@@ -26,7 +26,7 @@ config :pingcrm, PingcrmWeb.Endpoint,
   check_origin: false,
   code_reloader: true,
   # View real error pages setting this to false
-  debug_errors: false,
+  debug_errors: true,
   secret_key_base: "ZJdhzfq3sIfPMX0r8n2Uz3DkjMpObkvG/HtPvIgqZ6tkeryuPXV/2hwNQFxU7LQ5",
   watchers: [
     pnpm: ["run", "dev", cd: Path.expand("../assets", __DIR__)]

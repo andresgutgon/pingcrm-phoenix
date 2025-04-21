@@ -2,8 +2,6 @@ defmodule Pingcrm.AccountsTest do
   use Pingcrm.DataCase
 
   alias Pingcrm.Accounts
-
-  import Pingcrm.AccountsFixtures
   alias Pingcrm.Accounts.{User, UserToken}
 
   describe "get_user_by_email/1" do
@@ -12,7 +10,7 @@ defmodule Pingcrm.AccountsTest do
     end
 
     test "returns the user if the email exists" do
-      %{id: id} = user = user_fixture()
+      %{id: id} = user = account_owner()
       assert %User{id: ^id} = Accounts.get_user_by_email(user.email)
     end
   end
@@ -23,15 +21,15 @@ defmodule Pingcrm.AccountsTest do
     end
 
     test "does not return the user if the password is not valid" do
-      user = user_fixture() |> set_password()
+      user = account_owner()
       refute Accounts.get_user_by_email_and_password(user.email, "invalid")
     end
 
     test "returns the user if the email and password are valid" do
-      %{id: id} = user = user_fixture() |> set_password()
+      %{id: id} = user = account_owner()
 
-      assert %User{id: ^id} =
-               Accounts.get_user_by_email_and_password(user.email, valid_user_password())
+      expected_user = Accounts.get_user_by_email_and_password(user.email, valid_user_password())
+      assert %User{id: ^id} = expected_user
     end
   end
 
@@ -43,7 +41,7 @@ defmodule Pingcrm.AccountsTest do
     end
 
     test "returns the user with the given id" do
-      %{id: id} = user = user_fixture()
+      %{id: id} = user = account_owner()
       assert %User{id: ^id} = Accounts.get_user!(user.id)
     end
   end
@@ -69,7 +67,7 @@ defmodule Pingcrm.AccountsTest do
 
   describe "generate_user_session_token/1" do
     setup do
-      %{user: user_fixture()}
+      %{user: account_owner()}
     end
 
     test "generates a token", %{user: user} do
@@ -82,7 +80,7 @@ defmodule Pingcrm.AccountsTest do
       assert_raise Ecto.ConstraintError, fn ->
         Repo.insert!(%UserToken{
           token: user_token.token,
-          user_id: user_fixture().id,
+          user_id: account_owner().id,
           context: "session"
         })
       end
@@ -99,7 +97,7 @@ defmodule Pingcrm.AccountsTest do
 
   describe "get_user_by_session_token/1" do
     setup do
-      user = user_fixture()
+      user = account_owner()
       token = Accounts.generate_user_session_token(user)
       %{user: user, token: token}
     end
@@ -124,7 +122,7 @@ defmodule Pingcrm.AccountsTest do
 
   describe "delete_user_session_token/1" do
     test "deletes the token" do
-      user = user_fixture()
+      user = account_owner()
       token = Accounts.generate_user_session_token(user)
       assert Accounts.delete_user_session_token(token) == :ok
       refute Accounts.get_user_by_session_token(token)

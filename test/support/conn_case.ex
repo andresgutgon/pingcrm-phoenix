@@ -1,4 +1,8 @@
 defmodule PingcrmWeb.ConnCase do
+  alias Pingcrm.Accounts.Scope
+  alias Pingcrm.Support.AuthTestHelpers
+  import Pingcrm.Factory, only: [account_owner: 0]
+
   @moduledoc """
   This module defines the test case to be used by
   tests that require setting up a connection.
@@ -20,7 +24,6 @@ defmodule PingcrmWeb.ConnCase do
   using do
     quote do
       alias Pingcrm.Accounts.Scope
-      alias Pingcrm.AccountsFixtures
       # The default endpoint for testing
       @endpoint PingcrmWeb.Endpoint
 
@@ -29,7 +32,10 @@ defmodule PingcrmWeb.ConnCase do
       # Import conveniences for testing with connections
       import Plug.Conn
       import Phoenix.ConnTest
+      import Inertia.Testing
       import PingcrmWeb.ConnCase
+      import Pingcrm.Support.AuthTestHelpers
+      import Pingcrm.Factory
     end
   end
 
@@ -47,7 +53,7 @@ defmodule PingcrmWeb.ConnCase do
   test context.
   """
   def register_and_log_in_user(%{conn: conn} = context) do
-    user = AccountsFixtures.user_fixture()
+    user = account_owner()
     scope = Scope.for_user(user)
 
     opts =
@@ -76,6 +82,6 @@ defmodule PingcrmWeb.ConnCase do
   defp maybe_set_token_authenticated_at(_token, nil), do: nil
 
   defp maybe_set_token_authenticated_at(token, authenticated_at) do
-    Pingcrm.AccountsFixtures.override_token_authenticated_at(token, authenticated_at)
+    AuthTestHelpers.override_token_authenticated_at(token, authenticated_at)
   end
 end

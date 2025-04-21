@@ -6,6 +6,9 @@ on:
   pull_request:
     branches: [main]
 
+env:
+  DB_HOST: localhost
+
 jobs:
   build:
     name: OTP ${{ matrix.otp }} / Elixir ${{ matrix.elixir }}
@@ -13,14 +16,51 @@ jobs:
 
     strategy:
       matrix:
-        otp: ['26.2']        # Adjust as needed
-        elixir: ['1.16.1']   # Match your .tool-versions or mix.exs
+        otp: ["26.2"] # Adjust as needed
+        elixir: ["1.16.1"] # Match your .tool-versions or mix.exs
+
+    services:
+      db:
+        image: postgres:15
+        ports: ["5432:5432"]
+        env:
+          POSTGRES_USER: pingcrm
+          POSTGRES_PASSWORD: secret
+          POSTGRES_DB: pingcrm_test
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
 
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: 22
+
+      - name: Ensure pnpm store path exists
+        run: mkdir -p ~/.pnpm-store
+
+      - name: Install pnpm
+        run: npm install -g pnpm
+
+      - name: Cache pnpm store
+        uses: actions/cache@v3
+        with:
+          path: ~/.pnpm-store
+          key: ${{ runner.os }}-pnpm-store-${{ hashFiles('assets/pnpm-lock.yaml') }}
+          restore-keys: |
+            ${{ runner.os }}-pnpm-store-
+
+      - name: Install JS dependencies
+        working-directory: assets
+        run: pnpm install
 
       - name: Set up Elixir
         uses: erlef/setup-beam@v1
@@ -64,5 +104,13 @@ jobs:
       - name: Compile with warnings as errors
         run: mix compile --warnings-as-errors
 
-      # - name: Run tests
-      #   run: MIX_ENV=test mix test
+      - name: Assets build
+        run: mix assets.build
+
+      - name: Copy SSR dependencies into priv/ssr-js
+        run: |
+          cp assets/package.json priv/ssr-js/package.json
+          cp -r assets/node_modules priv/ssr-js/
+
+      - name: Run tests
+        run: MIX_ENV=test mix test

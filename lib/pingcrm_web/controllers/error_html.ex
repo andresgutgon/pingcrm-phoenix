@@ -1,5 +1,3 @@
-require Logger
-
 defmodule PingcrmWeb.ErrorHTML do
   @moduledoc false
 
@@ -21,7 +19,6 @@ defmodule PingcrmWeb.ErrorHTML do
 
   def render(_template, %{conn: conn} = assigns) do
     status = Map.get(assigns, :status) || Plug.Exception.status(conn.reason)
-
     meta = meta_for(status)
 
     {:ok, %{"body" => body, "head" => head}} =

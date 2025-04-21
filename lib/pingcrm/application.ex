@@ -6,6 +6,7 @@ defmodule Pingcrm.Application do
   @impl true
   def start(_type, _args) do
     dev_mode = Application.get_env(:pingcrm, :dev_mode)
+    dev_test_mode = Application.get_env(:pingcrm, :test_dev_mode)
 
     children = [
       PingcrmWeb.Telemetry,
@@ -15,7 +16,7 @@ defmodule Pingcrm.Application do
       {Finch, name: Pingcrm.Finch},
       PingcrmWeb.Endpoint,
       {Vitex,
-       dev_mode: dev_mode,
+       dev_mode: dev_mode or dev_test_mode,
        endpoint: PingcrmWeb.Endpoint,
        js_framework: :react,
        manifest_name: "vite_manifest"},

@@ -10,13 +10,13 @@ defmodule Pingcrm.MixProject do
       start_permanent: Mix.env() == :prod,
       aliases: aliases(),
       deps: deps(),
-      listeners: [Phoenix.CodeReloader]
+      listeners: [Phoenix.CodeReloader],
+      preferred_cli_env: [
+        "test.watch": :test
+      ]
     ]
   end
 
-  # Configuration for the OTP application.
-  #
-  # Type `mix help compile.app` for more information.
   def application do
     [
       mod: {Pingcrm.Application, []},
@@ -24,12 +24,9 @@ defmodule Pingcrm.MixProject do
     ]
   end
 
-  defp elixirc_paths(:test), do: ["lib", "test/support"]
+  defp elixirc_paths(:test), do: ["lib", "test/support", "test/factories"]
   defp elixirc_paths(_), do: ["lib"]
 
-  # Specifies your project dependencies.
-  #
-  # Type `mix help deps` for examples and options.
   defp deps do
     [
       {:bcrypt_elixir, "~> 3.0"},
@@ -38,7 +35,6 @@ defmodule Pingcrm.MixProject do
       {:phoenix_html, "~> 4.2.1"},
       {:ecto_sql, "~> 3.12"},
       {:postgrex, ">= 0.0.0"},
-      {:floki, ">= 0.30.0", only: :test},
       {:swoosh, "~> 1.5"},
       {:gen_smtp, "~> 1.2"},
       {:finch, "~> 0.13"},
@@ -50,6 +46,9 @@ defmodule Pingcrm.MixProject do
       {:bandit, "~> 1.5"},
       {:credo, "~> 1.7", only: [:dev, :test], runtime: false},
       {:dialyxir, "~> 1.3", only: [:dev], runtime: false},
+      {:ex_machina, "~> 2.8.0", only: :test},
+      {:faker, "~> 0.17", only: :test},
+      {:floki, ">= 0.34.0", only: :test},
       {:mix_test_watch, "~> 1.0", only: [:dev, :test], runtime: false},
       {:routes,
        git: "https://github.com/andresgutgon/routes",
@@ -61,12 +60,6 @@ defmodule Pingcrm.MixProject do
     ]
   end
 
-  # Aliases are shortcuts or tasks specific to the current project.
-  # For example, to install project dependencies and perform other setup tasks, run:
-  #
-  #     $ mix setup
-  #
-  # See the documentation for `Mix` for more info on aliases.
   defp aliases do
     [
       setup: ["deps.get", "ecto.setup", "assets.setup", "assets.build"],

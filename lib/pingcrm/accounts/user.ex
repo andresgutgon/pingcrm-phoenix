@@ -34,9 +34,14 @@ defmodule Pingcrm.Accounts.User do
     |> put_password_hash()
   end
 
+  @spec hash_password(String.t()) :: String.t()
+  def hash_password(password) do
+    Bcrypt.hash_pwd_salt(password)
+  end
+
   defp put_password_hash(changeset) do
     if password = get_change(changeset, :password) do
-      put_change(changeset, :hashed_password, Bcrypt.hash_pwd_salt(password))
+      put_change(changeset, :hashed_password, hash_password(password))
     else
       changeset
     end

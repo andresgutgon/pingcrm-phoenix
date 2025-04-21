@@ -1,46 +1,24 @@
 defmodule PingcrmWeb.UserSessionControllerTest do
   use PingcrmWeb.ConnCase, async: true
 
-  import Pingcrm.AccountsFixtures
-  alias Pingcrm.Accounts
-
   setup do
-    # TODO: use ExMachina for factories
-    %{unconfirmed_user: nil, user: user_fixture()}
+    %{user: account_owner()}
   end
 
   describe "GET /login" do
     test "renders login page", %{conn: conn} do
-      conn = get(conn, ~p"/users/log-in")
+      conn = get(conn, ~p"/login")
       response = html_response(conn, 200)
-      assert response =~ "Log in"
-      assert response =~ ~p"/users/register"
-      assert response =~ "Log in with email"
-    end
-
-    test "renders login page with email filled in (sudo mode)", %{conn: conn, user: user} do
-      html =
-        conn
-        |> log_in_user(user)
-        |> get(~p"/users/log-in")
-        |> html_response(200)
-
-      assert html =~ "You need to reauthenticate"
-      refute html =~ "Register"
-      assert html =~ "Log in with email"
-
-      assert html =~
-               ~s(<input type="email" name="user[email]" id="login_form_magic_email" value="#{user.email}")
+      assert response =~ "Welcome Back!"
     end
   end
 
   describe "POST /login" do
     test "logs the user in", %{conn: conn, user: user} do
-      user = set_password(user)
-
       conn =
         post(conn, ~p"/login", %{
-          "user" => %{"email" => user.email, "password" => valid_user_password()}
+          "email" => user.email,
+          "password" => valid_user_password()
         })
 
       assert get_session(conn, :user_token)
@@ -50,20 +28,16 @@ defmodule PingcrmWeb.UserSessionControllerTest do
       conn = get(conn, ~p"/")
       response = html_response(conn, 200)
       assert response =~ user.email
-      assert response =~ ~p"/users/settings"
-      assert response =~ ~p"/users/log-out"
+      assert response =~ "My Profile"
+      assert response =~ "Logout"
     end
 
     test "logs the user in with remember me", %{conn: conn, user: user} do
-      user = set_password(user)
-
       conn =
         post(conn, ~p"/login", %{
-          "user" => %{
-            "email" => user.email,
-            "password" => valid_user_password(),
-            "remember_me" => "true"
-          }
+          "email" => user.email,
+          "password" => valid_user_password(),
+          "remember_me" => "true"
         })
 
       assert conn.resp_cookies["_pingcrm_web_user_remember_me"]
@@ -71,30 +45,30 @@ defmodule PingcrmWeb.UserSessionControllerTest do
     end
 
     test "logs the user in with return to", %{conn: conn, user: user} do
-      user = set_password(user)
+      conn = get(conn, "/")
+      assert redirected_to(conn) == "/login"
 
       conn =
         conn
-        |> init_test_session(user_return_to: "/foo/bar")
+        |> recycle()
         |> post(~p"/login", %{
-          "user" => %{
-            "email" => user.email,
-            "password" => valid_user_password()
-          }
+          "email" => user.email,
+          "password" => valid_user_password()
         })
 
-      assert redirected_to(conn) == "/foo/bar"
+      assert redirected_to(conn) == PingcrmWeb.UserAuth.signed_in_path(conn)
       assert Phoenix.Flash.get(conn.assigns.flash, :info) =~ "Welcome back!"
     end
 
     test "emits error message with invalid credentials", %{conn: conn, user: user} do
       conn =
         post(conn, ~p"/login", %{
-          "user" => %{"email" => user.email, "password" => "invalid_password"}
+          "email" => user.email,
+          "password" => "invalid_password"
         })
 
       response = html_response(conn, 200)
-      assert response =~ "Log in"
+      assert response =~ "Welcome Back!"
       assert response =~ "Invalid email or password"
     end
   end
@@ -102,9 +76,19 @@ defmodule PingcrmWeb.UserSessionControllerTest do
   describe "DELETE /logout" do
     test "logs the user out", %{conn: conn, user: user} do
       conn = conn |> log_in_user(user) |> delete(~p"/logout")
-      assert redirected_to(conn) == ~p"/"
+      assert "/" = redirected_to(conn, 302)
+
+      # First redirect: to "/"
+      conn = get(recycle(conn), ~p"/")
+      assert "/login" = redirected_to(conn, 302)
+
+      conn = get(recycle(conn), ~p"/login")
+      html = html_response(conn, 200)
+      {:ok, document} = Floki.parse_document(html)
+      [flash_div] = Floki.find(document, "[data-test='flash-message']")
+      flash_text = Floki.text(flash_div)
+      assert flash_text =~ "Logged out successfully."
       refute get_session(conn, :user_token)
-      assert Phoenix.Flash.get(conn.assigns.flash, :info) =~ "Logged out successfully"
     end
 
     test "succeeds even if the user is not logged in", %{conn: conn} do

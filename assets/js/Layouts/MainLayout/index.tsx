@@ -28,7 +28,7 @@ export default function MainLayout({ title, children }: MainLayoutProps) {
              * [Read more](https://inertiajs.com/pages#scroll-regions)
              */}
             <div
-              className='w-full px-4 py-8 overflow-hidden overflow-y-auto md:p-12'
+              className='w-full px-4 py-8 overflow-hidden overflow-y-auto md:p-12 flex flex-col gap-y-8'
               scroll-region='true'
             >
               <FlashMessages />

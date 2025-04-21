@@ -9,7 +9,6 @@ config :pingcrm, :scopes,
     schema_key: :user_id,
     schema_type: :id,
     schema_table: :users,
-    test_data_fixture: Pingcrm.AccountsFixtures,
     test_login_helper: :register_and_log_in_user
   ]
 
