@@ -1,4 +1,6 @@
 defmodule Pingcrm.Accounts.UserToken do
+  @moduledoc false
+
   use Ecto.Schema
   import Ecto.Query
   alias Pingcrm.Accounts.UserToken

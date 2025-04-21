@@ -1,4 +1,6 @@
 defmodule PingcrmWeb.UserAuth do
+  @moduledoc false
+
   use PingcrmWeb, :verified_routes
 
   import Plug.Conn

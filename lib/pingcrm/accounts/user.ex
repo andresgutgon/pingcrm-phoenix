@@ -1,7 +1,10 @@
 defmodule Pingcrm.Accounts.User do
+  @moduledoc false
+
+  alias Pingcrm.Accounts.Account
+
   use Ecto.Schema
   import Ecto.Changeset
-  alias Pingcrm.Accounts.Account
 
   schema "users" do
     # Basics

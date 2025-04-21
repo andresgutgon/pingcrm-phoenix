@@ -19,6 +19,8 @@ defmodule PingcrmWeb.ConnCase do
 
   using do
     quote do
+      alias Pingcrm.Accounts.Scope
+      alias Pingcrm.AccountsFixtures
       # The default endpoint for testing
       @endpoint PingcrmWeb.Endpoint
 
@@ -45,8 +47,8 @@ defmodule PingcrmWeb.ConnCase do
   test context.
   """
   def register_and_log_in_user(%{conn: conn} = context) do
-    user = Pingcrm.AccountsFixtures.user_fixture()
-    scope = Pingcrm.Accounts.Scope.for_user(user)
+    user = AccountsFixtures.user_fixture()
+    scope = Scope.for_user(user)
 
     opts =
       context

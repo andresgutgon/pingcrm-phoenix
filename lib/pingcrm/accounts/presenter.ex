@@ -1,5 +1,7 @@
 defmodule Pingcrm.Accounts.Presenter do
-  alias Pingcrm.Accounts.{User, Account}
+  @moduledoc false
+
+  alias Pingcrm.Accounts.{Account, User}
 
   def serialize(%User{} = user) do
     %{

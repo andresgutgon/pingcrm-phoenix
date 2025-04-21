@@ -16,8 +16,8 @@ defmodule Pingcrm.Accounts.Scope do
   growing application requirements.
   """
 
-  alias Pingcrm.Accounts.User
   alias Pingcrm.Accounts.Presenter, as: UserPresenter
+  alias Pingcrm.Accounts.User
 
   defstruct user: nil
 
