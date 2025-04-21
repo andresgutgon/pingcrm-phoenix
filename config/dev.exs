@@ -29,7 +29,7 @@ config :pingcrm, PingcrmWeb.Endpoint,
   debug_errors: false,
   secret_key_base: "ZJdhzfq3sIfPMX0r8n2Uz3DkjMpObkvG/HtPvIgqZ6tkeryuPXV/2hwNQFxU7LQ5",
   watchers: [
-    pnpm: ["run", "dev", cd: Path.expand("../assets", __DIR__)],
+    pnpm: ["run", "dev", cd: Path.expand("../assets", __DIR__)]
   ]
 
 config :pingcrm, Pingcrm.Mailer,

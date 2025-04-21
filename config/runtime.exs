@@ -25,6 +25,7 @@ end
 env = config_env()
 dev_mode = env == :dev
 config :pingcrm, :dev_mode, dev_mode
+
 config :pingcrm, Inertia.SSR,
   path: Path.join([Application.app_dir(:pingcrm), "priv", "ssr-js"]),
   ssr_adapter: Vitex.inertia_ssr_adapter(dev_mode: dev_mode),

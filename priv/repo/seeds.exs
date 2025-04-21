@@ -30,4 +30,3 @@ for i <- 1..5 do
   })
   |> Repo.insert!()
 end
-

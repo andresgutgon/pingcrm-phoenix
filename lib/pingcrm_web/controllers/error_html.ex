@@ -23,6 +23,7 @@ defmodule PingcrmWeb.ErrorHTML do
     status = Map.get(assigns, :status) || Plug.Exception.status(conn.reason)
 
     meta = meta_for(status)
+
     {:ok, %{"body" => body, "head" => head}} =
       Inertia.SSR.call(%{
         component: "ErrorPage",
@@ -47,7 +48,7 @@ defmodule PingcrmWeb.ErrorHTML do
           conn: conn,
           inner_content: Phoenix.HTML.raw(body),
           inertia_head: head,
-          page_title: meta.title,
+          page_title: meta.title
         }
       )
     )

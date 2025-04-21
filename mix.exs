@@ -10,7 +10,7 @@ defmodule Pingcrm.MixProject do
       start_permanent: Mix.env() == :prod,
       aliases: aliases(),
       deps: deps(),
-      listeners: [Phoenix.CodeReloader],
+      listeners: [Phoenix.CodeReloader]
     ]
   end
 
@@ -48,12 +48,11 @@ defmodule Pingcrm.MixProject do
       {:jason, "~> 1.2"},
       {:dns_cluster, "~> 0.1.1"},
       {:bandit, "~> 1.5"},
-       {:credo, "~> 1.7", only: [:dev, :test], runtime: false},
+      {:credo, "~> 1.7", only: [:dev, :test], runtime: false},
       {:mix_test_watch, "~> 1.0", only: [:dev, :test], runtime: false},
       {:routes,
        git: "https://github.com/andresgutgon/routes",
        branch: "fix/make-routes-esm-and-ssr-compatible"},
-      # {:inertia, path: "/inertia-phoenix", override: true},
       {:inertia,
        git: "https://github.com/andresgutgon/inertia-phoenix.git",
        branch: "feature/inertia-vitejs-integration"},
@@ -73,6 +72,7 @@ defmodule Pingcrm.MixProject do
       "ecto.setup": ["ecto.create", "ecto.migrate", "run priv/repo/seeds.exs"],
       "ecto.reset": ["ecto.drop", "ecto.setup"],
       test: ["ecto.create --quiet", "ecto.migrate --quiet", "test"],
+      check: ["format --check-formatted", "credo --strict", "cmd MIX_ENV=test mix test"],
       "assets.build": ["cmd pnpm --dir assets run build"],
       "assets.deploy": ["cmd pnpm --dir assets run build", "phx.digest"]
     ]
