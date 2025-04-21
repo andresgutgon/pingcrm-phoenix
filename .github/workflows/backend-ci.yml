@@ -39,11 +39,27 @@ jobs:
       - name: Install dependencies
         run: mix deps.get
 
+      - name: Create PLT directory
+        run: mkdir -p priv/plts
+
+      - name: Cache PLT files
+        uses: actions/cache@v3
+        with:
+          path: priv/plts
+          key: plt-${{ runner.os }}-${{ hashFiles('mix.lock') }}
+          restore-keys: plt-${{ runner.os }}-
+
       - name: Check formatting
         run: mix format --check-formatted
 
       - name: Run Credo (lint)
         run: mix credo --strict
+
+      - name: Build PLT
+        run: mix dialyzer --plt --plt-core-path priv/plts --plt-local-path priv/plts --no-check --quiet
+
+      - name: Run Dialyzer
+        run: mix dialyzer
 
       - name: Compile with warnings as errors
         run: mix compile --warnings-as-errors

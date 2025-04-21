@@ -25,3 +25,4 @@ docker/pgdata/
 .env.test.local
 .env.production.local
 *.*-E
+.dialyzer/

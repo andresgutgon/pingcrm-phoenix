@@ -49,6 +49,7 @@ defmodule Pingcrm.MixProject do
       {:dns_cluster, "~> 0.1.1"},
       {:bandit, "~> 1.5"},
       {:credo, "~> 1.7", only: [:dev, :test], runtime: false},
+      {:dialyxir, "~> 1.3", only: [:dev], runtime: false},
       {:mix_test_watch, "~> 1.0", only: [:dev, :test], runtime: false},
       {:routes,
        git: "https://github.com/andresgutgon/routes",
@@ -72,7 +73,11 @@ defmodule Pingcrm.MixProject do
       "ecto.setup": ["ecto.create", "ecto.migrate", "run priv/repo/seeds.exs"],
       "ecto.reset": ["ecto.drop", "ecto.setup"],
       test: ["ecto.create --quiet", "ecto.migrate --quiet", "test"],
-      check: ["format --check-formatted", "credo --strict", "cmd MIX_ENV=test mix test"],
+      check: [
+        "format --check-formatted",
+        "credo --strict",
+        "cmd mix dialyzer --halt-exit-status"
+      ],
       "assets.build": ["cmd pnpm --dir assets run build"],
       "assets.deploy": ["cmd pnpm --dir assets run build", "phx.digest"]
     ]
