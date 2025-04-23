@@ -1,5 +1,5 @@
 [![Backend](https://github.com/andresgutgon/pingcrm-phoenix/actions/workflows/backend-ci.yml/badge.svg?branch=main)](https://github.com/andresgutgon/pingcrm-phoenix/actions/workflows/backend-ci.yml)
-[![Frontend](https://github.com/andresgutgon/pingcrm-phoenix/actions/workflows/frontend-ci.yml/badge.svg?branch=main)](https://github.com/andresgutgon/pingcrm-phoenix/actions/workflows/frontend.yml)
+[![Frontend](https://github.com/andresgutgon/pingcrm-phoenix/actions/workflows/frontend-ci.yml/badge.svg?branch=main)](https://github.com/andresgutgon/pingcrm-phoenix/actions/workflows/frontend-ci.yml)
 
 # Ping CRM
 This [InertiaJS's official example](https://inertiajs.com/demo-application)
