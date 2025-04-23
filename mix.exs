@@ -9,13 +9,14 @@ defmodule Pingcrm.MixProject do
       elixirc_paths: elixirc_paths(Mix.env()),
       start_permanent: Mix.env() == :prod,
       aliases: aliases(),
-      deps: deps()
+      deps: deps(),
+      listeners: [Phoenix.CodeReloader],
+      preferred_cli_env: [
+        "test.watch": :test
+      ]
     ]
   end
 
-  # Configuration for the OTP application.
-  #
-  # Type `mix help compile.app` for more information.
   def application do
     [
       mod: {Pingcrm.Application, []},
@@ -23,23 +24,17 @@ defmodule Pingcrm.MixProject do
     ]
   end
 
-  # Specifies which paths to compile per environment.
-  defp elixirc_paths(:test), do: ["lib", "test/support"]
+  defp elixirc_paths(:test), do: ["lib", "test/support", "test/factories"]
   defp elixirc_paths(_), do: ["lib"]
 
-  # Specifies your project dependencies.
-  #
-  # Type `mix help deps` for examples and options.
   defp deps do
     [
       {:bcrypt_elixir, "~> 3.0"},
-      {:phoenix, "~> 1.7.19"},
-      {:phoenix_ecto, "~> 4.5"},
-      {:ecto_sql, "~> 3.10"},
+      {:phoenix, "~> 1.8.0-rc.1", override: true},
+      {:phoenix_ecto, "~> 4.6"},
+      {:phoenix_html, "~> 4.2.1"},
+      {:ecto_sql, "~> 3.12"},
       {:postgrex, ">= 0.0.0"},
-      {:phoenix_html, "~> 4.1"},
-      {:floki, ">= 0.30.0", only: :test},
-      {:phoenix_live_dashboard, "~> 0.8.3"},
       {:swoosh, "~> 1.5"},
       {:gen_smtp, "~> 1.2"},
       {:finch, "~> 0.13"},
@@ -49,6 +44,11 @@ defmodule Pingcrm.MixProject do
       {:jason, "~> 1.2"},
       {:dns_cluster, "~> 0.1.1"},
       {:bandit, "~> 1.5"},
+      {:credo, "~> 1.7", only: [:dev, :test], runtime: false},
+      {:dialyxir, "~> 1.3", only: [:dev], runtime: false},
+      {:ex_machina, "~> 2.8.0", only: :test},
+      {:faker, "~> 0.17", only: :test},
+      {:floki, ">= 0.34.0", only: :test},
       {:mix_test_watch, "~> 1.0", only: [:dev, :test], runtime: false},
       {:routes,
        git: "https://github.com/andresgutgon/routes",
@@ -56,23 +56,21 @@ defmodule Pingcrm.MixProject do
       {:inertia,
        git: "https://github.com/andresgutgon/inertia-phoenix.git",
        branch: "feature/inertia-vitejs-integration"},
-      # Publish in hex once this is merged: https://github.com/inertiajs/inertia-phoenix/pull/44
       {:vitex, git: "https://github.com/andresgutgon/vitex.git", branch: "main"}
     ]
   end
 
-  # Aliases are shortcuts or tasks specific to the current project.
-  # For example, to install project dependencies and perform other setup tasks, run:
-  #
-  #     $ mix setup
-  #
-  # See the documentation for `Mix` for more info on aliases.
   defp aliases do
     [
       setup: ["deps.get", "ecto.setup", "assets.setup", "assets.build"],
       "ecto.setup": ["ecto.create", "ecto.migrate", "run priv/repo/seeds.exs"],
       "ecto.reset": ["ecto.drop", "ecto.setup"],
       test: ["ecto.create --quiet", "ecto.migrate --quiet", "test"],
+      check: [
+        "format --check-formatted",
+        "credo --strict",
+        "cmd mix dialyzer --halt-exit-status"
+      ],
       "assets.build": ["cmd pnpm --dir assets run build"],
       "assets.deploy": ["cmd pnpm --dir assets run build", "phx.digest"]
     ]

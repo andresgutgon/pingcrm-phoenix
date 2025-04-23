@@ -17,7 +17,7 @@ defmodule PingcrmWeb do
   those modules here.
   """
 
-  def static_paths, do: ~w(assets fonts images favicon.ico robots.txt)
+  def static_paths, do: ~w(assets fonts images favicon.svg robots.txt)
 
   def router do
     quote do
@@ -88,7 +88,7 @@ defmodule PingcrmWeb do
   end
 
   @doc """
-  When used, dispatch to the appropriate controller/live_view/etc.
+  When used, dispatch to the appropriate controller
   """
   defmacro __using__(which) when is_atom(which) do
     apply(__MODULE__, which, [])

@@ -7,23 +7,19 @@ interface Route {
   readonly params: readonly string[];
 }
 
-type HTTPMethod = GET | *;
+type HTTPMethod = GET | POST | DELETE;
 
 type QueryParam = string | number | boolean | null | undefined;
 type QueryParams = Record<string, QueryParam | QueryParam[]>;
 
 type RouteParams = {
   "index": Record<string, never>;
-  "nominations.show": {id: string | number};
-  "dev.dashboard.css-:md5.css": {md5: string | number};
-  "dev.dashboard.js-:md5.js": {md5: string | number};
-  "dev.dashboard.home": Record<string, never>;
-  "dev.dashboard.page": {page: string | number};
-  "dev.dashboard.page": {node: string | number; page: string | number};
-  "dev.mailbox": Record<string, never>
+  "login.new": Record<string, never>;
+  "login.create": Record<string, never>;
+  "logout.delete": Record<string, never>
 }
 
-type RouteName = "index" | "nominations.show" | "dev.dashboard.css-:md5.css" | "dev.dashboard.js-:md5.js" | "dev.dashboard.home" | "dev.dashboard.page" | "dev.dashboard.page" | "dev.mailbox";
+type RouteName = "index" | "login.new" | "login.create" | "logout.delete";
 
 type RouteParamsWithQuery<T extends Record<string, any>> = T & {
   _query?: QueryParams;
@@ -31,13 +27,8 @@ type RouteParamsWithQuery<T extends Record<string, any>> = T & {
 
 type RoutePathConfig = {
   "/": Record<string, never>;
-      "/dev/dashboard": Record<string, never>;
-      "/dev/dashboard/:node/:page": {node: string | number; page: string | number};
-      "/dev/dashboard/:page": {page: string | number};
-      "/dev/dashboard/css-:md5": {md5: string | number};
-      "/dev/dashboard/js-:md5": {md5: string | number};
-      "/dev/mailbox": Record<string, never>;
-      "/nominations/:id": {id: string | number}
+      "/login": Record<string, never>;
+      "/logout": Record<string, never>
 }
 
 type RoutePath = keyof RoutePathConfig;

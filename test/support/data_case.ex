@@ -14,16 +14,19 @@ defmodule Pingcrm.DataCase do
   this option is not recommended for other databases.
   """
 
+  alias Ecto.Adapters.SQL.Sandbox
   use ExUnit.CaseTemplate
 
   using do
     quote do
+      alias Ecto.Adapters.SQL.Sandbox
       alias Pingcrm.Repo
 
       import Ecto
       import Ecto.Changeset
       import Ecto.Query
       import Pingcrm.DataCase
+      import Pingcrm.Factory
     end
   end
 
@@ -36,8 +39,8 @@ defmodule Pingcrm.DataCase do
   Sets up the sandbox based on the test tags.
   """
   def setup_sandbox(tags) do
-    pid = Ecto.Adapters.SQL.Sandbox.start_owner!(Pingcrm.Repo, shared: not tags[:async])
-    on_exit(fn -> Ecto.Adapters.SQL.Sandbox.stop_owner(pid) end)
+    pid = Sandbox.start_owner!(Pingcrm.Repo, shared: not tags[:async])
+    on_exit(fn -> Sandbox.stop_owner(pid) end)
   end
 
   @doc """

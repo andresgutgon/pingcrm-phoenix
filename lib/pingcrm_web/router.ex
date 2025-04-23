@@ -2,6 +2,8 @@ defmodule PingcrmWeb.Router do
   use PingcrmWeb, :router
   use Routes
 
+  import PingcrmWeb.UserAuth
+
   pipeline :browser do
     plug :accepts, ["html"]
     plug :fetch_session
@@ -10,6 +12,7 @@ defmodule PingcrmWeb.Router do
     plug :put_layout, html: {PingcrmWeb.Layouts, :root}
     plug :protect_from_forgery
     plug :put_secure_browser_headers
+    plug :fetch_current_scope_for_user
     plug Inertia.Plug
   end
 
@@ -18,20 +21,17 @@ defmodule PingcrmWeb.Router do
   end
 
   scope "/", PingcrmWeb do
-    pipe_through :browser
+    pipe_through [:browser, :require_authenticated_user]
 
-    get "/", HomeController, :index
-    get "/nominations/:id", HomeController, :show
+    get "/", DashboardController, :index, as: :dashboard
   end
 
-  if Application.compile_env(:pingcrm, :dev_routes) do
-    import Phoenix.LiveDashboard.Router
+  scope "/", PingcrmWeb do
+    pipe_through [:browser]
 
-    scope "/dev" do
-      pipe_through :browser
-
-      live_dashboard "/dashboard", metrics: PingcrmWeb.Telemetry
-      forward "/mailbox", Plug.Swoosh.MailboxPreview
-    end
+    # Auth
+    get "/login", UserSessionController, :new
+    post "/login", UserSessionController, :create
+    delete "/logout", UserSessionController, :delete
   end
 end
