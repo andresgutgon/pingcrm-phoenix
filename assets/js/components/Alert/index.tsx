@@ -25,7 +25,7 @@ export default function Alert({
   message,
   variant,
   onClose,
-  dataTestRef
+  dataTestRef,
 }: AlertProps) {
   const iconComponent = {
     info: <Check size={20} />,

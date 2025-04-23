@@ -45,7 +45,7 @@ export default function FlashedMessages() {
 
   return (
     <Alert
-      dataTestRef="flash-message"
+      dataTestRef='flash-message'
       variant={alert.variant}
       message={alert.message}
       onClose={() => setVisible(false)}

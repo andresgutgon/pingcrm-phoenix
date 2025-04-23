@@ -16,9 +16,10 @@
     "js:client:prod": "NODE_ENV=production vite build --mode production",
     "js:server:prod": "NODE_ENV=production VITE_SSR=true vite build --mode production",
     "build": "pnpm run js:client:prod && pnpm run js:server:prod",
+    "prettier": "prettier --write js/**/*.{ts,tsx} --ignore-path .prettierignore",
     "tc": "tsc --noEmit",
     "lint": "eslint js/",
-    "prettier": "prettier --write js/**/*.{ts,tsx}"
+    "prettier:check": "prettier --check \"js/**/*.{ts,tsx}\" --ignore-path .prettierignore"
   },
   "packageManager": "pnpm@9.12.2",
   "type": "module",

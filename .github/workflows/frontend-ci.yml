@@ -1,0 +1,55 @@
+name: Frontend CI
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "assets/**"
+  pull_request:
+    branches: [main]
+    paths:
+      - "assets/**"
+
+jobs:
+  lint-ts-prettier:
+    name: Typecheck, Lint & Prettier
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: 📥 Checkout code
+        uses: actions/checkout@v4
+
+      - name: 📦 Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: 22
+
+      - name: Ensure pnpm store path exists
+        run: mkdir -p ~/.pnpm-store
+
+      - name: 🛠 Install pnpm
+        run: npm install -g pnpm
+
+      - name: 💾 Cache pnpm store
+        uses: actions/cache@v3
+        with:
+          path: ~/.pnpm-store
+          key: ${{ runner.os }}-pnpm-store-${{ hashFiles('assets/pnpm-lock.yaml') }}
+          restore-keys: |
+            ${{ runner.os }}-pnpm-store-
+
+      - name: 📦 Install dependencies
+        working-directory: assets
+        run: pnpm install
+
+      - name: ✅ Typecheck (tsc)
+        working-directory: assets
+        run: pnpm run tc
+
+      - name: 🧹 Lint (eslint)
+        working-directory: assets
+        run: pnpm run lint
+
+      - name: 🎨 Prettier check
+        working-directory: assets
+        run: pnpm run prettier:check
