@@ -12,9 +12,15 @@
 
     <%= if dev_mode?() do %>
       <style>
+        /* TODO: move to Vitext when available */
         /* Prevents flash of unstyled content in development */
         body { visibility: hidden; }
       </style>
+      <noscript>
+        <style>
+          body { visibility: visible; }
+        </style>
+      </noscript>
     <% end %>
 
     <.vitex_assets js={["js/app.tsx"]} preload />

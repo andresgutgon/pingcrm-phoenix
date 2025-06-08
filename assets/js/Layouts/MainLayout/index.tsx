@@ -1,8 +1,8 @@
 import { Head } from '@inertiajs/react'
 import MainMenu from '@/components/Menu/MainMenu'
 import FlashMessages from '@/components/Messages/FlashMessages'
-import TopHeader from '@/components/Header/TopHeader'
-import BottomHeader from '@/components/Header/BottomHeader'
+import { TopHeader } from '@/components/Header/TopHeader'
+import { SubHeader } from '@/components/Header/SubHeader'
 
 interface MainLayoutProps {
   title?: string
@@ -17,10 +17,10 @@ export default function MainLayout({ title, children }: MainLayoutProps) {
         <div className='flex flex-col h-screen'>
           <div className='md:flex'>
             <TopHeader />
-            <BottomHeader />
+            <SubHeader />
           </div>
           <div className='flex flex-grow overflow-hidden'>
-            <MainMenu className='flex-shrink-0 hidden w-56 p-12 overflow-y-auto bg-indigo-800 md:block' />
+            <MainMenu className='flex-shrink-0 hidden w-56 overflow-y-auto bg-indigo-800 md:block' />
             {/**
              * We need to scroll the content of the page, not the whole page.
              * So we need to add `scroll-region="true"` to the div below.

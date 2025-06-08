@@ -1,2 +1,2 @@
-js/routes/routes.d.ts
-js/routes/routes.js
+js/actions/**/*
+js/wayfinder/**/*

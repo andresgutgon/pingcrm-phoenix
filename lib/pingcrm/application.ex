@@ -25,7 +25,7 @@ defmodule Pingcrm.Application do
 
     children =
       if dev_mode do
-        children ++ [{Routes.Watcher, []}]
+        children ++ [{Wayfinder.RoutesWatcher, []}]
       else
         children
       end

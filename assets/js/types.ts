@@ -47,10 +47,10 @@ export interface User {
   deletedAt: string
 }
 
-export type PageProps<
-  T extends Record<string, unknown> = Record<string, unknown>,
-> = T & {
+export type ConcretePageProps = Record<string, unknown>
+export type PageProps<T extends ConcretePageProps = ConcretePageProps> = T & {
   ssr?: boolean
+  currentPath: string
   auth: {
     user: User
   }

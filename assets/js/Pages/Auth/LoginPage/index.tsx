@@ -6,8 +6,9 @@ import LoadingButton from '@/components/Button/LoadingButton'
 import TextInput from '@/components/Form/TextInput'
 import FieldGroup from '@/components/Form/FieldGroup'
 import { CheckboxInput } from '@/components/Form/CheckboxInput'
-import Routes from '@/routes/routes'
 import FlashedMessages from '@/components/Messages/FlashMessages'
+
+import { login } from '@/actions/UserSessionController'
 
 export default function LoginPage() {
   const { data, setData, errors, post, processing } = useForm<{
@@ -23,7 +24,7 @@ export default function LoginPage() {
   function handleSubmit(e: FormEvent<HTMLFormElement>) {
     e.preventDefault()
 
-    post(Routes.path('login.create'))
+    post(login().url)
   }
 
   return (

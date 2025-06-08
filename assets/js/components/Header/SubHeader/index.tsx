@@ -2,9 +2,9 @@ import { useState } from 'react'
 import { PageProps } from '@/types'
 import { Link, usePage } from '@inertiajs/react'
 import { ChevronDown } from 'lucide-react'
-import Routes from '@/routes/routes'
+import { deleteMethod } from '@/actions/UserSessionController'
 
-export default function BottomHeader() {
+export function SubHeader() {
   const { auth } = usePage<PageProps>().props
   const [menuOpened, setMenuOpened] = useState(false)
   return (
@@ -44,7 +44,7 @@ export default function BottomHeader() {
             </Link>
             <Link
               as='button'
-              href={Routes.path('logout.delete')}
+              href={deleteMethod().url}
               method='delete'
               className='block w-full px-6 py-2 text-left focus:outline-none hover:bg-indigo-600 hover:text-white'
             >

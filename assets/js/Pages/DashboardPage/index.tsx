@@ -2,7 +2,7 @@ import MainLayout from '@/Layouts/MainLayout'
 
 function DashboardPage() {
   return (
-    <div>
+    <>
       <h1 className='mb-8 text-3xl font-bold'>Dashboard</h1>
       <p className='mb-12 leading-normal'>
         Hey there! Welcome to Ping CRM, a demo app designed to help illustrate
@@ -24,7 +24,7 @@ function DashboardPage() {
         </a>
         .
       </p>
-    </div>
+    </>
   )
 }
 
