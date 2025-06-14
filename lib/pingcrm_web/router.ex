@@ -1,6 +1,20 @@
 defmodule PingcrmWeb.Router do
   use PingcrmWeb, :router
-  use Wayfinder.PhoenixRouter, otp_app: :pingcrm
+  use Wayfinder.PhoenixRouter
+
+  # For running profiling on Wayfinder
+  # @fake_controllers_count 100
+  # Gen fake controlers
+  # docker compose run web mix generate_fake_controllers.task 1000
+
+  # Profile Wayfinder
+  # docker compose run web mix profile.task wayfinder.generate
+
+  # Uncomment to enable fake controllers
+  # @compile {:no_warn_undefined,
+  #           for i <- 1..@fake_controllers_count do
+  #             Module.concat(PingcrmWeb.FakeControllers, :"FakeController#{i}")
+  #           end}
 
   import PingcrmWeb.UserAuth
 
@@ -39,4 +53,12 @@ defmodule PingcrmWeb.Router do
     post "/login", UserSessionController, :create
     delete "/logout", UserSessionController, :delete
   end
+
+  # Explanation on top
+  # scope "/fake" do
+  #   for i <- 1..@fake_controllers_count do
+  #     controller = Module.concat(PingcrmWeb.FakeControllers, :"FakeController#{i}")
+  #     resources("/fake-controller-#{i}", controller)
+  #   end
+  # end
 end

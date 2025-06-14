@@ -16,11 +16,6 @@
         /* Prevents flash of unstyled content in development */
         body { visibility: hidden; }
       </style>
-      <noscript>
-        <style>
-          body { visibility: visible; }
-        </style>
-      </noscript>
     <% end %>
 
     <.vitex_assets js={["js/app.tsx"]} preload />
@@ -28,6 +23,7 @@
   <body class="bg-white text-gray-700">
     {@inner_content}
 
+    <!-- TODO: Move to Vitex and make a helper for this -->
     <%= if dev_mode?() do %>
       <script>
         /* Prevents flash of unstyled content in development */
@@ -35,6 +31,11 @@
           document.body.style.visibility = 'visible';
         });
       </script>
+      <noscript>
+        <style>
+          body { visibility: visible; }
+        </style>
+      </noscript>
     <% end %>
   </body>
 </html>

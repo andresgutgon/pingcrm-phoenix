@@ -16,7 +16,7 @@
     "js:client:prod": "NODE_ENV=production vite build --mode production",
     "js:server:prod": "NODE_ENV=production VITE_SSR=true vite build --mode production",
     "build": "pnpm run js:client:prod && pnpm run js:server:prod",
-    "tc": "tsc --noEmit",
+    "tc": "tsc --noEmit -p tsconfig.app.json",
     "lint": "eslint js/",
     "prettier": "prettier --write js/**/*.{ts,tsx} --ignore-path .prettierignore",
     "prettier:check": "prettier --check \"js/**/*.{ts,tsx}\" --ignore-path .prettierignore"
