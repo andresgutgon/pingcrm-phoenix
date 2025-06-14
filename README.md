@@ -33,3 +33,10 @@ in your test file to stop the execution and start a debug session.
 ```bash
 ./bin/test --debug
 ```
+
+## Data migrations
+When the app is released how to do data migrations?
+[This fly.io article is nice](https://fly.io/phoenix-files/backfilling-data/)
+```bash
+mix ecto.gen.migration --migrations-path=priv/repo/data_migrations add_demo_user
+```

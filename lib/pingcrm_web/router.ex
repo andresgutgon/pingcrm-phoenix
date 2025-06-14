@@ -1,6 +1,6 @@
 defmodule PingcrmWeb.Router do
   use PingcrmWeb, :router
-  use Routes
+  use Wayfinder.PhoenixRouter, otp_app: :pingcrm
 
   import PingcrmWeb.UserAuth
 
@@ -23,14 +23,19 @@ defmodule PingcrmWeb.Router do
   scope "/", PingcrmWeb do
     pipe_through [:browser, :require_authenticated_user]
 
-    get "/", DashboardController, :index, as: :dashboard
+    get "/", DashboardController, :index, as: :home
+
+    # TODO: Implement for real
+    get "/organizations", DashboardController, :index, as: :organizations
+    get "/contacts", DashboardController, :index, as: :contacts
+    get "/reports", DashboardController, :index, as: :reports
   end
 
   scope "/", PingcrmWeb do
     pipe_through [:browser]
 
     # Auth
-    get "/login", UserSessionController, :new
+    get "/login", UserSessionController, :new, as: :login
     post "/login", UserSessionController, :create
     delete "/logout", UserSessionController, :delete
   end

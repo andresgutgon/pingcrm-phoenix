@@ -1,39 +1,40 @@
 import { ReactNode } from 'react'
 import cn from 'classnames'
-import { Link } from '@/components/Link'
-import { type RoutePath } from '@/routes/routes'
+import { Link } from '@inertiajs/react'
+import { WayfinderUrl } from '@/wayfinder'
 
-export default function MainMenuItem({
-  icon,
+export function MainMenuItem({
   link,
   text,
+  icon,
 }: {
-  icon?: ReactNode
-  link: RoutePath
+  link: WayfinderUrl
   text: string
+  icon?: ReactNode
 }) {
-  // TODO: Improve routes integration between Phoenix and React
-  const isActive = false
   return (
-    <div className='mb-4'>
-      <Link to={link} className='flex items-center group py-3 space-x-3'>
-        <div
-          className={cn({
-            'text-white': isActive,
-            'text-indigo-400 group-hover:text-white': !isActive,
-          })}
-        >
-          {icon}
-        </div>
-        <div
-          className={cn({
-            'text-white': isActive,
-            'text-indigo-200 group-hover:text-white': !isActive,
-          })}
-        >
-          {text}
-        </div>
-      </Link>
-    </div>
+    <Link
+      href={link.path}
+      className={cn('flex items-center group px-12 py-3 space-x-3', {
+        'bg-indigo-500': link.isCurrent,
+      })}
+    >
+      <div
+        className={cn({
+          'text-white': link.isCurrent,
+          'text-indigo-400 group-hover:text-white': !link.isCurrent,
+        })}
+      >
+        {icon}
+      </div>
+      <div
+        className={cn({
+          'text-white': link.isCurrent,
+          'text-indigo-200 group-hover:text-white': !link.isCurrent,
+        })}
+      >
+        {text}
+      </div>
+    </Link>
   )
 }

@@ -7,7 +7,7 @@ import reactRefresh from 'eslint-plugin-react-refresh'
 import tseslint from 'typescript-eslint'
 
 export default tseslint.config(
-  { ignores: ['dist', 'js/routes/**'] },
+  { ignores: ['dist', 'js/actions/**', 'js/wayfinder/**'] },
   {
     extends: [js.configs.recommended, ...tseslint.configs.recommended],
     files: ['**/*.{js,ts,jsx,tsx}'],

@@ -44,10 +44,10 @@ config :inertia,
   ssr: false,
   raise_on_ssr_failure: config_env() != :prod
 
-config :routes,
+config :wayfinder,
+  otp_app: :pingcrm,
   router: PingcrmWeb.Router,
-  typescript: true,
-  routes_path: "assets/js/routes"
+  ignore_paths: ["^/backoffice"]
 
 # Configures Elixir's Logger
 config :logger, :console,

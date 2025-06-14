@@ -30,6 +30,7 @@ defmodule Pingcrm.Accounts.User do
     user
     |> cast(attrs, [:email, :first_name, :last_name, :password, :owner, :account_id])
     |> validate_required([:email, :first_name, :last_name, :password])
+    |> unique_constraint(:email, name: :users_email_index)
     |> validate_length(:password, min: 6)
     |> put_password_hash()
   end

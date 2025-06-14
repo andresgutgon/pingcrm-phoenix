@@ -65,7 +65,7 @@ COPY mix.exs mix.lock ./
 RUN mix deps.get --only prod
 
 # Assets pipeline with full dependencies dev + prod
-COPY assets/{package.json,pnpm-lock.yaml,.prettierignore} ./assets/
+COPY assets/package.json assets/pnpm-lock.yaml assets/.prettierignore ./assets/
 RUN pnpm install --prefix ./assets
 
 RUN mkdir config

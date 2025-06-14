@@ -10,7 +10,6 @@ defmodule Pingcrm.MixProject do
       start_permanent: Mix.env() == :prod,
       aliases: aliases(),
       deps: deps(),
-      listeners: [Phoenix.CodeReloader],
       preferred_cli_env: [
         "test.watch": :test
       ]
@@ -50,13 +49,15 @@ defmodule Pingcrm.MixProject do
       {:faker, "~> 0.17", only: :test},
       {:floki, ">= 0.34.0", only: :test},
       {:mix_test_watch, "~> 1.0", only: [:dev, :test], runtime: false},
-      {:routes,
-       git: "https://github.com/andresgutgon/routes",
-       branch: "fix/make-routes-esm-and-ssr-compatible"},
-      {:inertia,
-       git: "https://github.com/andresgutgon/inertia-phoenix.git",
-       branch: "feature/inertia-vitejs-integration"},
-      {:vitex, git: "https://github.com/andresgutgon/vitex.git", branch: "main"}
+      {
+        :inertia,
+        git: "https://github.com/andresgutgon/inertia-phoenix.git",
+        branch: "feature/inertia-vitejs-integration"
+      },
+      {:vitex, git: "https://github.com/andresgutgon/vitex.git", branch: "main"},
+      {:wayfinder,
+       git: "https://github.com/andresgutgon/phoenix-wayfinder.git",
+       ref: "0dbbb8405d3f38438052c049da5d4d33bbf69c6d"}
     ]
   end
 
@@ -71,8 +72,8 @@ defmodule Pingcrm.MixProject do
         "credo --strict",
         "cmd mix dialyzer --halt-exit-status"
       ],
-      "assets.build": ["cmd pnpm --dir assets run build"],
-      "assets.deploy": ["cmd pnpm --dir assets run build", "phx.digest"]
+      "assets.build": ["wayfinder.generate", "cmd pnpm --dir assets run build"],
+      "assets.deploy": ["assets.build", "phx.digest"]
     ]
   end
 end
