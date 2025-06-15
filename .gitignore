@@ -26,3 +26,4 @@ docker/pgdata/
 .env.production.local
 *.*-E
 .dialyzer/
+fake_controllers

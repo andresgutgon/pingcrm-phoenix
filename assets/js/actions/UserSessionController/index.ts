@@ -1,4 +1,4 @@
-import { queryParams, isCurrentUrl, type RouteQueryOptions, type RouteDefinition, type WayfinderUrl } from './../../wayfinder'
+import { buildUrl, type RouteQueryOptions, type RouteDefinition, type RouteDefinitionWithParameters, type WayfinderUrl } from './../../wayfinder'
 
 /**
  * @see PingcrmWeb.UserSessionController::create
@@ -13,25 +13,14 @@ export const create = (options?: RouteQueryOptions): RouteDefinition<'post'> => 
 
 create.definition = {
   methods: ["post"],
-  url: '/login'
-} satisfies RouteDefinition<['post']>
+  url: '/login',
+  parameters: {}
+} satisfies RouteDefinitionWithParameters<['post']>
 create.url = (options?: RouteQueryOptions): WayfinderUrl => {
-  let routePath = create.definition.url
-
-  
-  routePath = create.definition.url
-  routePath = routePath.replace(/\/+$/, '') || '/'
-    const path = routePath + queryParams(options);
-
-  return {
-    path,
-    isCurrent: isCurrentUrl({
-      routePath,
-      currentPath: options?.currentPath,
-      matchExact: options?.matchExact
-    })
-  }
-
+  return buildUrl({
+    definition: create.definition,
+    options
+  })
 }
 create.post = (options?: RouteQueryOptions): RouteDefinition<'post'> => ({
   url: create.url(options).path,
@@ -51,25 +40,14 @@ export const deleteMethod = (options?: RouteQueryOptions): RouteDefinition<'dele
 
 deleteMethod.definition = {
   methods: ["delete"],
-  url: '/logout'
-} satisfies RouteDefinition<['delete']>
+  url: '/logout',
+  parameters: {}
+} satisfies RouteDefinitionWithParameters<['delete']>
 deleteMethod.url = (options?: RouteQueryOptions): WayfinderUrl => {
-  let routePath = deleteMethod.definition.url
-
-  
-  routePath = deleteMethod.definition.url
-  routePath = routePath.replace(/\/+$/, '') || '/'
-    const path = routePath + queryParams(options);
-
-  return {
-    path,
-    isCurrent: isCurrentUrl({
-      routePath,
-      currentPath: options?.currentPath,
-      matchExact: options?.matchExact
-    })
-  }
-
+  return buildUrl({
+    definition: deleteMethod.definition,
+    options
+  })
 }
 deleteMethod.delete = (options?: RouteQueryOptions): RouteDefinition<'delete'> => ({
   url: deleteMethod.url(options).path,
@@ -89,25 +67,14 @@ export const login = (options?: RouteQueryOptions): RouteDefinition<'get'> => ({
 
 login.definition = {
   methods: ["get"],
-  url: '/login'
-} satisfies RouteDefinition<['get']>
+  url: '/login',
+  parameters: {}
+} satisfies RouteDefinitionWithParameters<['get']>
 login.url = (options?: RouteQueryOptions): WayfinderUrl => {
-  let routePath = login.definition.url
-
-  
-  routePath = login.definition.url
-  routePath = routePath.replace(/\/+$/, '') || '/'
-    const path = routePath + queryParams(options);
-
-  return {
-    path,
-    isCurrent: isCurrentUrl({
-      routePath,
-      currentPath: options?.currentPath,
-      matchExact: options?.matchExact
-    })
-  }
-
+  return buildUrl({
+    definition: login.definition,
+    options
+  })
 }
 login.get = (options?: RouteQueryOptions): RouteDefinition<'get'> => ({
   url: login.url(options).path,

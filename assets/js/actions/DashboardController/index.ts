@@ -1,4 +1,4 @@
-import { queryParams, isCurrentUrl, type RouteQueryOptions, type RouteDefinition, type WayfinderUrl } from './../../wayfinder'
+import { buildUrl, type RouteQueryOptions, type RouteDefinition, type RouteDefinitionWithParameters, type WayfinderUrl } from './../../wayfinder'
 
 /**
  * @see PingcrmWeb.DashboardController::index
@@ -13,25 +13,14 @@ export const home = (options?: RouteQueryOptions): RouteDefinition<'get'> => ({
 
 home.definition = {
   methods: ["get"],
-  url: '/'
-} satisfies RouteDefinition<['get']>
+  url: '/',
+  parameters: {}
+} satisfies RouteDefinitionWithParameters<['get']>
 home.url = (options?: RouteQueryOptions): WayfinderUrl => {
-  let routePath = home.definition.url
-
-  
-  routePath = home.definition.url
-  routePath = routePath.replace(/\/+$/, '') || '/'
-    const path = routePath + queryParams(options);
-
-  return {
-    path,
-    isCurrent: isCurrentUrl({
-      routePath,
-      currentPath: options?.currentPath,
-      matchExact: options?.matchExact
-    })
-  }
-
+  return buildUrl({
+    definition: home.definition,
+    options
+  })
 }
 home.get = (options?: RouteQueryOptions): RouteDefinition<'get'> => ({
   url: home.url(options).path,
@@ -51,25 +40,14 @@ export const contacts = (options?: RouteQueryOptions): RouteDefinition<'get'> =>
 
 contacts.definition = {
   methods: ["get"],
-  url: '/contacts'
-} satisfies RouteDefinition<['get']>
+  url: '/contacts',
+  parameters: {}
+} satisfies RouteDefinitionWithParameters<['get']>
 contacts.url = (options?: RouteQueryOptions): WayfinderUrl => {
-  let routePath = contacts.definition.url
-
-  
-  routePath = contacts.definition.url
-  routePath = routePath.replace(/\/+$/, '') || '/'
-    const path = routePath + queryParams(options);
-
-  return {
-    path,
-    isCurrent: isCurrentUrl({
-      routePath,
-      currentPath: options?.currentPath,
-      matchExact: options?.matchExact
-    })
-  }
-
+  return buildUrl({
+    definition: contacts.definition,
+    options
+  })
 }
 contacts.get = (options?: RouteQueryOptions): RouteDefinition<'get'> => ({
   url: contacts.url(options).path,
@@ -89,25 +67,14 @@ export const organizations = (options?: RouteQueryOptions): RouteDefinition<'get
 
 organizations.definition = {
   methods: ["get"],
-  url: '/organizations'
-} satisfies RouteDefinition<['get']>
+  url: '/organizations',
+  parameters: {}
+} satisfies RouteDefinitionWithParameters<['get']>
 organizations.url = (options?: RouteQueryOptions): WayfinderUrl => {
-  let routePath = organizations.definition.url
-
-  
-  routePath = organizations.definition.url
-  routePath = routePath.replace(/\/+$/, '') || '/'
-    const path = routePath + queryParams(options);
-
-  return {
-    path,
-    isCurrent: isCurrentUrl({
-      routePath,
-      currentPath: options?.currentPath,
-      matchExact: options?.matchExact
-    })
-  }
-
+  return buildUrl({
+    definition: organizations.definition,
+    options
+  })
 }
 organizations.get = (options?: RouteQueryOptions): RouteDefinition<'get'> => ({
   url: organizations.url(options).path,
@@ -127,25 +94,14 @@ export const reports = (options?: RouteQueryOptions): RouteDefinition<'get'> => 
 
 reports.definition = {
   methods: ["get"],
-  url: '/reports'
-} satisfies RouteDefinition<['get']>
+  url: '/reports',
+  parameters: {}
+} satisfies RouteDefinitionWithParameters<['get']>
 reports.url = (options?: RouteQueryOptions): WayfinderUrl => {
-  let routePath = reports.definition.url
-
-  
-  routePath = reports.definition.url
-  routePath = routePath.replace(/\/+$/, '') || '/'
-    const path = routePath + queryParams(options);
-
-  return {
-    path,
-    isCurrent: isCurrentUrl({
-      routePath,
-      currentPath: options?.currentPath,
-      matchExact: options?.matchExact
-    })
-  }
-
+  return buildUrl({
+    definition: reports.definition,
+    options
+  })
 }
 reports.get = (options?: RouteQueryOptions): RouteDefinition<'get'> => ({
   url: reports.url(options).path,

@@ -15,7 +15,7 @@ export default function MainMenu({ className }: { className?: string }) {
     <div className={className}>
       <MainMenuItem
         text='Dashboard'
-        link={home.url({ currentPath, matchExact: true })}
+        link={home.url({ currentPath, exactMatch: true })}
         icon={<CircleGauge size={20} />}
       />
       <MainMenuItem

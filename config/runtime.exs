@@ -1,6 +1,13 @@
 import Config
 
-config :pingcrm, env: config_env()
+env = config_env()
+dev_mode = env == :dev
+test_dev_mode = env == :test and System.get_env("CI") != "true"
+
+config :pingcrm,
+  env: env,
+  dev_mode: dev_mode,
+  test_dev_mode: test_dev_mode
 
 # config/runtime.exs is executed for all environments, including
 # during releases. It is executed after compilation and before the
@@ -21,12 +28,6 @@ config :pingcrm, env: config_env()
 if System.get_env("PHX_SERVER") do
   config :pingcrm, PingcrmWeb.Endpoint, server: true
 end
-
-env = config_env()
-dev_mode = env == :dev
-test_dev_mode = config_env() == :test and System.get_env("CI") != "true"
-config :pingcrm, :dev_mode, dev_mode
-config :pingcrm, :test_dev_mode, test_dev_mode
 
 config :pingcrm, Inertia.SSR,
   path: Path.join([Application.app_dir(:pingcrm), "priv", "ssr-js"]),

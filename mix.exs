@@ -12,6 +12,13 @@ defmodule Pingcrm.MixProject do
       deps: deps(),
       preferred_cli_env: [
         "test.watch": :test
+      ],
+      dialyzer: [
+        plt_add_apps: [:mix],
+        ignore_warnings_for: [
+          "lib/mix/tasks/generate_controllers.task.ex",
+          "lib/mix/tasks/profile.task.ex"
+        ]
       ]
     ]
   end
@@ -57,7 +64,7 @@ defmodule Pingcrm.MixProject do
       {:vitex, git: "https://github.com/andresgutgon/vitex.git", branch: "main"},
       {:wayfinder,
        git: "https://github.com/andresgutgon/phoenix-wayfinder.git",
-       ref: "0dbbb8405d3f38438052c049da5d4d33bbf69c6d"}
+       ref: "fa619434bca21cfd825fb605ac75d82565e8a10b"}
     ]
   end
 

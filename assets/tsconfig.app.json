@@ -1,6 +1,5 @@
 {
   "compilerOptions": {
-    "tsBuildInfoFile": "./node_modules/.tmp/tsconfig.app.tsbuildinfo",
     "target": "ES2020",
     "useDefineForClassFields": true,
     "types": ["vite/client"],
@@ -8,15 +7,11 @@
     "module": "ESNext",
     "skipLibCheck": true,
     "jsx": "react-jsx",
-
-    /* Bundler mode */
     "moduleResolution": "bundler",
     "allowImportingTsExtensions": true,
     "isolatedModules": true,
     "moduleDetection": "force",
     "noEmit": true,
-
-    /* Linting */
     "strict": true,
     "noUnusedLocals": true,
     "noUnusedParameters": true,
@@ -30,4 +25,3 @@
   "include": ["js", "types"],
   "exclude": ["node_modules"]
 }
-

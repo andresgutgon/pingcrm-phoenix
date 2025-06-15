@@ -12,6 +12,7 @@ const input: Record<string, string> = isSSR
 export default defineConfig(({ mode }: ConfigEnv) => {
   const isProd = mode === 'production'
   const isDev = mode === 'development'
+
   return {
     publicDir: 'static',
     plugins: [
