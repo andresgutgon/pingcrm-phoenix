@@ -44,7 +44,7 @@ config :inertia,
   ssr: false,
   raise_on_ssr_failure: config_env() != :prod
 
-config :wayfinder,
+config :wayfinder_ex,
   otp_app: :pingcrm,
   router: PingcrmWeb.Router,
   ignore_paths: ["^/backoffice"]

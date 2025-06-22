@@ -16,12 +16,14 @@ home.definition = {
   url: '/',
   parameters: {}
 } satisfies RouteDefinitionWithParameters<['get']>
+
 home.url = (options?: RouteQueryOptions): WayfinderUrl => {
   return buildUrl({
     definition: home.definition,
     options
   })
 }
+
 home.get = (options?: RouteQueryOptions): RouteDefinition<'get'> => ({
   url: home.url(options).path,
   method: 'get',
@@ -43,12 +45,14 @@ contacts.definition = {
   url: '/contacts',
   parameters: {}
 } satisfies RouteDefinitionWithParameters<['get']>
+
 contacts.url = (options?: RouteQueryOptions): WayfinderUrl => {
   return buildUrl({
     definition: contacts.definition,
     options
   })
 }
+
 contacts.get = (options?: RouteQueryOptions): RouteDefinition<'get'> => ({
   url: contacts.url(options).path,
   method: 'get',
@@ -70,12 +74,14 @@ organizations.definition = {
   url: '/organizations',
   parameters: {}
 } satisfies RouteDefinitionWithParameters<['get']>
+
 organizations.url = (options?: RouteQueryOptions): WayfinderUrl => {
   return buildUrl({
     definition: organizations.definition,
     options
   })
 }
+
 organizations.get = (options?: RouteQueryOptions): RouteDefinition<'get'> => ({
   url: organizations.url(options).path,
   method: 'get',
@@ -97,12 +103,14 @@ reports.definition = {
   url: '/reports',
   parameters: {}
 } satisfies RouteDefinitionWithParameters<['get']>
+
 reports.url = (options?: RouteQueryOptions): WayfinderUrl => {
   return buildUrl({
     definition: reports.definition,
     options
   })
 }
+
 reports.get = (options?: RouteQueryOptions): RouteDefinition<'get'> => ({
   url: reports.url(options).path,
   method: 'get',

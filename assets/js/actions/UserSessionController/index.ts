@@ -16,12 +16,14 @@ create.definition = {
   url: '/login',
   parameters: {}
 } satisfies RouteDefinitionWithParameters<['post']>
+
 create.url = (options?: RouteQueryOptions): WayfinderUrl => {
   return buildUrl({
     definition: create.definition,
     options
   })
 }
+
 create.post = (options?: RouteQueryOptions): RouteDefinition<'post'> => ({
   url: create.url(options).path,
   method: 'post',
@@ -43,12 +45,14 @@ deleteMethod.definition = {
   url: '/logout',
   parameters: {}
 } satisfies RouteDefinitionWithParameters<['delete']>
+
 deleteMethod.url = (options?: RouteQueryOptions): WayfinderUrl => {
   return buildUrl({
     definition: deleteMethod.definition,
     options
   })
 }
+
 deleteMethod.delete = (options?: RouteQueryOptions): RouteDefinition<'delete'> => ({
   url: deleteMethod.url(options).path,
   method: 'delete',
@@ -70,12 +74,14 @@ login.definition = {
   url: '/login',
   parameters: {}
 } satisfies RouteDefinitionWithParameters<['get']>
+
 login.url = (options?: RouteQueryOptions): WayfinderUrl => {
   return buildUrl({
     definition: login.definition,
     options
   })
 }
+
 login.get = (options?: RouteQueryOptions): RouteDefinition<'get'> => ({
   url: login.url(options).path,
   method: 'get',

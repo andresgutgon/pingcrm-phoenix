@@ -56,15 +56,13 @@ defmodule Pingcrm.MixProject do
       {:faker, "~> 0.17", only: :test},
       {:floki, ">= 0.34.0", only: :test},
       {:mix_test_watch, "~> 1.0", only: [:dev, :test], runtime: false},
+      {:wayfinder_ex, "~> 0.1.5"},
       {
         :inertia,
         git: "https://github.com/andresgutgon/inertia-phoenix.git",
         branch: "feature/inertia-vitejs-integration"
       },
-      {:vitex, git: "https://github.com/andresgutgon/vitex.git", branch: "main"},
-      {:wayfinder,
-       git: "https://github.com/andresgutgon/phoenix-wayfinder.git",
-       ref: "fa619434bca21cfd825fb605ac75d82565e8a10b"}
+      {:vitex, git: "https://github.com/andresgutgon/vitex.git", branch: "main"}
     ]
   end
 
