@@ -28,7 +28,7 @@ defmodule PingcrmWeb.ErrorHTML do
           status: status,
           title: meta.title,
           description: meta.description,
-          ssr: true
+          ssr: false
         },
         url: request_path(conn.request_path, conn.query_string),
         version: "1",

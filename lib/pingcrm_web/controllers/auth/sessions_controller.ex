@@ -1,13 +1,11 @@
-defmodule PingcrmWeb.UserSessionController do
+defmodule PingcrmWeb.Auth.SessionsController do
   use PingcrmWeb, :controller
 
   alias Pingcrm.Accounts
   alias PingcrmWeb.UserAuth
 
   def new(conn, _params) do
-    conn
-    |> assign_prop(:ssr, true)
-    |> render_inertia("Auth/LoginPage", ssr: true)
+    render_inertia(conn, "Auth/LoginPage")
   end
 
   def create(conn, %{"email" => email, "password" => password} = user_params) do
@@ -18,7 +16,6 @@ defmodule PingcrmWeb.UserSessionController do
     else
       conn
       |> assign_errors(%{email: "Invalid email or password"})
-      |> assign_prop(:ssr, true)
       |> render_inertia("Auth/LoginPage", ssr: true)
     end
   end

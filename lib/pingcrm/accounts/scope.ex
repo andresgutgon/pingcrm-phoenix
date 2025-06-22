@@ -19,23 +19,38 @@ defmodule Pingcrm.Accounts.Scope do
   alias Pingcrm.Accounts.Presenter, as: UserPresenter
   alias Pingcrm.Accounts.User
 
-  defstruct user: nil
+  defstruct user: nil, account: nil, role: nil
 
-  @doc """
-  Creates a scope for the given user.
+  def for_user(nil, _account_id), do: nil
 
-  Returns nil if no user is given.
-  """
-  def for_user(%User{} = user) do
+  def for_user(%User{} = user, account_id) do
     user =
-      if Ecto.assoc_loaded?(user.account) do
+      if Ecto.assoc_loaded?(user.memberships) do
         user
       else
-        Pingcrm.Repo.preload(user, :account)
+        Pingcrm.Repo.preload(user, memberships: :account)
       end
 
-    %__MODULE__{user: UserPresenter.serialize(user)}
-  end
+    memberships = user.memberships
 
-  def for_user(nil), do: nil
+    current_membership =
+      if account_id do
+        Enum.find(memberships, fn m -> m.account_id == account_id end)
+      else
+        List.first(memberships)
+      end
+
+    account = current_membership && current_membership.account
+    role = current_membership && current_membership.role
+
+    if account && current_membership.role && role do
+      %__MODULE__{
+        user: UserPresenter.serialize(user),
+        account: UserPresenter.serialize_account(account),
+        role: role
+      }
+    else
+      nil
+    end
+  end
 end

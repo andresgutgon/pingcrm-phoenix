@@ -1,8 +1,8 @@
-defmodule PingcrmWeb.UserSessionControllerTest do
+defmodule PingcrmWeb.Auth.SessionsControllerTest do
   use PingcrmWeb.ConnCase, async: true
 
   setup do
-    %{user: account_owner()}
+    %{user: account_owner().user}
   end
 
   describe "GET /login" do
@@ -91,11 +91,10 @@ defmodule PingcrmWeb.UserSessionControllerTest do
       refute get_session(conn, :user_token)
     end
 
-    test "succeeds even if the user is not logged in", %{conn: conn} do
+    test "redirects to /login if not logged", %{conn: conn} do
       conn = delete(conn, ~p"/logout")
-      assert redirected_to(conn) == ~p"/"
+      assert redirected_to(conn) == ~p"/login"
       refute get_session(conn, :user_token)
-      assert Phoenix.Flash.get(conn.assigns.flash, :info) =~ "Logged out successfully"
     end
   end
 end

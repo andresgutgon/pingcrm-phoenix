@@ -13,6 +13,7 @@ defmodule Pingcrm.MixProject do
       preferred_cli_env: [
         "test.watch": :test
       ],
+      listeners: [Phoenix.CodeReloader],
       dialyzer: [
         plt_add_apps: [:mix],
         ignore_warnings_for: [
@@ -36,7 +37,7 @@ defmodule Pingcrm.MixProject do
   defp deps do
     [
       {:bcrypt_elixir, "~> 3.0"},
-      {:phoenix, "~> 1.8.0-rc.1", override: true},
+      {:phoenix, "~> 1.8.0-rc.3", override: true},
       {:phoenix_ecto, "~> 4.6"},
       {:phoenix_html, "~> 4.2.1"},
       {:ecto_sql, "~> 3.12"},
@@ -50,6 +51,7 @@ defmodule Pingcrm.MixProject do
       {:jason, "~> 1.2"},
       {:dns_cluster, "~> 0.1.1"},
       {:bandit, "~> 1.5"},
+      {:tidewave, "~> 0.1", only: :dev},
       {:credo, "~> 1.7", only: [:dev, :test], runtime: false},
       {:dialyxir, "~> 1.3", only: [:dev], runtime: false},
       {:ex_machina, "~> 2.8.0", only: :test},

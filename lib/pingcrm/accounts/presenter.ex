@@ -10,16 +10,12 @@ defmodule Pingcrm.Accounts.Presenter do
       first_name: user.first_name,
       last_name: user.last_name,
       email: user.email,
-      owner: user.owner,
-      account: serialize_account(user.account),
       confirmed_at: user.confirmed_at,
       authenticated_at: user.authenticated_at,
       # TODO: Implement deletabled
       deleted_at: nil
     }
   end
-
-  def serialize_account(nil), do: nil
 
   def serialize_account(%Account{} = account) do
     %{

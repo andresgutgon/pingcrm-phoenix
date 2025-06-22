@@ -3,4 +3,6 @@ defmodule Pingcrm.Factory do
 
   use Pingcrm.AccountFactory
   use Pingcrm.UserFactory
+  use Pingcrm.UserTokenFactory
+  use Pingcrm.MembershipFactory
 end

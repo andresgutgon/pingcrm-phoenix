@@ -37,14 +37,12 @@ export interface Account {
 export interface User {
   id: number
   name: string
-  firstName: string
-  lastName: string
+  first_name: string
+  last_name: string
   email: string
-  owner: string
-  account: Account
-  confirmedAt: string
-  authenticatedAt: string
-  deletedAt: string
+  confirmed_at: string
+  authenticated_at: string
+  deleted_at: string
 }
 
 export type ConcretePageProps = Record<string, unknown>
@@ -53,6 +51,8 @@ export type PageProps<T extends ConcretePageProps = ConcretePageProps> = T & {
   currentPath: string
   auth: {
     user: User
+    account: Account
+    role: 'admin' | 'member'
   }
   flash: {
     success: string | null

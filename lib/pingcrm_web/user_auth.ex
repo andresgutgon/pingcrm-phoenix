@@ -1,3 +1,5 @@
+require Logger
+
 defmodule PingcrmWeb.UserAuth do
   @moduledoc false
 
@@ -10,8 +12,6 @@ defmodule PingcrmWeb.UserAuth do
   alias Pingcrm.Accounts
   alias Pingcrm.Accounts.Scope
 
-  # Make the remember me cookie valid for 14 days. This should match
-  # the session validity setting in UserToken.
   @max_cookie_age_in_days 14
   @remember_me_cookie "_pingcrm_web_user_remember_me"
   @remember_me_options [
@@ -20,21 +20,8 @@ defmodule PingcrmWeb.UserAuth do
     same_site: "Lax"
   ]
 
-  # How old the session token should be before a new one is issued. When a request is made
-  # with a session token older than this value, then a new session token will be created
-  # and the session and remember-me cookies (if set) will be updated with the new token.
-  # Lowering this value will result in more tokens being created by active users. Increasing
-  # it will result in less time before a session token expires for a user to get issued a new
-  # token. This can be set to a value greater than `@max_cookie_age_in_days` to disable
-  # the reissuing of tokens completely.
   @session_reissue_age_in_days 7
 
-  @doc """
-  Logs the user in.
-
-  Redirects to the session's `:user_return_to` path
-  or falls back to the `signed_in_path/1`.
-  """
   def log_in_user(conn, user, params \\ %{}) do
     user_return_to = get_session(conn, :user_return_to)
 
@@ -43,11 +30,6 @@ defmodule PingcrmWeb.UserAuth do
     |> redirect(to: user_return_to || signed_in_path(conn))
   end
 
-  @doc """
-  Logs the user out.
-
-  It clears all session data for safety. See renew_session.
-  """
   def log_out_user(conn) do
     user_token = get_session(conn, :user_token)
     user_token && Accounts.delete_user_session_token(user_token)
@@ -58,19 +40,18 @@ defmodule PingcrmWeb.UserAuth do
     |> redirect(to: ~p"/")
   end
 
-  @doc """
-  Authenticates the user by looking into the session and remember me token.
-
-  Will reissue the session token if it is older than the configured age.
-  """
-  def fetch_current_scope_for_user(conn, _opts) do
+  def fetch_scope(conn, _opts) do
     with {token, conn} <- ensure_user_token(conn),
          {user, token_inserted_at} <- Accounts.get_user_by_session_token(token) do
+      account_id = get_session(conn, :account_id)
+      scope = Scope.for_user(user, account_id)
+
       conn
-      |> assign(:current_scope, Scope.for_user(user))
+      |> assign(:current_scope, scope)
+      |> maybe_put_or_delete_account_session(account_id, scope && scope.account)
       |> maybe_reissue_user_session_token(user, token_inserted_at)
     else
-      nil -> assign(conn, :current_scope, Scope.for_user(nil))
+      nil -> assign(conn, :current_scope, Scope.for_user(nil, nil))
     end
   end
 
@@ -88,7 +69,19 @@ defmodule PingcrmWeb.UserAuth do
     end
   end
 
-  # Reissue the session token if it is older than the configured reissue age.
+  defp maybe_put_or_delete_account_session(conn, account_id, account) do
+    cond do
+      match?(%{id: _}, account) ->
+        put_session(conn, :account_id, account.id)
+
+      not is_nil(account_id) ->
+        delete_session(conn, :account_id)
+
+      true ->
+        conn
+    end
+  end
+
   defp maybe_reissue_user_session_token(conn, user, token_inserted_at) do
     token_age = DateTime.diff(DateTime.utc_now(:second), token_inserted_at, :day)
 
@@ -99,16 +92,8 @@ defmodule PingcrmWeb.UserAuth do
     end
   end
 
-  # This function is the one responsible for creating session tokens
-  # and storing them safely in the session and cookies. It may be called
-  # either when logging in, during sudo mode, or to renew a session which
-  # will soon expire.
-  #
-  # When the session is created, rather than extended, the renew_session
-  # function will clear the session to avoid fixation attacks. See the
-  # renew_session function to customize this behaviour.
   defp create_or_extend_session(conn, user, params) do
-    token = Accounts.generate_user_session_token(user)
+    token = Accounts.Auth.create_session_token(user)
     remember_me = get_session(conn, :user_remember_me) || params["remember_me"]
 
     conn
@@ -123,22 +108,6 @@ defmodule PingcrmWeb.UserAuth do
     conn
   end
 
-  # This function renews the session ID and erases the whole
-  # session to avoid fixation attacks. If there is any data
-  # in the session you may want to preserve after log in/log out,
-  # you must explicitly fetch the session data before clearing
-  # and then immediately set it after clearing, for example:
-  #
-  #     defp renew_session(conn, _user) do
-  #       delete_csrf_token()
-  #       preferred_locale = get_session(conn, :preferred_locale)
-  #
-  #       conn
-  #       |> configure_session(renew: true)
-  #       |> clear_session()
-  #       |> put_session(:preferred_locale, preferred_locale)
-  #     end
-  #
   defp renew_session(conn, _user) do
     delete_csrf_token()
 
@@ -180,9 +149,6 @@ defmodule PingcrmWeb.UserAuth do
     end
   end
 
-  @doc """
-  Plug for routes that require the user to not be authenticated.
-  """
   def redirect_if_user_is_authenticated(conn, _opts) do
     if conn.assigns.current_scope do
       conn
@@ -196,21 +162,35 @@ defmodule PingcrmWeb.UserAuth do
   def signed_in_path(_conn), do: ~p"/"
 
   @doc """
-  Plug for routes that require the user to be authenticated.
+  Plug for routes that require the user to be authenticated and confirmed.
   """
-  def require_authenticated_user(conn, _opts) do
-    if conn.assigns.current_scope && conn.assigns.current_scope.user do
-      user = conn.assigns.current_scope.user
+  def require_confirmed_user(conn, _opts) do
+    scope = conn.assigns.current_scope
 
-      conn
-      |> assign(:user, user)
-      |> assign_prop(:auth, %{user: user})
-    else
-      conn
-      |> put_flash(:error, "You must log in to access this page.")
-      |> maybe_store_return_to()
-      |> redirect(to: ~p"/login")
-      |> halt()
+    user = if scope && scope.user && scope.account, do: scope.user, else: nil
+
+    cond do
+      user && user.confirmed_at ->
+        account = conn.assigns.current_scope.account
+        role = conn.assigns.current_scope.role
+
+        conn
+        |> assign(:user, user)
+        |> assign_prop(:auth, %{user: user, account: account, role: role})
+
+      user && is_nil(user.confirmed_at) ->
+        conn
+        |> put_flash(:error, "You must confirm your account to access this page.")
+        |> maybe_store_return_to()
+        |> redirect(to: ~p"/confirm")
+        |> halt()
+
+      true ->
+        conn
+        |> put_flash(:error, "You must log in to access this page.")
+        |> maybe_store_return_to()
+        |> redirect(to: ~p"/login")
+        |> halt()
     end
   end
 
