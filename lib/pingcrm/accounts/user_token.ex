@@ -95,5 +95,6 @@ defmodule Pingcrm.Accounts.UserToken do
   end
 
   defp days_for_context("confirm"), do: @confirm_validity_in_days
+  defp days_for_context("confirm_email_change"), do: @confirm_validity_in_days
   defp days_for_context("reset_password"), do: @reset_password_validity_in_days
 end

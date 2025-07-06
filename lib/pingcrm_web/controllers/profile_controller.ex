@@ -11,6 +11,24 @@ defmodule PingcrmWeb.ProfileController do
     |> render_inertia("ProfilePage", ssr: true)
   end
 
+  def update_email(conn, params) do
+    case Auth.update_email(conn.assigns.current_scope.user, params) do
+      {:ok, user} ->
+        Auth.send_change_email_confirmation(
+          user,
+          &url(~p"/confirm-email/#{&1}")
+        )
+
+        conn
+        |> redirect(to: ~p"/profile")
+
+      {:error, changeset} ->
+        conn
+        |> assign_errors(changeset)
+        |> redirect(to: ~p"/profile")
+    end
+  end
+
   def update_password(conn, params) do
     case Auth.update_password(conn.assigns.current_scope.user, params) do
       {:ok, _} ->

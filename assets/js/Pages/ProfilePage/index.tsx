@@ -1,12 +1,16 @@
 import { ReactNode } from 'react'
 import MainLayout from '@/Layouts/MainLayout'
 import ChangePassword from '@/Pages/ProfilePage/components/ChangePassword'
+import ChangeEmail from '@/Pages/ProfilePage/components/ChangeEmail'
 
 function ProfilePage() {
   return (
     <div className='xl:max-w-1/2'>
       <h1 className='mb-8 text-3xl font-bold'>My profile</h1>
-      <ChangePassword />
+      <div className='flex flex-col gap-y-4'>
+        <ChangeEmail />
+        <ChangePassword />
+      </div>
     </div>
   )
 }

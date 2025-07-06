@@ -16,8 +16,8 @@ defmodule Pingcrm.Accounts.Auth.SignupChangeset do
       required: true,
       with: fn user, user_attrs ->
         User.registration_changeset(user, user_attrs,
-          validate_password: opts[:validate_password] || false,
-          validate_email: opts[:validate_email] || false
+          validate_password: Keyword.get(opts, :validate_password, true),
+          validate_email: Keyword.get(opts, :validate_email, true)
         )
       end
     )

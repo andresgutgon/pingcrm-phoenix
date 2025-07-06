@@ -1,8 +1,11 @@
 defmodule PingcrmWeb.ProfileControllerTest do
   use PingcrmWeb.ConnCase, async: true
+  import Swoosh.TestAssertions
 
   alias Pingcrm.Accounts
   alias Pingcrm.Accounts.User
+  alias Pingcrm.Accounts.UserToken
+  alias Pingcrm.Repo
 
   describe "GET /profile" do
     test "renders profile page for authenticated user", %{conn: conn} do
@@ -135,6 +138,160 @@ defmodule PingcrmWeb.ProfileControllerTest do
 
       assert errors[:password] &&
                String.contains?(errors[:password], "at least one lower case character")
+    end
+  end
+
+  describe "PATCH /profile/email" do
+    setup %{conn: conn} do
+      user = account_owner().user
+      conn = log_in_user(conn, user)
+
+      %{conn: conn, user: user}
+    end
+
+    test "successfully updates email with valid email", %{conn: conn, user: user} do
+      new_email = unique_user_email()
+
+      conn =
+        patch(conn, ~p"/profile/email", %{
+          "email_changed" => new_email
+        })
+
+      assert redirected_to(conn) == ~p"/profile"
+
+      updated_user = Accounts.get_user!(user.id)
+      assert updated_user.email_changed == new_email
+      # Original email should remain unchanged
+      assert updated_user.email == user.email
+    end
+
+    test "sends email change confirmation email", %{conn: conn, user: user} do
+      new_email = unique_user_email()
+
+      patch(conn, ~p"/profile/email", %{
+        "email_changed" => new_email
+      })
+
+      assert_email_sent(fn message ->
+        body = message.html_body || message.text_body
+
+        user_token = Repo.get_by!(UserToken, user_id: user.id, context: "confirm_email_change")
+
+        assert message.subject =~ "Confirm your new email"
+        assert message.to == [{"", user.email}]
+        assert body =~ "You can confirm your new email address"
+        [_, token] = Regex.run(~r/\/confirm-email\/([A-Za-z0-9\-_]+)/, body)
+
+        decoded_token = Base.url_decode64!(token, padding: false)
+        assert user_token.token == :crypto.hash(:sha256, decoded_token)
+      end)
+    end
+
+    test "fails with invalid email format", %{conn: conn} do
+      conn =
+        patch(conn, ~p"/profile/email", %{
+          "email_changed" => "invalid_email"
+        })
+
+      assert redirected_to(conn) == ~p"/profile"
+      errors = inertia_errors(conn)
+      assert errors[:email_changed] == "must have the @ sign and no spaces"
+    end
+
+    test "fails with email that has spaces", %{conn: conn} do
+      conn =
+        patch(conn, ~p"/profile/email", %{
+          "email_changed" => "test @example.com"
+        })
+
+      assert redirected_to(conn) == ~p"/profile"
+      errors = inertia_errors(conn)
+      assert errors[:email_changed] == "must have the @ sign and no spaces"
+    end
+
+    test "fails with email too long", %{conn: conn} do
+      long_email = String.duplicate("a", 150) <> "@example.com"
+
+      conn =
+        patch(conn, ~p"/profile/email", %{
+          "email_changed" => long_email
+        })
+
+      assert redirected_to(conn) == ~p"/profile"
+      errors = inertia_errors(conn)
+
+      assert errors[:email_changed] &&
+               String.contains?(errors[:email_changed], "should be at most")
+    end
+
+    test "fails when email is already taken by another user", %{conn: conn} do
+      existing_user = user_with_account()
+
+      conn =
+        patch(conn, ~p"/profile/email", %{
+          "email_changed" => existing_user.user.email
+        })
+
+      assert redirected_to(conn) == ~p"/profile"
+      errors = inertia_errors(conn)
+      assert errors[:email_changed] == "has already been taken"
+    end
+
+    test "fails when email is already taken as email_changed by another user", %{conn: conn} do
+      another_user = user_with_account()
+      email_to_change = unique_user_email()
+
+      # Set email_changed for another user
+      Repo.update!(
+        User.email_changed_changeset(another_user.user, %{"email_changed" => email_to_change})
+      )
+
+      conn =
+        patch(conn, ~p"/profile/email", %{
+          "email_changed" => email_to_change
+        })
+
+      assert redirected_to(conn) == ~p"/profile"
+      errors = inertia_errors(conn)
+      assert errors[:email_changed] == "has already been taken"
+    end
+
+    test "fails when new email is same as current email", %{conn: conn, user: user} do
+      conn =
+        patch(conn, ~p"/profile/email", %{
+          "email_changed" => user.email
+        })
+
+      assert redirected_to(conn) == ~p"/profile"
+      errors = inertia_errors(conn)
+      assert errors[:email_changed] == "must be different from current email"
+    end
+
+    test "redirects to login if user not authenticated", %{conn: conn} do
+      conn =
+        conn
+        |> Plug.Conn.clear_session()
+        |> patch(~p"/profile/email", %{"email_changed" => unique_user_email()})
+
+      assert redirected_to(conn) == ~p"/login"
+
+      assert Phoenix.Flash.get(conn.assigns.flash, :error) =~
+               "You must log in to access this page"
+    end
+
+    test "redirects to confirmation if user not confirmed", %{conn: conn} do
+      user = account_owner(confirmed_at: nil).user
+
+      conn =
+        conn
+        |> Plug.Conn.clear_session()
+        |> log_in_user(user)
+        |> patch(~p"/profile/email", %{"email_changed" => unique_user_email()})
+
+      assert redirected_to(conn) == ~p"/confirm"
+
+      assert Phoenix.Flash.get(conn.assigns.flash, :error) =~
+               "You must confirm your account to access this page"
     end
   end
 

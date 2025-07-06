@@ -33,7 +33,7 @@ export default function ChangePassword() {
       onSubmit={handleSubmit}
       className='rounded-lg border border-gray-200 p-2 space-y-3'
     >
-      <h3 className='text-xl'>Password</h3>
+      <h3 className='text-xl'>Update password</h3>
       <div className='grid gap-6'>
         <FieldGroup
           label='Current Password'
