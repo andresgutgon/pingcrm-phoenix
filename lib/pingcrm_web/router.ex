@@ -39,7 +39,6 @@ defmodule PingcrmWeb.Router do
 
     get "/", DashboardController, :index, as: :home
     get "/profile", ProfileController, :show, as: :my_profile
-    put "/profile", ProfileController, :update
     patch "/profile/password", ProfileController, :update_password
 
     # TODO: Implement for real

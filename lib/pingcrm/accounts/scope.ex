@@ -45,7 +45,7 @@ defmodule Pingcrm.Accounts.Scope do
 
     if account && current_membership.role && role do
       %__MODULE__{
-        user: UserPresenter.serialize(user),
+        user: user,
         account: UserPresenter.serialize_account(account),
         role: role
       }

@@ -56,6 +56,28 @@ defmodule Pingcrm.Accounts.Auth do
     end
   end
 
+  def update_password(%User{} = user, %{
+        "current_password" => current,
+        "password" => new_password,
+        "password_confirmation" => confirmation
+      }) do
+    if User.valid_password?(user, current) do
+      user
+      |> User.password_changeset(%{
+        "password" => new_password,
+        "password_confirmation" => confirmation
+      })
+      |> Repo.update()
+    else
+      changeset =
+        user
+        |> User.password_changeset(%{})
+        |> Ecto.Changeset.add_error(:current_password, "Current password is incorrect")
+
+      {:error, changeset}
+    end
+  end
+
   def send_confirmation(%User{} = user, confirmation_url_fun)
       when is_function(confirmation_url_fun, 1) do
     if user.confirmed_at do

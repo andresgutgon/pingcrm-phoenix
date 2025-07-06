@@ -1,5 +1,3 @@
-require Logger
-
 defmodule PingcrmWeb.UserAuth do
   @moduledoc false
 
@@ -10,6 +8,7 @@ defmodule PingcrmWeb.UserAuth do
   import Inertia.Controller, only: [assign_prop: 3]
 
   alias Pingcrm.Accounts
+  alias Pingcrm.Accounts.Presenter, as: UserPresenter
   alias Pingcrm.Accounts.Scope
 
   @max_cookie_age_in_days 14
@@ -22,6 +21,11 @@ defmodule PingcrmWeb.UserAuth do
 
   @session_reissue_age_in_days 7
 
+  # Plug protocol
+  def init(opts), do: opts
+  def call(conn, {:sudo_mode, opts}), do: require_sudo_mode(conn, opts)
+  def call(conn, :sudo_mode), do: require_sudo_mode(conn, [])
+
   def log_in_user(conn, user, params \\ %{}) do
     user_return_to = get_session(conn, :user_return_to)
 
@@ -31,12 +35,8 @@ defmodule PingcrmWeb.UserAuth do
   end
 
   def log_out_user(conn) do
-    user_token = get_session(conn, :user_token)
-    user_token && Accounts.delete_user_session_token(user_token)
-
     conn
-    |> renew_session(nil)
-    |> delete_resp_cookie(@remember_me_cookie)
+    |> kill_session()
     |> redirect(to: ~p"/")
   end
 
@@ -135,15 +135,17 @@ defmodule PingcrmWeb.UserAuth do
   end
 
   @doc """
-  Plug for routes that require sudo mode.
+  After pass X minute of inactivity, the user will be asked to re-enter their password
+  To make this actions
   """
-  def require_sudo_mode(conn, _opts) do
+  def require_sudo_mode(conn, opts) do
     if Accounts.sudo_mode?(conn.assigns.current_scope.user, -10) do
       conn
     else
       conn
+      |> kill_session()
+      |> store_return_to(opts[:return_to])
       |> put_flash(:error, "You must re-authenticate to access this page.")
-      |> maybe_store_return_to()
       |> redirect(to: ~p"/login")
       |> halt()
     end
@@ -176,7 +178,7 @@ defmodule PingcrmWeb.UserAuth do
 
         conn
         |> assign(:user, user)
-        |> assign_prop(:auth, %{user: user, account: account, role: role})
+        |> assign_prop(:auth, %{user: UserPresenter.serialize(user), account: account, role: role})
 
       user && is_nil(user.confirmed_at) ->
         conn
@@ -195,8 +197,23 @@ defmodule PingcrmWeb.UserAuth do
   end
 
   defp maybe_store_return_to(%{method: "GET"} = conn) do
-    put_session(conn, :user_return_to, current_path(conn))
+    store_return_to(conn, current_path(conn))
   end
 
   defp maybe_store_return_to(conn), do: conn
+
+  defp store_return_to(conn, path) when is_binary(path) do
+    put_session(conn, :user_return_to, path)
+  end
+
+  defp store_return_to(conn, nil), do: conn
+
+  defp kill_session(conn) do
+    user_token = get_session(conn, :user_token)
+    user_token && Accounts.delete_user_session_token(user_token)
+
+    conn
+    |> renew_session(nil)
+    |> delete_resp_cookie(@remember_me_cookie)
+  end
 end

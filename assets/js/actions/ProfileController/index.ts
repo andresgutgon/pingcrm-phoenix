@@ -2,7 +2,7 @@ import { buildUrl, type RouteQueryOptions, type RouteDefinition, type RouteDefin
 
 /**
  * @see PingcrmWeb.ProfileController::show
- * @see lib/pingcrm_web/controllers/profile_controller.ex:5
+ * @see lib/pingcrm_web/controllers/profile_controller.ex:9
  * @route /profile
 */
 
@@ -30,37 +30,8 @@ myProfile.get = (options?: RouteQueryOptions): RouteDefinition<'get'> => ({
 })
 
 /**
- * @see PingcrmWeb.ProfileController::update
- * @see lib/pingcrm_web/controllers/profile_controller.ex:10
- * @route /profile
-*/
-
-export const update = (options?: RouteQueryOptions): RouteDefinition<'put'> => ({
-  url: update.url(options).path,
-  method: 'put',
-})
-
-update.definition = {
-  methods: ["put"],
-  url: '/profile',
-  parameters: {}
-} satisfies RouteDefinitionWithParameters<['put']>
-
-update.url = (options?: RouteQueryOptions): WayfinderUrl => {
-  return buildUrl({
-    definition: update.definition,
-    options
-  })
-}
-
-update.put = (options?: RouteQueryOptions): RouteDefinition<'put'> => ({
-  url: update.url(options).path,
-  method: 'put',
-})
-
-/**
  * @see PingcrmWeb.ProfileController::update_password
- * @see lib/pingcrm_web/controllers/profile_controller.ex:25
+ * @see lib/pingcrm_web/controllers/profile_controller.ex:14
  * @route /profile/password
 */
 
@@ -88,6 +59,6 @@ updatePassword.patch = (options?: RouteQueryOptions): RouteDefinition<'patch'> =
 })
 
 
-const ProfileController = { myProfile, update, updatePassword }
+const ProfileController = { myProfile, updatePassword }
 
 export default ProfileController

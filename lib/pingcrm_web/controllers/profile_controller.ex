@@ -1,40 +1,40 @@
 defmodule PingcrmWeb.ProfileController do
   use PingcrmWeb, :controller
-  # plug PingcrmWeb.UserAuth, :require_sudo_mode when action in [:update_password]
+
+  alias Pingcrm.Accounts.Auth
+  alias PingcrmWeb.UserAuth
+
+  plug :sudo_mode when action in [:update_password]
 
   def show(conn, _params) do
-    user = conn.assigns.current_scope.user
-    render_inertia(conn, "ProfilePage", %{user: user})
+    conn
+    |> render_inertia("ProfilePage", ssr: true)
   end
 
-  def update(conn, %{"user" => _user_params}) do
-    user = conn.assigns.current_scope.user
+  def update_password(conn, params) do
+    case Auth.update_password(conn.assigns.current_scope.user, params) do
+      {:ok, _} ->
+        conn
+        |> put_flash(:info, "Password updated successfully.")
+        |> redirect(to: ~p"/profile")
 
-    render_inertia(conn, "ProfilePage", %{user: user})
-    # case Accounts.update_user_profile(user.id, user_params) do
-    #   {:ok, _user} ->
-    #     conn
-    #     |> put_flash(:success, "Profile updated successfully.")
-    #     |> redirect(to: ~p"/profile")
-    #
-    #   {:error, changeset} ->
-    #     render_inertia(conn, "ProfilePage", %{user: user, errors: changeset})
-    # end
+      {:error, changeset} ->
+        conn
+        |> assign_errors(changeset)
+        |> redirect(to: ~p"/profile")
+    end
   end
 
-  def update_password(conn, %{"user" => _user_params}) do
-    user = conn.assigns.current_scope.user
-    render_inertia(conn, "ProfilePage", %{user: user})
-    # user = conn.assigns.current_scope.user
-    #
-    # case Accounts.update_user_password(user.id, user_params) do
-    #   {:ok, _user} ->
-    #     conn
-    #     |> put_flash(:success, "Password updated successfully.")
-    #     |> redirect(to: ~p"/profile")
-    #
-    #   {:error, changeset} ->
-    #     render_inertia(conn, "ProfilePage", %{user: user, errors: changeset})
-    # end
+  defp sudo_mode(conn, _opts) do
+    UserAuth.call(
+      conn,
+      {:sudo_mode,
+       [
+         return_to:
+           case action_name(conn) do
+             :update_password -> ~p"/profile"
+           end
+       ]}
+    )
   end
 end
