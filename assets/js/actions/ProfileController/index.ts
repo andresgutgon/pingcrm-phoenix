@@ -2,7 +2,7 @@ import { buildUrl, type RouteQueryOptions, type RouteDefinition, type RouteDefin
 
 /**
  * @see PingcrmWeb.ProfileController::show
- * @see lib/pingcrm_web/controllers/profile_controller.ex:9
+ * @see lib/pingcrm_web/controllers/profile_controller.ex:10
  * @route /profile
 */
 
@@ -30,8 +30,37 @@ myProfile.get = (options?: RouteQueryOptions): RouteDefinition<'get'> => ({
 })
 
 /**
+ * @see PingcrmWeb.ProfileController::update
+ * @see lib/pingcrm_web/controllers/profile_controller.ex:15
+ * @route /profile
+*/
+
+export const updateProfile = (options?: RouteQueryOptions): RouteDefinition<'patch'> => ({
+  url: updateProfile.url(options).path,
+  method: 'patch',
+})
+
+updateProfile.definition = {
+  methods: ["patch"],
+  url: '/profile',
+  parameters: {}
+} satisfies RouteDefinitionWithParameters<['patch']>
+
+updateProfile.url = (options?: RouteQueryOptions): WayfinderUrl => {
+  return buildUrl({
+    definition: updateProfile.definition,
+    options
+  })
+}
+
+updateProfile.patch = (options?: RouteQueryOptions): RouteDefinition<'patch'> => ({
+  url: updateProfile.url(options).path,
+  method: 'patch',
+})
+
+/**
  * @see PingcrmWeb.ProfileController::update_email
- * @see lib/pingcrm_web/controllers/profile_controller.ex:14
+ * @see lib/pingcrm_web/controllers/profile_controller.ex:29
  * @route /profile/email
 */
 
@@ -60,7 +89,7 @@ updateEmail.patch = (options?: RouteQueryOptions): RouteDefinition<'patch'> => (
 
 /**
  * @see PingcrmWeb.ProfileController::update_password
- * @see lib/pingcrm_web/controllers/profile_controller.ex:32
+ * @see lib/pingcrm_web/controllers/profile_controller.ex:47
  * @route /profile/password
 */
 
@@ -88,6 +117,6 @@ updatePassword.patch = (options?: RouteQueryOptions): RouteDefinition<'patch'> =
 })
 
 
-const ProfileController = { myProfile, updateEmail, updatePassword }
+const ProfileController = { myProfile, updateProfile, updateEmail, updatePassword }
 
 export default ProfileController

@@ -1,6 +1,7 @@
 defmodule PingcrmWeb.ProfileController do
   use PingcrmWeb, :controller
 
+  alias Pingcrm.Accounts
   alias Pingcrm.Accounts.Auth
   alias PingcrmWeb.UserAuth
 
@@ -8,7 +9,21 @@ defmodule PingcrmWeb.ProfileController do
 
   def show(conn, _params) do
     conn
-    |> render_inertia("ProfilePage", ssr: true)
+    |> render_inertia("ProfilePage")
+  end
+
+  def update(conn, params) do
+    case Accounts.update_profile(conn.assigns.current_scope.user, params) do
+      {:ok, _u} ->
+        conn
+        |> put_flash(:info, "Profile updated")
+        |> redirect(to: ~p"/profile")
+
+      {:error, changeset} ->
+        conn
+        |> assign_errors(changeset)
+        |> redirect(to: ~p"/profile")
+    end
   end
 
   def update_email(conn, params) do

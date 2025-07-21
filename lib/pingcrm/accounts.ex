@@ -6,6 +6,12 @@ defmodule Pingcrm.Accounts do
 
   alias Pingcrm.Accounts.{User, UserToken}
 
+  def update_profile(%User{} = user, params) do
+    user
+    |> User.profile_changed_changeset(params)
+    |> Repo.update()
+  end
+
   def get_user_by_email(email) when is_binary(email) do
     Repo.get_by(User, email: email)
   end

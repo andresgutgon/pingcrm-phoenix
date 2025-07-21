@@ -32,6 +32,164 @@ defmodule PingcrmWeb.ProfileControllerTest do
     end
   end
 
+  describe "PATCH /profile" do
+    setup %{conn: conn} do
+      user = account_owner().user
+      conn = log_in_user(conn, user)
+
+      %{conn: conn, user: user}
+    end
+
+    test "successfully updates profile with valid first_name and last_name", %{
+      conn: conn,
+      user: user
+    } do
+      new_first_name = "Jane"
+      new_last_name = "Smith"
+
+      conn =
+        patch(conn, ~p"/profile", %{
+          "first_name" => new_first_name,
+          "last_name" => new_last_name
+        })
+
+      assert redirected_to(conn) == ~p"/profile"
+      assert Phoenix.Flash.get(conn.assigns.flash, :info) =~ "Profile updated"
+
+      updated_user = Accounts.get_user!(user.id)
+      assert updated_user.first_name == new_first_name
+      assert updated_user.last_name == new_last_name
+    end
+
+    test "successfully updates only first_name", %{conn: conn, user: user} do
+      new_first_name = "UpdatedFirstName"
+
+      conn =
+        patch(conn, ~p"/profile", %{
+          "first_name" => new_first_name,
+          "last_name" => user.last_name
+        })
+
+      assert redirected_to(conn) == ~p"/profile"
+      assert Phoenix.Flash.get(conn.assigns.flash, :info) =~ "Profile updated"
+
+      updated_user = Accounts.get_user!(user.id)
+      assert updated_user.first_name == new_first_name
+      assert updated_user.last_name == user.last_name
+    end
+
+    test "successfully updates only last_name", %{conn: conn, user: user} do
+      new_last_name = "UpdatedLastName"
+
+      conn =
+        patch(conn, ~p"/profile", %{
+          "first_name" => user.first_name,
+          "last_name" => new_last_name
+        })
+
+      assert redirected_to(conn) == ~p"/profile"
+      assert Phoenix.Flash.get(conn.assigns.flash, :info) =~ "Profile updated"
+
+      updated_user = Accounts.get_user!(user.id)
+      assert updated_user.first_name == user.first_name
+      assert updated_user.last_name == new_last_name
+    end
+
+    test "fails with empty first_name", %{conn: conn} do
+      conn =
+        patch(conn, ~p"/profile", %{
+          "first_name" => "",
+          "last_name" => "Smith"
+        })
+
+      assert redirected_to(conn) == ~p"/profile"
+      errors = inertia_errors(conn)
+      assert errors[:first_name] == "can't be blank"
+    end
+
+    test "fails with empty last_name", %{conn: conn} do
+      conn =
+        patch(conn, ~p"/profile", %{
+          "first_name" => "Jane",
+          "last_name" => ""
+        })
+
+      assert redirected_to(conn) == ~p"/profile"
+      errors = inertia_errors(conn)
+      assert errors[:last_name] == "can't be blank"
+    end
+
+    test "fails with both first_name and last_name empty", %{conn: conn} do
+      conn =
+        patch(conn, ~p"/profile", %{
+          "first_name" => "",
+          "last_name" => ""
+        })
+
+      assert redirected_to(conn) == ~p"/profile"
+      errors = inertia_errors(conn)
+      assert errors[:first_name] == "can't be blank"
+      assert errors[:last_name] == "can't be blank"
+    end
+
+    test "does not trim whitespace from first_name and last_name", %{conn: conn, user: user} do
+      conn =
+        patch(conn, ~p"/profile", %{
+          "first_name" => "  Jane  ",
+          "last_name" => "  Smith  "
+        })
+
+      assert redirected_to(conn) == ~p"/profile"
+      assert Phoenix.Flash.get(conn.assigns.flash, :info) =~ "Profile updated"
+
+      updated_user = Accounts.get_user!(user.id)
+      assert updated_user.first_name == "  Jane  "
+      assert updated_user.last_name == "  Smith  "
+    end
+
+    test "handles unicode characters in names", %{conn: conn, user: user} do
+      conn =
+        patch(conn, ~p"/profile", %{
+          "first_name" => "José",
+          "last_name" => "García"
+        })
+
+      assert redirected_to(conn) == ~p"/profile"
+      assert Phoenix.Flash.get(conn.assigns.flash, :info) =~ "Profile updated"
+
+      updated_user = Accounts.get_user!(user.id)
+      assert updated_user.first_name == "José"
+      assert updated_user.last_name == "García"
+    end
+
+    test "redirects to login if user not authenticated", %{conn: conn} do
+      conn =
+        conn
+        |> Plug.Conn.clear_session()
+        |> patch(~p"/profile", %{"first_name" => "Jane", "last_name" => "Smith"})
+
+      assert redirected_to(conn) == ~p"/login"
+
+      assert Phoenix.Flash.get(conn.assigns.flash, :error) =~
+               "You must log in to access this page"
+    end
+
+    test "redirects to confirmation if user not confirmed", %{conn: conn} do
+      user = account_owner(confirmed_at: nil).user
+
+      conn =
+        conn
+        |> Plug.Conn.clear_session()
+        |> log_in_user(user)
+        |> patch(~p"/profile", %{"first_name" => "Jane", "last_name" => "Smith"})
+
+      assert redirected_to(conn) == ~p"/confirm"
+
+      assert Phoenix.Flash.get(conn.assigns.flash, :error) =~
+               "You must confirm your account to access this page"
+    end
+  end
+
   describe "PATCH /profile/password" do
     setup %{conn: conn} do
       user = account_owner().user

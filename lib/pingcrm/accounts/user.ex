@@ -60,6 +60,12 @@ defmodule Pingcrm.Accounts.User do
     |> validate_email_field(:email_changed, opts)
   end
 
+  def profile_changed_changeset(user, attrs, _opts \\ []) do
+    user
+    |> cast(attrs, [:first_name, :last_name])
+    |> validate_required([:first_name, :last_name])
+  end
+
   @spec hash_password(String.t()) :: String.t()
   def hash_password(password) do
     Bcrypt.hash_pwd_salt(password)
