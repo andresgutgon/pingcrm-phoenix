@@ -42,6 +42,9 @@ defmodule PingcrmWeb.Router do
     patch "/profile", ProfileController, :update, as: :update_profile
     patch "/profile/password", ProfileController, :update_password
     patch "/profile/email", ProfileController, :update_email
+    post "/profile/change_account/:id", ProfileController, :change_account
+    patch "/profile/set_default_account/:account_id", ProfileController, :set_default_account
+
     get "/confirm-email/:token", Auth.ConfirmEmailController, :edit
     patch "/confirm-email/:token", Auth.ConfirmEmailController, :update, as: :confirm_email_change
 

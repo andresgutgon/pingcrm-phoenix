@@ -2,7 +2,7 @@ defmodule PingcrmWeb.UserAuthTest do
   use PingcrmWeb.ConnCase, async: true
 
   alias Pingcrm.Accounts
-  alias Pingcrm.Accounts.Scope
+  alias Pingcrm.Accounts.{Presenter, Scope}
   alias PingcrmWeb.UserAuth
 
   @remember_me_cookie "_pingcrm_web_user_remember_me"
@@ -197,6 +197,51 @@ defmodule PingcrmWeb.UserAuthTest do
       assert new_signed_token != signed_token
       assert max_age == @remember_me_cookie_max_age
     end
+
+    test "uses default_account_id when no account_id in session", %{conn: conn} do
+      owner_data = account_owner()
+      user = owner_data.user
+      second_account = insert(:account)
+      insert(:member_membership, %{user: user, account: second_account})
+
+      {:ok, user_with_default} = Accounts.set_default_account(user, second_account.id)
+
+      user_token = Accounts.Auth.create_session_token(user_with_default)
+
+      conn =
+        conn
+        |> put_session(:user_token, user_token)
+        |> UserAuth.fetch_scope([])
+
+      assert conn.assigns.current_scope.user.id == user.id
+      assert conn.assigns.current_scope.account.id == second_account.id
+      assert conn.assigns.current_scope.account.name == second_account.name
+      assert get_session(conn, :account_id) == second_account.id
+    end
+
+    test "falls back to first account when no default_account_id and no session account_id", %{
+      conn: conn
+    } do
+      owner_data = account_owner()
+      user = owner_data.user
+      first_account = owner_data.account
+      second_account = insert(:account)
+      insert(:member_membership, %{user: user, account: second_account})
+
+      assert user.default_account_id == nil
+
+      user_token = Accounts.Auth.create_session_token(user)
+
+      conn =
+        conn
+        |> put_session(:user_token, user_token)
+        |> UserAuth.fetch_scope([])
+
+      assert conn.assigns.current_scope.user.id == user.id
+      assert conn.assigns.current_scope.account.id == first_account.id
+      assert conn.assigns.current_scope.account.name == first_account.name
+      assert get_session(conn, :account_id) == first_account.id
+    end
   end
 
   describe "require_sudo_mode/2" do
@@ -313,7 +358,6 @@ defmodule PingcrmWeb.UserAuthTest do
     end
 
     test "allows access only to confirmed users", %{conn: conn, account: account} do
-      # Test confirmed user can access
       confirmed_user = insert(:user, confirmed_at: DateTime.utc_now())
       insert(:admin_membership, %{user: confirmed_user, account: account})
 
@@ -325,7 +369,6 @@ defmodule PingcrmWeb.UserAuthTest do
       refute conn.halted
       refute conn.status
       assert conn.assigns.user.id == confirmed_user.id
-      # The auth property is added via assign_prop for Inertia, so we verify user assign instead
 
       # Test unconfirmed user is redirected
       unconfirmed_user = insert(:user, confirmed_at: nil)
@@ -361,6 +404,28 @@ defmodule PingcrmWeb.UserAuthTest do
 
       assert Phoenix.Flash.get(conn.assigns.flash, :error) ==
                "You must confirm your account to access this page."
+    end
+
+    test "inertia shared props", %{conn: conn, user: user, account: account} do
+      second_account = insert(:account)
+      insert(:member_membership, %{user: user, account: second_account})
+
+      conn =
+        conn
+        |> assign(:current_scope, Scope.for_user(user, account.id))
+        |> UserAuth.require_confirmed_user([])
+
+      auth_prop = conn.private.inertia_shared[:auth]
+
+      assert auth_prop == %{
+               user: Presenter.serialize(user),
+               account: Presenter.serialize_account(account, true),
+               role: "admin",
+               accounts: [
+                 Presenter.serialize_account(account, true),
+                 Presenter.serialize_account(second_account, false)
+               ]
+             }
     end
 
     test "stores the path to redirect to on GET for unconfirmed user", %{

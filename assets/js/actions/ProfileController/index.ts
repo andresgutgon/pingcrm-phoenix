@@ -59,6 +59,66 @@ updateProfile.patch = (options?: RouteQueryOptions): RouteDefinition<'patch'> =>
 })
 
 /**
+ * @see PingcrmWeb.ProfileController::change_account
+ * @see lib/pingcrm_web/controllers/profile_controller.ex:61
+ * @route /profile/change_account/:id
+*/
+
+export const changeAccount = (args: { id: string | number } | [string | number] | string | number, options?: RouteQueryOptions): RouteDefinition<'post'> => ({
+  url: changeAccount.url(args, options).path,
+  method: 'post',
+})
+
+changeAccount.definition = {
+  methods: ["post"],
+  url: '/profile/change_account/:id',
+  parameters: { id: { name: "id", optional: false, required: true, glob: false } }
+} satisfies RouteDefinitionWithParameters<['post']>
+
+changeAccount.url = (args: { id: string | number } | [string | number] | string | number,  options?: RouteQueryOptions): WayfinderUrl => {
+  return buildUrl({
+    definition: changeAccount.definition,
+    args,
+    options
+  })
+}
+
+changeAccount.post = (args: { id: string | number } | [string | number] | string | number, options?: RouteQueryOptions): RouteDefinition<'post'> => ({
+  url: changeAccount.url(args, options).path,
+  method: 'post',
+})
+
+/**
+ * @see PingcrmWeb.ProfileController::set_default_account
+ * @see lib/pingcrm_web/controllers/profile_controller.ex:79
+ * @route /profile/set_default_account/:account_id
+*/
+
+export const setDefaultAccount = (args: { account_id: string | number } | [string | number] | string | number, options?: RouteQueryOptions): RouteDefinition<'patch'> => ({
+  url: setDefaultAccount.url(args, options).path,
+  method: 'patch',
+})
+
+setDefaultAccount.definition = {
+  methods: ["patch"],
+  url: '/profile/set_default_account/:account_id',
+  parameters: { account_id: { name: "account_id", optional: false, required: true, glob: false } }
+} satisfies RouteDefinitionWithParameters<['patch']>
+
+setDefaultAccount.url = (args: { account_id: string | number } | [string | number] | string | number,  options?: RouteQueryOptions): WayfinderUrl => {
+  return buildUrl({
+    definition: setDefaultAccount.definition,
+    args,
+    options
+  })
+}
+
+setDefaultAccount.patch = (args: { account_id: string | number } | [string | number] | string | number, options?: RouteQueryOptions): RouteDefinition<'patch'> => ({
+  url: setDefaultAccount.url(args, options).path,
+  method: 'patch',
+})
+
+/**
  * @see PingcrmWeb.ProfileController::update_email
  * @see lib/pingcrm_web/controllers/profile_controller.ex:29
  * @route /profile/email
@@ -117,6 +177,6 @@ updatePassword.patch = (options?: RouteQueryOptions): RouteDefinition<'patch'> =
 })
 
 
-const ProfileController = { myProfile, updateProfile, updateEmail, updatePassword }
+const ProfileController = { myProfile, updateProfile, changeAccount, setDefaultAccount, updateEmail, updatePassword }
 
 export default ProfileController

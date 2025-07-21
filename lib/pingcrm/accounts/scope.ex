@@ -19,7 +19,7 @@ defmodule Pingcrm.Accounts.Scope do
   alias Pingcrm.Accounts.Presenter, as: UserPresenter
   alias Pingcrm.Accounts.User
 
-  defstruct user: nil, account: nil, role: nil
+  defstruct user: nil, account: nil, role: nil, accounts: []
 
   def for_user(nil, _account_id), do: nil
 
@@ -37,7 +37,11 @@ defmodule Pingcrm.Accounts.Scope do
       if account_id do
         Enum.find(memberships, fn m -> m.account_id == account_id end)
       else
-        List.first(memberships)
+        if user.default_account_id do
+          Enum.find(memberships, fn m -> m.account_id == user.default_account_id end)
+        else
+          List.first(memberships)
+        end
       end
 
     account = current_membership && current_membership.account
@@ -46,8 +50,14 @@ defmodule Pingcrm.Accounts.Scope do
     if account && current_membership.role && role do
       %__MODULE__{
         user: user,
-        account: UserPresenter.serialize_account(account),
-        role: role
+        account: UserPresenter.serialize_account(account, true),
+        role: role,
+        accounts:
+          memberships
+          |> Enum.map(fn membership ->
+            acc = membership.account
+            UserPresenter.serialize_account(acc, acc.id == account.id)
+          end)
       }
     else
       nil

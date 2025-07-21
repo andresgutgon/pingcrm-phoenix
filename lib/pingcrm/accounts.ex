@@ -4,12 +4,29 @@ defmodule Pingcrm.Accounts do
   import Ecto.Query, warn: false
   alias Pingcrm.Repo
 
-  alias Pingcrm.Accounts.{User, UserToken}
+  alias Pingcrm.Accounts.{Membership, User, UserToken}
 
   def update_profile(%User{} = user, params) do
     user
     |> User.profile_changed_changeset(params)
     |> Repo.update()
+  end
+
+  def set_default_account(%User{} = user, account_id) do
+    user
+    |> User.default_account_changeset(%{default_account_id: account_id})
+    |> Repo.update()
+  end
+
+  def has_account?(%User{id: user_id}, account_id)
+      when is_binary(account_id) or is_integer(account_id) do
+    query =
+      from m in Membership,
+        where: m.user_id == ^user_id and m.account_id == ^account_id,
+        select: 1,
+        limit: 1
+
+    Repo.exists?(query)
   end
 
   def get_user_by_email(email) when is_binary(email) do

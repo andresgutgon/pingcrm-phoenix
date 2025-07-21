@@ -5,7 +5,7 @@ defmodule Pingcrm.Accounts.User do
   import Ecto.Changeset
 
   use Ecto.Schema
-  alias Pingcrm.Accounts.Membership
+  alias Pingcrm.Accounts.{Account, Membership}
   alias Pingcrm.Repo
 
   schema "users" do
@@ -26,6 +26,7 @@ defmodule Pingcrm.Accounts.User do
     # Relations
     has_many :memberships, Membership
     has_many :accounts, through: [:memberships, :account]
+    belongs_to :default_account, Account
 
     timestamps(type: :utc_datetime)
   end
@@ -64,6 +65,12 @@ defmodule Pingcrm.Accounts.User do
     user
     |> cast(attrs, [:first_name, :last_name])
     |> validate_required([:first_name, :last_name])
+  end
+
+  def default_account_changeset(user, attrs) do
+    user
+    |> cast(attrs, [:default_account_id])
+    |> validate_default_account_membership()
   end
 
   @spec hash_password(String.t()) :: String.t()
@@ -196,5 +203,26 @@ defmodule Pingcrm.Accounts.User do
       end
 
     Repo.exists?(query)
+  end
+
+  defp validate_default_account_membership(changeset) do
+    default_account_id = get_field(changeset, :default_account_id)
+    user_id = get_field(changeset, :id)
+
+    if default_account_id && user_id do
+      membership_exists =
+        from(m in Membership,
+          where: m.user_id == ^user_id and m.account_id == ^default_account_id
+        )
+        |> Repo.exists?()
+
+      if membership_exists do
+        changeset
+      else
+        add_error(changeset, :default_account_id, "must be an account you belong to")
+      end
+    else
+      changeset
+    end
   end
 end

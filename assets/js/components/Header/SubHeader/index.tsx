@@ -1,16 +1,55 @@
-import { useState } from 'react'
+import { ChangeEventHandler, useCallback, useState } from 'react'
 import { PageProps } from '@/types'
-import { Link, usePage } from '@inertiajs/react'
+import { Link, useForm, usePage } from '@inertiajs/react'
 import { ChevronDown } from 'lucide-react'
-import { myProfile } from '@/actions/ProfileController'
+import { changeAccount, myProfile } from '@/actions/ProfileController'
 import { deleteMethod } from '@/actions/Auth/SessionsController'
+import { DefaultAccountToggle } from '@/components/Header/SubHeader/DefaultAccountToggle'
+
+function AccountSelector() {
+  const { auth } = usePage<PageProps>().props
+  const accounts = auth.accounts
+  const form = useForm()
+
+  const onChangeAccount: ChangeEventHandler<HTMLSelectElement> = useCallback(
+    (event) => {
+      form.submit(changeAccount(event.target.value))
+    },
+    [form],
+  )
+
+  if (accounts.length <= 1) {
+    return (
+      <div className='mt-1 mr-4 text-xl font-medium'>{auth.account.name}</div>
+    )
+  }
+
+  return (
+    <div className='flex items-center gap-3'>
+      <select
+        className='text-sm py-1 rounded'
+        value={auth.account.id}
+        onChange={onChangeAccount}
+      >
+        {auth.accounts.map((account) => (
+          <option key={account.id} value={account.id}>
+            {account.name}
+          </option>
+        ))}
+      </select>
+      <DefaultAccountToggle />
+    </div>
+  )
+}
 
 export function SubHeader() {
   const { auth } = usePage<PageProps>().props
   const [menuOpened, setMenuOpened] = useState(false)
   return (
     <div className='flex items-center justify-between w-full p-4 text-sm bg-white border-b md:py-0 md:px-12 d:text-md'>
-      <div className='mt-1 mr-4 text-xl font-medium'>{auth.account.name}</div>
+      <div className='flex flex-col gap-x-2'>
+        <AccountSelector />
+      </div>
       <div className='relative'>
         <div
           className='flex items-center cursor-pointer select-none group'

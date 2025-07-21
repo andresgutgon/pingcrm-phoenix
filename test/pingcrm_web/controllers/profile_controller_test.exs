@@ -548,4 +548,231 @@ defmodule PingcrmWeb.ProfileControllerTest do
       assert redirected_to(conn) == ~p"/profile"
     end
   end
+
+  describe "POST /profile/change_account/:id" do
+    setup %{conn: conn} do
+      owner_data = account_owner()
+      user = owner_data.user
+      original_account = owner_data.account
+      another_account = insert(:account)
+      insert(:member_membership, %{user: user, account: another_account})
+      conn = log_in_user(conn, user)
+
+      %{
+        conn: conn,
+        user: user,
+        original_account: original_account,
+        another_account: another_account
+      }
+    end
+
+    test "successfully changes to an account the user has access to", %{
+      conn: conn,
+      another_account: another_account
+    } do
+      initial_account_id = get_session(conn, :account_id)
+
+      conn =
+        conn
+        |> put_req_header("referer", "/organizations")
+        |> post(~p"/profile/change_account/#{another_account.id}")
+
+      assert redirected_to(conn) == "/organizations"
+      assert get_session(conn, :account_id) == another_account.id
+      refute get_session(conn, :account_id) == initial_account_id
+    end
+
+    test "redirects to home when no referer is provided", %{
+      conn: conn,
+      another_account: another_account
+    } do
+      conn = post(conn, ~p"/profile/change_account/#{another_account.id}")
+
+      assert redirected_to(conn) == "/"
+      assert get_session(conn, :account_id) == another_account.id
+    end
+
+    test "preserves referer query parameters in redirect", %{
+      conn: conn,
+      another_account: another_account
+    } do
+      conn =
+        conn
+        |> put_req_header("referer", "/organizations?page=2&filter=active")
+        |> post(~p"/profile/change_account/#{another_account.id}")
+
+      assert redirected_to(conn) == "/organizations?page=2&filter=active"
+      assert get_session(conn, :account_id) == another_account.id
+    end
+
+    test "handles account ID as string", %{
+      conn: conn,
+      another_account: another_account
+    } do
+      conn = post(conn, ~p"/profile/change_account/#{Integer.to_string(another_account.id)}")
+
+      assert redirected_to(conn) == "/"
+      assert get_session(conn, :account_id) == another_account.id
+    end
+
+    test "fails when user does not have access to the account", %{conn: conn} do
+      unauthorized_account = insert(:account)
+
+      conn =
+        conn
+        |> put_req_header("referer", "/organizations")
+        |> post(~p"/profile/change_account/#{unauthorized_account.id}")
+
+      assert redirected_to(conn) == "/"
+
+      assert Phoenix.Flash.get(conn.assigns.flash, :error) =~
+               "You do not have access to that account."
+
+      refute get_session(conn, :account_id) == unauthorized_account.id
+    end
+
+    test "fails when account does not exist", %{conn: conn} do
+      non_existent_id = 99_999
+
+      conn = post(conn, ~p"/profile/change_account/#{non_existent_id}")
+
+      assert redirected_to(conn) == "/"
+
+      assert Phoenix.Flash.get(conn.assigns.flash, :error) =~
+               "You do not have access to that account."
+    end
+
+    test "renews session when changing accounts", %{
+      conn: conn,
+      another_account: another_account
+    } do
+      conn = post(conn, ~p"/profile/change_account/#{another_account.id}")
+
+      # Session should be renewed and account_id should be updated
+      # Should still be authenticated
+      assert get_session(conn, :user_token)
+      assert get_session(conn, :account_id) == another_account.id
+
+      # Verify that the session was marked for renewal
+      assert conn.private[:plug_session_info] == :renew
+    end
+
+    test "can change back to original account", %{
+      conn: conn,
+      original_account: original_account,
+      another_account: another_account
+    } do
+      conn = post(conn, ~p"/profile/change_account/#{another_account.id}")
+      assert get_session(conn, :account_id) == another_account.id
+
+      conn = post(conn, ~p"/profile/change_account/#{original_account.id}")
+      assert get_session(conn, :account_id) == original_account.id
+    end
+
+    test "redirects to login if user not authenticated", %{conn: conn} do
+      # Create an account to try to change to
+      another_account = insert(:account)
+
+      conn =
+        conn
+        |> Plug.Conn.clear_session()
+        |> post(~p"/profile/change_account/#{another_account.id}")
+
+      assert redirected_to(conn) == ~p"/login"
+
+      assert Phoenix.Flash.get(conn.assigns.flash, :error) =~
+               "You must log in to access this page"
+    end
+
+    test "preserves authentication state after account change", %{
+      conn: conn,
+      another_account: another_account
+    } do
+      assert get_session(conn, :user_token)
+      conn = post(conn, ~p"/profile/change_account/#{another_account.id}")
+
+      # Should still have authentication token (though may be renewed)
+      assert get_session(conn, :user_token)
+      assert get_session(conn, :account_id) == another_account.id
+    end
+  end
+
+  describe "PATCH /profile/set_default_account" do
+    setup %{conn: conn} do
+      owner_data = account_owner()
+      user = owner_data.user
+      original_account = owner_data.account
+      another_account = insert(:account)
+      insert(:member_membership, %{user: user, account: another_account})
+      conn = log_in_user(conn, user)
+
+      %{
+        conn: conn,
+        user: user,
+        original_account: original_account,
+        another_account: another_account
+      }
+    end
+
+    test "successfully sets default account for user with valid account", %{
+      conn: conn,
+      user: user,
+      another_account: another_account
+    } do
+      assert user.default_account_id == nil
+
+      conn =
+        conn
+        |> put_req_header("referer", "/profile")
+        |> patch(~p"/profile/set_default_account/#{another_account.id}")
+
+      assert redirected_to(conn) == "/profile"
+
+      updated_user = Repo.get!(User, user.id)
+      assert updated_user.default_account_id == another_account.id
+    end
+
+    test "fails when user does not have membership in the account", %{conn: conn} do
+      unauthorized_account = insert(:account)
+
+      conn =
+        patch(
+          conn,
+          ~p"/profile/set_default_account/#{unauthorized_account.id}"
+        )
+
+      assert redirected_to(conn) == ~p"/"
+      assert inertia_errors(conn) == %{default_account_id: "must be an account you belong to"}
+    end
+
+    test "fails when account does not exist", %{conn: conn} do
+      non_existent_id = 99_999
+
+      conn = patch(conn, ~p"/profile/set_default_account/#{non_existent_id}")
+
+      assert redirected_to(conn) == ~p"/"
+      assert inertia_errors(conn) == %{default_account_id: "must be an account you belong to"}
+    end
+
+    test "redirects to login if user not authenticated", %{conn: conn} do
+      unauthorized_account = insert(:account)
+
+      conn =
+        conn
+        |> Plug.Conn.clear_session()
+        |> patch(~p"/profile/set_default_account/#{unauthorized_account.id}")
+
+      assert redirected_to(conn) == ~p"/login"
+
+      assert Phoenix.Flash.get(conn.assigns.flash, :error) =~
+               "You must log in to access this page"
+    end
+
+    test "handles invalid account_id parameter gracefully", %{conn: conn} do
+      conn =
+        patch(conn, ~p"/profile/set_default_account/invalid")
+
+      assert redirected_to(conn) == ~p"/"
+    end
+  end
 end

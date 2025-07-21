@@ -58,6 +58,39 @@ defmodule PingcrmWeb.ProfileController do
     end
   end
 
+  def change_account(conn, %{"id" => id}) do
+    account_id = String.to_integer(id)
+    user = conn.assigns.current_scope.user
+
+    case Accounts.has_account?(user, account_id) do
+      true ->
+        conn
+        |> put_session(:account_id, account_id)
+        |> configure_session(renew: true)
+        |> redirect(to: get_referer_path(conn))
+
+      false ->
+        conn
+        |> put_flash(:error, "You do not have access to that account.")
+        |> redirect(to: "/")
+    end
+  end
+
+  def set_default_account(conn, %{"account_id" => account_id}) do
+    user = conn.assigns.current_scope.user
+
+    case Accounts.set_default_account(user, account_id) do
+      {:ok, _user} ->
+        conn
+        |> redirect(to: get_referer_path(conn))
+
+      {:error, changeset} ->
+        conn
+        |> assign_errors(changeset)
+        |> redirect(to: "/")
+    end
+  end
+
   defp sudo_mode(conn, _opts) do
     UserAuth.call(
       conn,

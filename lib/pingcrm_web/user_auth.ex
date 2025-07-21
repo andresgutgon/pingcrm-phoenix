@@ -174,11 +174,17 @@ defmodule PingcrmWeb.UserAuth do
     cond do
       user && user.confirmed_at ->
         account = conn.assigns.current_scope.account
+        accounts = conn.assigns.current_scope.accounts
         role = conn.assigns.current_scope.role
 
         conn
         |> assign(:user, user)
-        |> assign_prop(:auth, %{user: UserPresenter.serialize(user), account: account, role: role})
+        |> assign_prop(:auth, %{
+          user: UserPresenter.serialize(user),
+          account: account,
+          role: role,
+          accounts: accounts
+        })
 
       user && is_nil(user.confirmed_at) ->
         conn

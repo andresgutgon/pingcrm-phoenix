@@ -48,6 +48,25 @@ defmodule PingcrmWeb do
 
       unquote(verified_routes())
       import Inertia.Controller
+
+      def get_referer_path(conn, fallback \\ "/") do
+        case get_req_header(conn, "referer") |> List.first() do
+          nil ->
+            fallback
+
+          referer ->
+            case URI.parse(referer) do
+              %URI{path: path, query: nil} when is_binary(path) ->
+                path
+
+              %URI{path: path, query: query} when is_binary(path) and is_binary(query) ->
+                path <> "?" <> query
+
+              _ ->
+                fallback
+            end
+        end
+      end
     end
   end
 

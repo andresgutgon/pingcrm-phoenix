@@ -12,6 +12,7 @@ services:
       - ./deps:/pingcrm/deps
       - node_modules_container:/pingcrm/assets/node_modules
       - /Users/andres/code/opensource/inertia-phoenix:/inertia-phoenix
+      - ~/.iex_history:/root/.iex_history
     depends_on:
       - db
       - mailpit
@@ -20,6 +21,9 @@ services:
       - MAILPIT_SMTP_HOST=pingcrm_mailpit
       - MAILPIT_SMTP_PORT=1025
       - PORT=4004
+      - ERL_AFLAGS=-kernel shell_history enabled -kernel shell_history_path '"/root/.iex_history"'
+
+
     # require IEx
     # In the line you want to stop:
     # IEx.pry()
