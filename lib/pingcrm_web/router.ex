@@ -23,10 +23,10 @@ defmodule PingcrmWeb.Router do
     plug :fetch_session
     plug :fetch_live_flash
     plug :put_root_layout, html: {PingcrmWeb.Layouts, :root}
-    plug :put_layout, html: {PingcrmWeb.Layouts, :root}
+    plug :put_layout, false
     plug :protect_from_forgery
     plug :put_secure_browser_headers
-    plug :fetch_current_scope_for_user
+    plug :fetch_scope
     plug Inertia.Plug
   end
 
@@ -35,23 +35,53 @@ defmodule PingcrmWeb.Router do
   end
 
   scope "/", PingcrmWeb do
-    pipe_through [:browser, :require_authenticated_user]
+    pipe_through [:browser, :require_confirmed_user]
 
     get "/", DashboardController, :index, as: :home
+    get "/profile", ProfileController, :show, as: :my_profile
+    patch "/profile", ProfileController, :update, as: :update_profile
+    patch "/profile/password", ProfileController, :update_password
+    patch "/profile/email", ProfileController, :update_email
+    post "/profile/change_account/:id", ProfileController, :change_account
+    patch "/profile/set_default_account/:account_id", ProfileController, :set_default_account
+
+    get "/confirm-email/:token", Auth.ConfirmEmailController, :edit
+    patch "/confirm-email/:token", Auth.ConfirmEmailController, :update, as: :confirm_email_change
 
     # TODO: Implement for real
     get "/organizations", DashboardController, :index, as: :organizations
     get "/contacts", DashboardController, :index, as: :contacts
     get "/reports", DashboardController, :index, as: :reports
+
+    delete "/logout", Auth.SessionsController, :delete
   end
 
-  scope "/", PingcrmWeb do
+  scope "/", PingcrmWeb.Auth do
+    pipe_through [:browser, :redirect_if_user_is_authenticated]
+
+    get "/login", SessionsController, :new, as: :login
+    post "/login", SessionsController, :create
+
+    get "/signup", SignupsController, :new, as: :signup
+    post "/signup", SignupsController, :create, as: :signup_create
+
+    get "/reset_password", ResetPasswordController, :new, as: :forgot_password
+
+    post "/reset_password", ResetPasswordController, :create,
+      as: :send_reset_password_instructions
+
+    get "/reset_password/:token", ResetPasswordController, :edit
+    put "/reset_password/:token", ResetPasswordController, :update
+  end
+
+  scope "/", PingcrmWeb.Auth do
     pipe_through [:browser]
 
-    # Auth
-    get "/login", UserSessionController, :new, as: :login
-    post "/login", UserSessionController, :create
-    delete "/logout", UserSessionController, :delete
+    get "/confirmation-sent", ConfirmationsController, :confirmation_sent
+    get "/confirm", ConfirmationsController, :new
+    post "/confirm", ConfirmationsController, :create, as: :resend_confirmation
+    get "/confirm/:token", ConfirmationsController, :edit
+    post "/confirm/:token", ConfirmationsController, :confirm_user
   end
 
   # Explanation on top

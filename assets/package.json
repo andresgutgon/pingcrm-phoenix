@@ -24,8 +24,8 @@
   "packageManager": "pnpm@9.12.2",
   "type": "module",
   "dependencies": {
-    "@inertiajs/react": "^2.0.3",
-    "axios": "^1.7.9",
+    "@inertiajs/react": "^2.0.14",
+    "axios": "^1.8.2",
     "classnames": "^2.5.1",
     "lucide-react": "^0.501.0",
     "react": "^19.0.0",

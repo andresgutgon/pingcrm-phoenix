@@ -1,5 +1,5 @@
 defmodule PingcrmWeb.ConnCase do
-  alias Pingcrm.Accounts.Scope
+  alias Pingcrm.Accounts.{Auth, Scope}
   alias Pingcrm.Support.AuthTestHelpers
   import Pingcrm.Factory, only: [account_owner: 0]
 
@@ -53,8 +53,8 @@ defmodule PingcrmWeb.ConnCase do
   test context.
   """
   def register_and_log_in_user(%{conn: conn} = context) do
-    user = account_owner()
-    scope = Scope.for_user(user)
+    %{user: user, account: account} = account_owner()
+    scope = Scope.for_user(user, account.id)
 
     opts =
       context
@@ -70,7 +70,7 @@ defmodule PingcrmWeb.ConnCase do
   It returns an updated `conn`.
   """
   def log_in_user(conn, user, opts \\ []) do
-    token = Pingcrm.Accounts.generate_user_session_token(user)
+    token = Auth.create_session_token(user)
 
     maybe_set_token_authenticated_at(token, opts[:token_authenticated_at])
 

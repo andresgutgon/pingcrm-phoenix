@@ -2,7 +2,7 @@ defmodule PingcrmWeb.UserAuthTest do
   use PingcrmWeb.ConnCase, async: true
 
   alias Pingcrm.Accounts
-  alias Pingcrm.Accounts.Scope
+  alias Pingcrm.Accounts.{Presenter, Scope}
   alias PingcrmWeb.UserAuth
 
   @remember_me_cookie "_pingcrm_web_user_remember_me"
@@ -14,7 +14,9 @@ defmodule PingcrmWeb.UserAuthTest do
       |> Map.replace!(:secret_key_base, PingcrmWeb.Endpoint.config(:secret_key_base))
       |> init_test_session(%{})
 
-    %{user: %{account_owner() | authenticated_at: DateTime.utc_now(:second)}, conn: conn}
+    %{user: user, account: account} = account_owner(authenticated_at: DateTime.utc_now(:second))
+
+    %{user: user, account: account, conn: conn}
   end
 
   describe "log_in_user/3" do
@@ -30,10 +32,23 @@ defmodule PingcrmWeb.UserAuthTest do
       refute get_session(conn, :to_be_removed)
     end
 
-    test "keeps session when re-authenticating", %{conn: conn, user: user} do
+    test "stores account_id in the session", %{conn: conn, user: user, account: account} do
+      conn = UserAuth.log_in_user(conn, user)
+      redirected_path = redirected_to(conn)
+      token = get_session(conn, :user_token)
+
+      conn =
+        build_conn()
+        |> Phoenix.ConnTest.init_test_session(%{user_token: token})
+        |> get(redirected_path)
+
+      assert get_session(conn, :account_id) == account.id
+    end
+
+    test "keeps session when re-authenticating", %{conn: conn, user: user, account: account} do
       conn =
         conn
-        |> assign(:current_scope, Scope.for_user(user))
+        |> assign(:current_scope, Scope.for_user(user, account.id))
         |> put_session(:to_be_removed, "value")
         |> UserAuth.log_in_user(user)
 
@@ -44,11 +59,11 @@ defmodule PingcrmWeb.UserAuthTest do
       conn: conn,
       user: user
     } do
-      other_user = account_owner()
+      %{user: other_user, account: other_account} = account_owner()
 
       conn =
         conn
-        |> assign(:current_scope, Scope.for_user(other_user))
+        |> assign(:current_scope, Scope.for_user(other_user, other_account.id))
         |> put_session(:to_be_removed, "value")
         |> UserAuth.log_in_user(user)
 
@@ -95,7 +110,7 @@ defmodule PingcrmWeb.UserAuthTest do
 
   describe "logout_user/1" do
     test "erases session and cookies", %{conn: conn, user: user} do
-      user_token = Accounts.generate_user_session_token(user)
+      user_token = Accounts.Auth.create_session_token(user)
 
       conn =
         conn
@@ -119,16 +134,16 @@ defmodule PingcrmWeb.UserAuthTest do
     end
   end
 
-  describe "fetch_current_scope_for_user/2" do
-    test "authenticates user from session", %{conn: conn, user: user} do
-      user_token = Accounts.generate_user_session_token(user)
+  describe "fetch_scope/2" do
+    test "authenticates user from session", %{conn: conn, user: user, account: account} do
+      user_token = Accounts.Auth.create_session_token(user)
 
       conn =
-        conn |> put_session(:user_token, user_token) |> UserAuth.fetch_current_scope_for_user([])
+        conn |> put_session(:user_token, user_token) |> UserAuth.fetch_scope([])
 
       assert conn.assigns.current_scope.user.id == user.id
       assert conn.assigns.current_scope.user.authenticated_at == user.authenticated_at
-      assert conn.assigns.current_scope.user.account.name == user.account.name
+      assert conn.assigns.current_scope.account.name == account.name
       assert get_session(conn, :user_token) == user_token
     end
 
@@ -142,7 +157,7 @@ defmodule PingcrmWeb.UserAuthTest do
       conn =
         conn
         |> put_req_cookie(@remember_me_cookie, signed_token)
-        |> UserAuth.fetch_current_scope_for_user([])
+        |> UserAuth.fetch_scope([])
 
       assert conn.assigns.current_scope.user.id == user.id
       assert conn.assigns.current_scope.user.authenticated_at == user.authenticated_at
@@ -151,8 +166,8 @@ defmodule PingcrmWeb.UserAuthTest do
     end
 
     test "does not authenticate if data is missing", %{conn: conn, user: user} do
-      _ = Accounts.generate_user_session_token(user)
-      conn = UserAuth.fetch_current_scope_for_user(conn, [])
+      _ = Accounts.Auth.create_session_token(user)
+      conn = UserAuth.fetch_scope(conn, [])
       refute get_session(conn, :user_token)
       refute conn.assigns.current_scope
     end
@@ -172,7 +187,7 @@ defmodule PingcrmWeb.UserAuthTest do
         |> put_session(:user_token, token)
         |> put_session(:user_remember_me, true)
         |> put_req_cookie(@remember_me_cookie, signed_token)
-        |> UserAuth.fetch_current_scope_for_user([])
+        |> UserAuth.fetch_scope([])
 
       assert conn.assigns.current_scope.user.id == user.id
       assert conn.assigns.current_scope.user.authenticated_at == user.authenticated_at
@@ -182,31 +197,80 @@ defmodule PingcrmWeb.UserAuthTest do
       assert new_signed_token != signed_token
       assert max_age == @remember_me_cookie_max_age
     end
+
+    test "uses default_account_id when no account_id in session", %{conn: conn} do
+      owner_data = account_owner()
+      user = owner_data.user
+      second_account = insert(:account)
+      insert(:member_membership, %{user: user, account: second_account})
+
+      {:ok, user_with_default} = Accounts.set_default_account(user, second_account.id)
+
+      user_token = Accounts.Auth.create_session_token(user_with_default)
+
+      conn =
+        conn
+        |> put_session(:user_token, user_token)
+        |> UserAuth.fetch_scope([])
+
+      assert conn.assigns.current_scope.user.id == user.id
+      assert conn.assigns.current_scope.account.id == second_account.id
+      assert conn.assigns.current_scope.account.name == second_account.name
+      assert get_session(conn, :account_id) == second_account.id
+    end
+
+    test "falls back to first account when no default_account_id and no session account_id", %{
+      conn: conn
+    } do
+      owner_data = account_owner()
+      user = owner_data.user
+      first_account = owner_data.account
+      second_account = insert(:account)
+      insert(:member_membership, %{user: user, account: second_account})
+
+      assert user.default_account_id == nil
+
+      user_token = Accounts.Auth.create_session_token(user)
+
+      conn =
+        conn
+        |> put_session(:user_token, user_token)
+        |> UserAuth.fetch_scope([])
+
+      assert conn.assigns.current_scope.user.id == user.id
+      assert conn.assigns.current_scope.account.id == first_account.id
+      assert conn.assigns.current_scope.account.name == first_account.name
+      assert get_session(conn, :account_id) == first_account.id
+    end
   end
 
   describe "require_sudo_mode/2" do
-    test "allows users that have authenticated in the last 10 minutes", %{conn: conn, user: user} do
+    test "allows users that have authenticated in the last 10 minutes", %{
+      conn: conn,
+      user: user,
+      account: account
+    } do
       conn =
         conn
         |> fetch_flash()
-        |> assign(:current_scope, Scope.for_user(user))
+        |> assign(:current_scope, Scope.for_user(user, account.id))
         |> UserAuth.require_sudo_mode([])
 
       refute conn.halted
       refute conn.status
     end
 
-    test "redirects when authentication is too old", %{conn: conn, user: user} do
+    test "redirects when authentication is too old", %{conn: conn, user: user, account: account} do
       eleven_minutes_ago = DateTime.utc_now(:second) |> DateTime.add(-11, :minute)
       user = %{user | authenticated_at: eleven_minutes_ago}
-      user_token = Accounts.generate_user_session_token(user)
+      user_token = Accounts.Auth.create_session_token(user)
       {user, token_inserted_at} = Accounts.get_user_by_session_token(user_token)
       assert DateTime.compare(token_inserted_at, user.authenticated_at) == :gt
 
       conn =
         conn
         |> fetch_flash()
-        |> assign(:current_scope, Scope.for_user(user))
+        |> assign(:current_scope, Scope.for_user(user, account.id))
         |> UserAuth.require_sudo_mode([])
 
       assert redirected_to(conn) == ~p"/login"
@@ -218,13 +282,13 @@ defmodule PingcrmWeb.UserAuthTest do
 
   describe "redirect_if_user_is_authenticated/2" do
     setup %{conn: conn} do
-      %{conn: UserAuth.fetch_current_scope_for_user(conn, [])}
+      %{conn: UserAuth.fetch_scope(conn, [])}
     end
 
-    test "redirects if user is authenticated", %{conn: conn, user: user} do
+    test "redirects if user is authenticated", %{conn: conn, user: user, account: account} do
       conn =
         conn
-        |> assign(:current_scope, Scope.for_user(user))
+        |> assign(:current_scope, Scope.for_user(user, account.id))
         |> UserAuth.redirect_if_user_is_authenticated([])
 
       assert conn.halted
@@ -238,13 +302,13 @@ defmodule PingcrmWeb.UserAuthTest do
     end
   end
 
-  describe "require_authenticated_user/2" do
+  describe "require_confirmed_user/2" do
     setup %{conn: conn} do
-      %{conn: UserAuth.fetch_current_scope_for_user(conn, [])}
+      %{conn: UserAuth.fetch_scope(conn, [])}
     end
 
     test "redirects if user is not authenticated", %{conn: conn} do
-      conn = conn |> fetch_flash() |> UserAuth.require_authenticated_user([])
+      conn = conn |> fetch_flash() |> UserAuth.require_confirmed_user([])
       assert conn.halted
 
       assert redirected_to(conn) == ~p"/login"
@@ -257,7 +321,7 @@ defmodule PingcrmWeb.UserAuthTest do
       halted_conn =
         %{conn | path_info: ["foo"], query_string: ""}
         |> fetch_flash()
-        |> UserAuth.require_authenticated_user([])
+        |> UserAuth.require_confirmed_user([])
 
       assert halted_conn.halted
       assert get_session(halted_conn, :user_return_to) == "/foo"
@@ -265,7 +329,7 @@ defmodule PingcrmWeb.UserAuthTest do
       halted_conn =
         %{conn | path_info: ["foo"], query_string: "bar=baz"}
         |> fetch_flash()
-        |> UserAuth.require_authenticated_user([])
+        |> UserAuth.require_confirmed_user([])
 
       assert halted_conn.halted
       assert get_session(halted_conn, :user_return_to) == "/foo?bar=baz"
@@ -273,20 +337,131 @@ defmodule PingcrmWeb.UserAuthTest do
       halted_conn =
         %{conn | path_info: ["foo"], query_string: "bar", method: "POST"}
         |> fetch_flash()
-        |> UserAuth.require_authenticated_user([])
+        |> UserAuth.require_confirmed_user([])
 
       assert halted_conn.halted
       refute get_session(halted_conn, :user_return_to)
     end
 
-    test "does not redirect if user is authenticated", %{conn: conn, user: user} do
+    test "does not redirect if user is authenticated and confirmed", %{
+      conn: conn,
+      user: user,
+      account: account
+    } do
       conn =
         conn
-        |> assign(:current_scope, Scope.for_user(user))
-        |> UserAuth.require_authenticated_user([])
+        |> assign(:current_scope, Scope.for_user(user, account.id))
+        |> UserAuth.require_confirmed_user([])
 
       refute conn.halted
       refute conn.status
+    end
+
+    test "allows access only to confirmed users", %{conn: conn, account: account} do
+      confirmed_user = insert(:user, confirmed_at: DateTime.utc_now())
+      insert(:admin_membership, %{user: confirmed_user, account: account})
+
+      conn =
+        conn
+        |> assign(:current_scope, Scope.for_user(confirmed_user, account.id))
+        |> UserAuth.require_confirmed_user([])
+
+      refute conn.halted
+      refute conn.status
+      assert conn.assigns.user.id == confirmed_user.id
+
+      # Test unconfirmed user is redirected
+      unconfirmed_user = insert(:user, confirmed_at: nil)
+      insert(:admin_membership, %{user: unconfirmed_user, account: account})
+
+      conn =
+        build_conn()
+        |> init_test_session(%{})
+        |> fetch_flash()
+        |> assign(:current_scope, Scope.for_user(unconfirmed_user, account.id))
+        |> UserAuth.require_confirmed_user([])
+
+      assert conn.halted
+      assert redirected_to(conn) == ~p"/confirm"
+
+      assert Phoenix.Flash.get(conn.assigns.flash, :error) ==
+               "You must confirm your account to access this page."
+    end
+
+    test "redirects unconfirmed user to confirmation page", %{conn: conn, account: account} do
+      # Create an unconfirmed user
+      unconfirmed_user = insert(:user, confirmed_at: nil)
+      insert(:admin_membership, %{user: unconfirmed_user, account: account})
+
+      conn =
+        conn
+        |> fetch_flash()
+        |> assign(:current_scope, Scope.for_user(unconfirmed_user, account.id))
+        |> UserAuth.require_confirmed_user([])
+
+      assert conn.halted
+      assert redirected_to(conn) == ~p"/confirm"
+
+      assert Phoenix.Flash.get(conn.assigns.flash, :error) ==
+               "You must confirm your account to access this page."
+    end
+
+    test "inertia shared props", %{conn: conn, user: user, account: account} do
+      second_account = insert(:account)
+      insert(:member_membership, %{user: user, account: second_account})
+
+      conn =
+        conn
+        |> assign(:current_scope, Scope.for_user(user, account.id))
+        |> UserAuth.require_confirmed_user([])
+
+      auth_prop = conn.private.inertia_shared[:auth]
+
+      assert auth_prop == %{
+               user: Presenter.serialize(user),
+               account: Presenter.serialize_account(account, true),
+               role: "admin",
+               accounts: [
+                 Presenter.serialize_account(account, true),
+                 Presenter.serialize_account(second_account, false)
+               ]
+             }
+    end
+
+    test "stores the path to redirect to on GET for unconfirmed user", %{
+      conn: conn,
+      account: account
+    } do
+      # Create an unconfirmed user
+      unconfirmed_user = insert(:user, confirmed_at: nil)
+      insert(:admin_membership, %{user: unconfirmed_user, account: account})
+
+      halted_conn =
+        %{conn | path_info: ["foo"], query_string: ""}
+        |> fetch_flash()
+        |> assign(:current_scope, Scope.for_user(unconfirmed_user, account.id))
+        |> UserAuth.require_confirmed_user([])
+
+      assert halted_conn.halted
+      assert get_session(halted_conn, :user_return_to) == "/foo"
+
+      halted_conn =
+        %{conn | path_info: ["foo"], query_string: "bar=baz"}
+        |> fetch_flash()
+        |> assign(:current_scope, Scope.for_user(unconfirmed_user, account.id))
+        |> UserAuth.require_confirmed_user([])
+
+      assert halted_conn.halted
+      assert get_session(halted_conn, :user_return_to) == "/foo?bar=baz"
+
+      halted_conn =
+        %{conn | path_info: ["foo"], query_string: "bar", method: "POST"}
+        |> fetch_flash()
+        |> assign(:current_scope, Scope.for_user(unconfirmed_user, account.id))
+        |> UserAuth.require_confirmed_user([])
+
+      assert halted_conn.halted
+      refute get_session(halted_conn, :user_return_to)
     end
   end
 end

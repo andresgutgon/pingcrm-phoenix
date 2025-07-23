@@ -1,5 +1,5 @@
 import { FormEvent } from 'react'
-import { Head } from '@inertiajs/react'
+import { Head, Link } from '@inertiajs/react'
 import { useForm } from '@inertiajs/react'
 import Logo from '@/components/Logo'
 import LoadingButton from '@/components/Button/LoadingButton'
@@ -7,8 +7,9 @@ import TextInput from '@/components/Form/TextInput'
 import FieldGroup from '@/components/Form/FieldGroup'
 import { CheckboxInput } from '@/components/Form/CheckboxInput'
 import FlashedMessages from '@/components/Messages/FlashMessages'
-
-import { login } from '@/actions/UserSessionController'
+import { login } from '@/actions/Auth/SessionsController'
+import { signup } from '@/actions/Auth/SignupsController'
+import { forgotPassword } from '@/actions/Auth/ResetPasswordController'
 
 export default function LoginPage() {
   const { data, setData, errors, post, processing } = useForm<{
@@ -81,7 +82,7 @@ export default function LoginPage() {
               </FieldGroup>
             </div>
           </div>
-          <div className='flex items-center justify-end px-10 py-4 bg-gray-100'>
+          <div className='flex flex-col gap-y-2 items-center justify-end px-10 py-4 bg-gray-100'>
             <LoadingButton
               type='submit'
               loading={processing}
@@ -89,6 +90,21 @@ export default function LoginPage() {
             >
               Login
             </LoadingButton>
+            <div className='px-8 pb-6'>
+              <Link
+                href={signup.get().url}
+                className='text-indigo-700 hover:underline'
+              >
+                Register
+              </Link>{' '}
+              |{' '}
+              <Link
+                href={forgotPassword.get().url}
+                className='text-indigo-700 hover:underline'
+              >
+                Forgot your password?
+              </Link>
+            </div>
           </div>
         </form>
       </div>

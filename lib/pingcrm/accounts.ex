@@ -1,66 +1,54 @@
-require Logger
-
 defmodule Pingcrm.Accounts do
-  @moduledoc """
-  The Accounts context.
-  """
+  @moduledoc false
 
   import Ecto.Query, warn: false
   alias Pingcrm.Repo
 
-  alias Pingcrm.Accounts.{User, UserToken}
+  alias Pingcrm.Accounts.{Membership, User, UserToken}
 
-  ## Database getters
+  def update_profile(%User{} = user, params) do
+    user
+    |> User.profile_changed_changeset(params)
+    |> Repo.update()
+  end
 
-  @doc """
-  Gets a user by email.
+  def set_default_account(%User{} = user, account_id) do
+    user
+    |> User.default_account_changeset(%{default_account_id: account_id})
+    |> Repo.update()
+  end
 
-  ## Examples
+  def has_account?(%User{id: user_id}, account_id)
+      when is_binary(account_id) or is_integer(account_id) do
+    query =
+      from m in Membership,
+        where: m.user_id == ^user_id and m.account_id == ^account_id,
+        select: 1,
+        limit: 1
 
-      iex> get_user_by_email("foo@example.com")
-      %User{}
+    Repo.exists?(query)
+  end
 
-      iex> get_user_by_email("unknown@example.com")
-      nil
-
-  """
   def get_user_by_email(email) when is_binary(email) do
     Repo.get_by(User, email: email)
   end
 
-  @doc """
-  Gets a user by email and password.
-
-  ## Examples
-
-      iex> get_user_by_email_and_password("foo@example.com", "correct_password")
-      %User{}
-
-      iex> get_user_by_email_and_password("foo@example.com", "invalid_password")
-      nil
-
-  """
   def get_user_by_email_and_password(email, password)
       when is_binary(email) and is_binary(password) do
     user = Repo.get_by(User, email: email)
     if User.valid_password?(user, password), do: user
   end
 
-  @doc """
-  Gets a single user.
-
-  Raises `Ecto.NoResultsError` if the User does not exist.
-
-  ## Examples
-
-      iex> get_user!(123)
-      %User{}
-
-      iex> get_user!(456)
-      ** (Ecto.NoResultsError)
-
-  """
   def get_user!(id), do: Repo.get!(User, id)
+
+  def get_user_by_reset_password_token(token) do
+    with {:ok, query} <- UserToken.verify_email_token_query(token, "reset_password"),
+         %User{} = user <- Repo.one(query) do
+      user
+    else
+      _ -> nil
+    end
+  end
 
   ## Settings
 
@@ -78,30 +66,11 @@ defmodule Pingcrm.Accounts do
 
   def sudo_mode?(_user, _minutes), do: false
 
-  ## Session
-
-  @doc """
-  Generates a session token.
-  """
-  def generate_user_session_token(user) do
-    {token, user_token} = UserToken.build_session_token(user)
-    Repo.insert!(user_token)
-    token
-  end
-
-  @doc """
-  Gets the user with the given signed token.
-
-  If the token is valid `{user, token_inserted_at}` is returned, otherwise `nil` is returned.
-  """
   def get_user_by_session_token(token) do
     {:ok, query} = UserToken.verify_session_token_query(token)
     Repo.one(query)
   end
 
-  @doc """
-  Deletes the signed token with the given context.
-  """
   def delete_user_session_token(token) do
     Repo.delete_all(UserToken.by_token_and_context_query(token, "session"))
     :ok

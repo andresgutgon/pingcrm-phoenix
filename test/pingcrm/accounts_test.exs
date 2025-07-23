@@ -10,7 +10,8 @@ defmodule Pingcrm.AccountsTest do
     end
 
     test "returns the user if the email exists" do
-      %{id: id} = user = account_owner()
+      %{user: user} = account_owner()
+      %{id: id} = user
       assert %User{id: ^id} = Accounts.get_user_by_email(user.email)
     end
   end
@@ -21,12 +22,13 @@ defmodule Pingcrm.AccountsTest do
     end
 
     test "does not return the user if the password is not valid" do
-      user = account_owner()
+      %{user: user} = account_owner()
       refute Accounts.get_user_by_email_and_password(user.email, "invalid")
     end
 
     test "returns the user if the email and password are valid" do
-      %{id: id} = user = account_owner()
+      %{user: user} = account_owner()
+      %{id: id} = user
 
       expected_user = Accounts.get_user_by_email_and_password(user.email, valid_user_password())
       assert %User{id: ^id} = expected_user
@@ -41,7 +43,8 @@ defmodule Pingcrm.AccountsTest do
     end
 
     test "returns the user with the given id" do
-      %{id: id} = user = account_owner()
+      %{user: user} = account_owner()
+      %{id: id} = user
       assert %User{id: ^id} = Accounts.get_user!(user.id)
     end
   end
@@ -65,13 +68,13 @@ defmodule Pingcrm.AccountsTest do
     end
   end
 
-  describe "generate_user_session_token/1" do
+  describe ".Auth.create_session_token/1" do
     setup do
-      %{user: account_owner()}
+      %{user: account_owner().user}
     end
 
     test "generates a token", %{user: user} do
-      token = Accounts.generate_user_session_token(user)
+      token = Accounts.Auth.create_session_token(user)
       assert user_token = Repo.get_by(UserToken, token: token)
       assert user_token.context == "session"
       assert user_token.authenticated_at != nil
@@ -80,7 +83,7 @@ defmodule Pingcrm.AccountsTest do
       assert_raise Ecto.ConstraintError, fn ->
         Repo.insert!(%UserToken{
           token: user_token.token,
-          user_id: account_owner().id,
+          user_id: account_owner().user.id,
           context: "session"
         })
       end
@@ -88,7 +91,7 @@ defmodule Pingcrm.AccountsTest do
 
     test "duplicates the authenticated_at of given user in new token", %{user: user} do
       user = %{user | authenticated_at: DateTime.add(DateTime.utc_now(:second), -3600)}
-      token = Accounts.generate_user_session_token(user)
+      token = Accounts.Auth.create_session_token(user)
       assert user_token = Repo.get_by(UserToken, token: token)
       assert user_token.authenticated_at == user.authenticated_at
       assert DateTime.compare(user_token.inserted_at, user.authenticated_at) == :gt
@@ -97,8 +100,8 @@ defmodule Pingcrm.AccountsTest do
 
   describe "get_user_by_session_token/1" do
     setup do
-      user = account_owner()
-      token = Accounts.generate_user_session_token(user)
+      %{user: user} = account_owner()
+      token = Accounts.Auth.create_session_token(user)
       %{user: user, token: token}
     end
 
@@ -122,8 +125,8 @@ defmodule Pingcrm.AccountsTest do
 
   describe "delete_user_session_token/1" do
     test "deletes the token" do
-      user = account_owner()
-      token = Accounts.generate_user_session_token(user)
+      %{user: user} = account_owner()
+      token = Accounts.Auth.create_session_token(user)
       assert Accounts.delete_user_session_token(token) == :ok
       refute Accounts.get_user_by_session_token(token)
     end

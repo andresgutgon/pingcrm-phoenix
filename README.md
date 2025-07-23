@@ -24,14 +24,14 @@ You can pass a file path and also a line number with the following syntax:
 Test in watch mode
 
 ```bash
-./bin/test --watch
+./bin/test.sh --watch
 ```
 
 Run test in debug mode. You can put a require IEx; IEx.pry
 in your test file to stop the execution and start a debug session.
 
 ```bash
-./bin/test --debug
+./bin/test.sh --debug
 ```
 
 ## Data migrations

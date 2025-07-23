@@ -24,7 +24,12 @@ defmodule PingcrmWeb.Endpoint do
   # Code reloading can be explicitly enabled under the
   # :code_reloader configuration of your endpoint.
   if code_reloading? do
+    plug Phoenix.CodeReloader
     plug Phoenix.Ecto.CheckRepoStatus, otp_app: :pingcrm
+  end
+
+  if Code.ensure_loaded?(Tidewave) do
+    plug Tidewave, autoformat: true
   end
 
   plug Plug.RequestId

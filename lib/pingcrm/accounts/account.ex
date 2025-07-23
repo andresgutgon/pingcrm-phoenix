@@ -3,22 +3,22 @@ defmodule Pingcrm.Accounts.Account do
   use Ecto.Schema
   import Ecto.Changeset
 
-  alias Pingcrm.Accounts.User
+  alias Pingcrm.Accounts.Membership
 
   schema "accounts" do
     field :name, :string
-    field :user_id, :id
 
-    has_many :users, User
+    has_many :memberships, Membership
+    has_many :members, through: [:memberships, :user]
 
     timestamps(type: :utc_datetime)
   end
 
   @doc false
-  def changeset(account, attrs, user_scope) do
+  def changeset(account, attrs) do
     account
     |> cast(attrs, [:name])
     |> validate_required([:name])
-    |> put_change(:user_id, user_scope.user.id)
+    |> validate_length(:name, min: 2)
   end
 end

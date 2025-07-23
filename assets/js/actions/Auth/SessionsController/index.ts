@@ -1,8 +1,8 @@
-import { buildUrl, type RouteQueryOptions, type RouteDefinition, type RouteDefinitionWithParameters, type WayfinderUrl } from './../../wayfinder'
+import { buildUrl, type RouteQueryOptions, type RouteDefinition, type RouteDefinitionWithParameters, type WayfinderUrl } from './../../../wayfinder'
 
 /**
- * @see PingcrmWeb.UserSessionController::create
- * @see lib/pingcrm_web/controllers/user_session_controller.ex:13
+ * @see PingcrmWeb.Auth.SessionsController::create
+ * @see lib/pingcrm_web/controllers/auth/sessions_controller.ex:11
  * @route /login
 */
 
@@ -30,8 +30,8 @@ create.post = (options?: RouteQueryOptions): RouteDefinition<'post'> => ({
 })
 
 /**
- * @see PingcrmWeb.UserSessionController::delete
- * @see lib/pingcrm_web/controllers/user_session_controller.ex:26
+ * @see PingcrmWeb.Auth.SessionsController::delete
+ * @see lib/pingcrm_web/controllers/auth/sessions_controller.ex:23
  * @route /logout
 */
 
@@ -59,8 +59,8 @@ deleteMethod.delete = (options?: RouteQueryOptions): RouteDefinition<'delete'> =
 })
 
 /**
- * @see PingcrmWeb.UserSessionController::new
- * @see lib/pingcrm_web/controllers/user_session_controller.ex:7
+ * @see PingcrmWeb.Auth.SessionsController::new
+ * @see lib/pingcrm_web/controllers/auth/sessions_controller.ex:7
  * @route /login
 */
 
@@ -88,6 +88,6 @@ login.get = (options?: RouteQueryOptions): RouteDefinition<'get'> => ({
 })
 
 
-const UserSessionController = { create, delete: deleteMethod, login }
+const SessionsController = { create, delete: deleteMethod, login }
 
-export default UserSessionController
+export default SessionsController
