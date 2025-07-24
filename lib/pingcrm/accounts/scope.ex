@@ -50,13 +50,21 @@ defmodule Pingcrm.Accounts.Scope do
     if account && current_membership.role && role do
       %__MODULE__{
         user: user,
-        account: UserPresenter.serialize_account(account, true),
+        account:
+          UserPresenter.serialize_account(account, %{
+            is_current: true,
+            is_default: account.id == user.default_account_id
+          }),
         role: role,
         accounts:
           memberships
           |> Enum.map(fn membership ->
             acc = membership.account
-            UserPresenter.serialize_account(acc, acc.id == account.id)
+
+            UserPresenter.serialize_account(acc, %{
+              is_current: acc.id == account.id,
+              is_default: acc.id == user.default_account_id
+            })
           end)
       }
     else

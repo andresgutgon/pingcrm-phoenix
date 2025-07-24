@@ -1,3 +1,9 @@
+import { usePage } from '@inertiajs/react'
+import type { Dispatch, SetStateAction } from 'react'
+
+export type ReactStateDispatch<T> = Dispatch<SetStateAction<T>>
+
+export type ExtendsUnion<T, U extends T> = U
 export interface Organization {
   id: number
   name: string
@@ -32,7 +38,9 @@ export interface Contact {
 export interface Account {
   id: number
   name: string
+  initials: string
   is_current: boolean
+  is_default: boolean
 }
 
 export interface User {
@@ -40,7 +48,9 @@ export interface User {
   name: string
   first_name: string
   last_name: string
+  initials: string
   email: string
+  avatar?: string
   email_changed?: string
   confirmed_at: string
   authenticated_at: string
@@ -48,6 +58,7 @@ export interface User {
   default_account_id?: number
 }
 
+type Errors = ReturnType<typeof usePage>['props']['errors']
 export type ConcretePageProps = Record<string, unknown>
 export type PageProps<T extends ConcretePageProps = ConcretePageProps> = T & {
   ssr?: boolean
@@ -58,6 +69,7 @@ export type PageProps<T extends ConcretePageProps = ConcretePageProps> = T & {
     accounts: Account[]
     role: 'admin' | 'member'
   }
+  errors: Errors
   flash: {
     success: string | null
     error: string | null

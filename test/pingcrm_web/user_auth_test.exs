@@ -23,7 +23,7 @@ defmodule PingcrmWeb.UserAuthTest do
     test "stores the user token in the session", %{conn: conn, user: user} do
       conn = UserAuth.log_in_user(conn, user)
       assert token = get_session(conn, :user_token)
-      assert redirected_to(conn) == ~p"/"
+      assert redirected_to(conn) == ~p"/dashboard"
       assert Accounts.get_user_by_session_token(token)
     end
 
@@ -122,7 +122,7 @@ defmodule PingcrmWeb.UserAuthTest do
       refute get_session(conn, :user_token)
       refute conn.cookies[@remember_me_cookie]
       assert %{max_age: 0} = conn.resp_cookies[@remember_me_cookie]
-      assert redirected_to(conn) == ~p"/"
+      assert redirected_to(conn) == ~p"/login"
       refute Accounts.get_user_by_session_token(user_token)
     end
 
@@ -130,7 +130,7 @@ defmodule PingcrmWeb.UserAuthTest do
       conn = conn |> fetch_cookies() |> UserAuth.log_out_user()
       refute get_session(conn, :user_token)
       assert %{max_age: 0} = conn.resp_cookies[@remember_me_cookie]
-      assert redirected_to(conn) == ~p"/"
+      assert redirected_to(conn) == ~p"/login"
     end
   end
 
@@ -292,7 +292,7 @@ defmodule PingcrmWeb.UserAuthTest do
         |> UserAuth.redirect_if_user_is_authenticated([])
 
       assert conn.halted
-      assert redirected_to(conn) == ~p"/"
+      assert redirected_to(conn) == ~p"/dashboard"
     end
 
     test "does not redirect if user is not authenticated", %{conn: conn} do
@@ -406,6 +406,35 @@ defmodule PingcrmWeb.UserAuthTest do
                "You must confirm your account to access this page."
     end
 
+    test "sets auth prop with user initials when user is authenticated and confirmed", %{
+      conn: conn,
+      user: user,
+      account: account
+    } do
+      conn =
+        conn
+        |> assign(:current_scope, Scope.for_user(user, account.id))
+        |> UserAuth.require_confirmed_user([])
+
+      refute conn.halted
+
+      # Check that auth prop is set with serialized user that includes initials
+      auth_prop = conn.private.inertia_shared.auth
+
+      assert auth_prop.user.id == user.id
+      assert auth_prop.user.first_name == user.first_name
+      assert auth_prop.user.last_name == user.last_name
+
+      # User initials should be first letter of first_name + first letter of last_name
+      expected_initials = String.at(user.first_name, 0) <> String.at(user.last_name, 0)
+      assert auth_prop.user.initials == expected_initials
+
+      # Also check account and role are properly set
+      assert auth_prop.account.id == account.id
+      assert auth_prop.role == "admin"
+      assert is_list(auth_prop.accounts)
+    end
+
     test "inertia shared props", %{conn: conn, user: user, account: account} do
       second_account = insert(:account)
       insert(:member_membership, %{user: user, account: second_account})
@@ -419,11 +448,18 @@ defmodule PingcrmWeb.UserAuthTest do
 
       assert auth_prop == %{
                user: Presenter.serialize(user),
-               account: Presenter.serialize_account(account, true),
+               account:
+                 Presenter.serialize_account(account, %{is_current: true, is_default: false}),
                role: "admin",
                accounts: [
-                 Presenter.serialize_account(account, true),
-                 Presenter.serialize_account(second_account, false)
+                 Presenter.serialize_account(account, %{
+                   is_current: true,
+                   is_default: false
+                 }),
+                 Presenter.serialize_account(second_account, %{
+                   is_current: false,
+                   is_default: false
+                 })
                ]
              }
     end
@@ -462,6 +498,153 @@ defmodule PingcrmWeb.UserAuthTest do
 
       assert halted_conn.halted
       refute get_session(halted_conn, :user_return_to)
+    end
+  end
+
+  describe "require_admin/2" do
+    test "allows access when user has admin role", %{conn: conn} do
+      %{user: user, account: account} = account_owner(authenticated_at: DateTime.utc_now(:second))
+
+      conn =
+        conn
+        |> assign(:current_scope, Scope.for_user(user, account.id))
+        |> UserAuth.require_admin([])
+
+      refute conn.halted
+    end
+
+    test "denies access when user has member role", %{conn: conn} do
+      %{user: user, account: account} = user_with_account()
+
+      conn =
+        conn
+        |> fetch_flash()
+        |> assign(:current_scope, Scope.for_user(user, account.id))
+        |> UserAuth.require_admin([])
+
+      assert conn.halted
+      assert redirected_to(conn) == "/dashboard"
+
+      assert Phoenix.Flash.get(conn.assigns.flash, :error) ==
+               "You must be an admin to access this page."
+    end
+
+    test "denies access when user has no scope", %{conn: conn} do
+      conn =
+        conn
+        |> fetch_flash()
+        |> assign(:current_scope, nil)
+        |> UserAuth.require_admin([])
+
+      assert conn.halted
+      assert redirected_to(conn) == "/dashboard"
+
+      assert Phoenix.Flash.get(conn.assigns.flash, :error) ==
+               "You must be an admin to access this page."
+    end
+
+    test "redirects to custom path when redirect_to option is provided", %{conn: conn} do
+      %{user: user, account: account} = user_with_account()
+
+      conn =
+        conn
+        |> fetch_flash()
+        |> assign(:current_scope, Scope.for_user(user, account.id))
+        |> UserAuth.require_admin(redirect_to: "/account/team")
+
+      assert conn.halted
+      assert redirected_to(conn) == "/account/team"
+
+      assert Phoenix.Flash.get(conn.assigns.flash, :error) ==
+               "You must be an admin to access this page."
+    end
+
+    test "shows custom flash message when flash_message option is provided", %{conn: conn} do
+      %{user: user, account: account} = user_with_account()
+
+      conn =
+        conn
+        |> fetch_flash()
+        |> assign(:current_scope, Scope.for_user(user, account.id))
+        |> UserAuth.require_admin(flash_message: "Admin access required for billing.")
+
+      assert conn.halted
+      assert redirected_to(conn) == "/dashboard"
+      assert Phoenix.Flash.get(conn.assigns.flash, :error) == "Admin access required for billing."
+    end
+
+    test "uses both custom redirect and flash message when both options provided", %{conn: conn} do
+      %{user: user, account: account} = user_with_account()
+
+      conn =
+        conn
+        |> fetch_flash()
+        |> assign(:current_scope, Scope.for_user(user, account.id))
+        |> UserAuth.require_admin(redirect_to: "/profile", flash_message: "Custom admin message")
+
+      assert conn.halted
+      assert redirected_to(conn) == "/profile"
+      assert Phoenix.Flash.get(conn.assigns.flash, :error) == "Custom admin message"
+    end
+
+    test "works as plug with call/2 function", %{conn: conn} do
+      %{user: user, account: account} = user_with_account()
+
+      conn =
+        conn
+        |> fetch_flash()
+        |> assign(:current_scope, Scope.for_user(user, account.id))
+        |> UserAuth.call(:require_admin)
+
+      assert conn.halted
+      assert redirected_to(conn) == "/dashboard"
+
+      assert Phoenix.Flash.get(conn.assigns.flash, :error) ==
+               "You must be an admin to access this page."
+    end
+
+    test "works as plug with call/2 function and options", %{conn: conn} do
+      %{user: user, account: account} = user_with_account()
+
+      conn =
+        conn
+        |> fetch_flash()
+        |> assign(:current_scope, Scope.for_user(user, account.id))
+        |> UserAuth.call(
+          {:require_admin, [redirect_to: "/custom", flash_message: "Custom message"]}
+        )
+
+      assert conn.halted
+      assert redirected_to(conn) == "/custom"
+      assert Phoenix.Flash.get(conn.assigns.flash, :error) == "Custom message"
+    end
+
+    test "skips flash message when flash_message is false", %{conn: conn} do
+      %{user: user, account: account} = user_with_account()
+
+      conn =
+        conn
+        |> fetch_flash()
+        |> assign(:current_scope, Scope.for_user(user, account.id))
+        |> UserAuth.require_admin(redirect_to: "/account/team", flash_message: false)
+
+      assert conn.halted
+      assert redirected_to(conn) == "/account/team"
+      assert Phoenix.Flash.get(conn.assigns.flash, :error) == nil
+    end
+
+    test "skips flash message when flash_message is nil", %{conn: conn} do
+      %{user: user, account: account} = user_with_account()
+
+      conn =
+        conn
+        |> fetch_flash()
+        |> assign(:current_scope, Scope.for_user(user, account.id))
+        |> UserAuth.require_admin(redirect_to: "/account/team", flash_message: nil)
+
+      assert conn.halted
+      assert redirected_to(conn) == "/account/team"
+      assert Phoenix.Flash.get(conn.assigns.flash, :error) == nil
     end
   end
 end

@@ -25,6 +25,8 @@ defmodule PingcrmWeb.UserAuth do
   def init(opts), do: opts
   def call(conn, {:sudo_mode, opts}), do: require_sudo_mode(conn, opts)
   def call(conn, :sudo_mode), do: require_sudo_mode(conn, [])
+  def call(conn, {:require_admin, opts}), do: require_admin(conn, opts)
+  def call(conn, :require_admin), do: require_admin(conn, [])
 
   def log_in_user(conn, user, params \\ %{}) do
     user_return_to = get_session(conn, :user_return_to)
@@ -37,7 +39,7 @@ defmodule PingcrmWeb.UserAuth do
   def log_out_user(conn) do
     conn
     |> kill_session()
-    |> redirect(to: ~p"/")
+    |> redirect(to: ~p"/login")
   end
 
   def fetch_scope(conn, _opts) do
@@ -151,6 +153,47 @@ defmodule PingcrmWeb.UserAuth do
     end
   end
 
+  @doc """
+  Plug for routes that require the user to have admin role.
+
+  ## Options
+
+    * `:redirect_to` - The path to redirect to if user is not admin.
+      Defaults to "/dashboard"
+    * `:flash_message` - Custom flash error message.
+      Defaults to "You must be an admin to access this page."
+      Set to `false` or `nil` to skip flash message.
+
+  ## Examples
+
+      plug :require_admin
+      plug :require_admin, redirect_to: "/account", flash_message: "Admin access required"
+      plug :require_admin, redirect_to: "/account", flash_message: false
+  """
+  def require_admin(conn, opts \\ []) do
+    scope = conn.assigns.current_scope
+
+    if scope && scope.role == "admin" do
+      conn
+    else
+      redirect_path = opts[:redirect_to] || ~p"/dashboard"
+
+      flash_message =
+        Keyword.get(opts, :flash_message, "You must be an admin to access this page.")
+
+      conn =
+        case flash_message do
+          false -> conn
+          nil -> conn
+          message -> put_flash(conn, :error, message)
+        end
+
+      conn
+      |> redirect(to: redirect_path)
+      |> halt()
+    end
+  end
+
   def redirect_if_user_is_authenticated(conn, _opts) do
     if conn.assigns.current_scope do
       conn
@@ -161,7 +204,7 @@ defmodule PingcrmWeb.UserAuth do
     end
   end
 
-  def signed_in_path(_conn), do: ~p"/"
+  def signed_in_path(_conn), do: ~p"/dashboard"
 
   @doc """
   Plug for routes that require the user to be authenticated and confirmed.

@@ -2,6 +2,7 @@ defmodule PingcrmWeb.Auth.ConfirmationsController do
   use PingcrmWeb, :controller
   alias Pingcrm.Accounts
   alias Pingcrm.Accounts.Auth
+  alias PingcrmWeb.UserAuth
 
   def confirmation_sent(conn, _params) do
     email = conn.params["email"]
@@ -29,7 +30,7 @@ defmodule PingcrmWeb.Auth.ConfirmationsController do
       "If your email is in our system and it has not been confirmed yet, " <>
         "you will receive an email with instructions shortly."
     )
-    |> redirect(to: ~p"/")
+    |> redirect(to: ~p"/login")
   end
 
   def edit(conn, %{"token" => token}) do
@@ -40,10 +41,10 @@ defmodule PingcrmWeb.Auth.ConfirmationsController do
 
   def confirm_user(conn, %{"token" => token}) do
     case Auth.confirm_user(token) do
-      {:ok, _} ->
+      {:ok, user} ->
         conn
         |> put_flash(:info, "User confirmed successfully.")
-        |> redirect(to: ~p"/")
+        |> UserAuth.log_in_user(user, %{"remember_me" => "false"})
 
       :error ->
         # If there is a current user and the account was already confirmed,
