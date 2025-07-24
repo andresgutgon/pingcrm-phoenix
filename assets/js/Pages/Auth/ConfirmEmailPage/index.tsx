@@ -1,10 +1,10 @@
 import { FormEvent } from 'react'
 import { Head, useForm, usePage } from '@inertiajs/react'
 import Logo from '@/components/Logo'
-import LoadingButton from '@/components/Button/LoadingButton'
 import FlashedMessages from '@/components/Messages/FlashMessages'
 import { confirmEmailChange } from '@/actions/Auth/ConfirmEmailController'
 import { PageProps } from '@/types'
+import { Button } from '@/components/ui/atoms/Button'
 
 export default function ConfirmEmailPage({ token }: { token: string }) {
   const {
@@ -43,13 +43,9 @@ export default function ConfirmEmailPage({ token }: { token: string }) {
             <div className='w-24 mx-auto mt-6 mb-10 border-b-2' />
           </div>
           <div className='flex flex-col gap-y-2 items-center justify-end px-10 py-4 bg-gray-100'>
-            <LoadingButton
-              type='submit'
-              loading={form.processing}
-              className='btn-indigo'
-            >
+            <Button type='submit' loading={form.processing}>
               Confirm
-            </LoadingButton>
+            </Button>
           </div>
         </form>
       </div>

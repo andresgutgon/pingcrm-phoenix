@@ -2,7 +2,6 @@ import { FormEvent } from 'react'
 import { Head, Link } from '@inertiajs/react'
 import { useForm } from '@inertiajs/react'
 import Logo from '@/components/Logo'
-import LoadingButton from '@/components/Button/LoadingButton'
 import TextInput from '@/components/Form/TextInput'
 import FieldGroup from '@/components/Form/FieldGroup'
 import { CheckboxInput } from '@/components/Form/CheckboxInput'
@@ -10,6 +9,7 @@ import FlashedMessages from '@/components/Messages/FlashMessages'
 import { login } from '@/actions/Auth/SessionsController'
 import { signup } from '@/actions/Auth/SignupsController'
 import { forgotPassword } from '@/actions/Auth/ResetPasswordController'
+import { Button } from '@/components/ui/atoms/Button'
 
 export default function LoginPage() {
   const { data, setData, errors, post, processing } = useForm<{
@@ -83,13 +83,9 @@ export default function LoginPage() {
             </div>
           </div>
           <div className='flex flex-col gap-y-2 items-center justify-end px-10 py-4 bg-gray-100'>
-            <LoadingButton
-              type='submit'
-              loading={processing}
-              className='btn-indigo'
-            >
+            <Button type='submit' loading={processing}>
               Login
-            </LoadingButton>
+            </Button>
             <div className='px-8 pb-6'>
               <Link
                 href={signup.get().url}

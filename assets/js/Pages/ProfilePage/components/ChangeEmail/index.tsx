@@ -1,11 +1,11 @@
 import { FormEvent } from 'react'
 import { useForm, usePage } from '@inertiajs/react'
-import LoadingButton from '@/components/Button/LoadingButton'
+import { Alert } from '@/components/ui/atoms/Alert'
+import { Button } from '@/components/ui/atoms/Button'
 import TextInput from '@/components/Form/TextInput'
 import FieldGroup from '@/components/Form/FieldGroup'
 import { updateEmail } from '@/actions/ProfileController'
 import { PageProps } from '@/types'
-import Alert from '@/components/Alert'
 
 export default function ChangeEmail() {
   const {
@@ -31,7 +31,7 @@ export default function ChangeEmail() {
       {user.email_changed ? (
         <Alert
           variant='warning'
-          message={`Pending email change to ${user.email_changed}.`}
+          title={`Pending email change to ${user.email_changed}.`}
         />
       ) : null}
       <div className='grid gap-6'>
@@ -51,13 +51,9 @@ export default function ChangeEmail() {
           />
         </FieldGroup>
       </div>
-      <LoadingButton
-        type='submit'
-        loading={form.processing}
-        className='w-full btn-indigo'
-      >
+      <Button type='submit' size='sm' loading={form.processing}>
         Change email
-      </LoadingButton>
+      </Button>
     </form>
   )
 }

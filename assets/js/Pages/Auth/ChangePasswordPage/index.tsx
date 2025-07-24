@@ -1,13 +1,13 @@
 import { FormEvent } from 'react'
 import { Head, Link, useForm } from '@inertiajs/react'
 import Logo from '@/components/Logo'
-import LoadingButton from '@/components/Button/LoadingButton'
 import TextInput from '@/components/Form/TextInput'
 import FieldGroup from '@/components/Form/FieldGroup'
 import FlashedMessages from '@/components/Messages/FlashMessages'
 import { update } from '@/actions/Auth/ResetPasswordController'
 import { signup } from '@/actions/Auth/SignupsController'
 import { login } from '@/actions/Auth/SessionsController'
+import { Button } from '@/components/ui/atoms/Button'
 
 export default function ChangePasswordPage({ token }: { token: string }) {
   const form = useForm<{
@@ -73,13 +73,13 @@ export default function ChangePasswordPage({ token }: { token: string }) {
             </div>
           </div>
           <div className='flex flex-col gap-y-2 items-center justify-end px-10 py-4 bg-gray-100'>
-            <LoadingButton
+            <Button
               type='submit'
               loading={form.processing}
               className='w-full btn-indigo'
             >
               Reset Password
-            </LoadingButton>
+            </Button>
             <div className='px-8 pb-6'>
               <Link
                 href={signup.get().url}

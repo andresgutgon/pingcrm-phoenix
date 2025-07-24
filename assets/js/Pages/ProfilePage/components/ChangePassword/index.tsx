@@ -1,6 +1,6 @@
 import { FormEvent } from 'react'
 import { useForm } from '@inertiajs/react'
-import LoadingButton from '@/components/Button/LoadingButton'
+import { Button } from '@/components/ui/atoms/Button'
 import TextInput from '@/components/Form/TextInput'
 import FieldGroup from '@/components/Form/FieldGroup'
 import { updatePassword } from '@/actions/ProfileController'
@@ -80,13 +80,12 @@ export default function ChangePassword() {
           />
         </FieldGroup>
       </div>
-      <LoadingButton
+      <Button
         type='submit'
         loading={form.processing}
-        className='w-full btn-indigo'
       >
         Change Password
-      </LoadingButton>
+      </Button>
     </form>
   )
 }
