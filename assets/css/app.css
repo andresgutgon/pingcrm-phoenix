@@ -1,4 +1,5 @@
 @import 'tailwindcss';
+/* DEPRECATED: Remove these button styles */
 @import './components/buttons.css';
 
 @custom-variant dark (&:is(.dark *));

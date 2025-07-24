@@ -25,6 +25,7 @@
   "type": "module",
   "dependencies": {
     "@inertiajs/react": "^2.0.14",
+    "@radix-ui/react-slot": "^1.2.3",
     "axios": "^1.8.2",
     "class-variance-authority": "^0.7.1",
     "classnames": "^2.5.1",
