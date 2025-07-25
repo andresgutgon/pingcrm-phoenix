@@ -35,18 +35,7 @@ export function Alert({
   return (
     <AlertRoot data-test={dataTestRef} variant={variant}>
       <Icon name={iconName} className='text-current' />
-      <AlertTitle>
-        {title}
-        {onClose ? (
-          <button
-            type='button'
-            className='text-muted-foreground hover:text-foreground'
-            onClick={onClose}
-          >
-            <Icon name='x' size='small' />
-          </button>
-        ) : null}
-      </AlertTitle>
+      <AlertTitle onClose={onClose}>{title}</AlertTitle>
       {description ? <AlertDescription>{description}</AlertDescription> : null}
     </AlertRoot>
   )

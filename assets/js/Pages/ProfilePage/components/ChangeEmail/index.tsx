@@ -24,36 +24,38 @@ export default function ChangeEmail() {
   }
 
   return (
-    <form
-      onSubmit={handleSubmit}
-      className='rounded-lg border border-gray-200 p-2 space-y-3'
-    >
+    <div className='flex flex-col gap-y-4'>
       {user.email_changed ? (
         <Alert
           variant='warning'
           title={`Pending email change to ${user.email_changed}.`}
         />
       ) : null}
-      <div className='grid gap-6'>
-        <FieldGroup
-          label='Email'
-          name='email'
-          error={form.errors.email_changed}
-          description='Changing your email will require you to confirm the new email address. Please check your inbox for a confirmation link after submitting the form.'
-        >
-          <TextInput
+      <form
+        onSubmit={handleSubmit}
+        className='rounded-lg border border-gray-200 p-2 space-y-3'
+      >
+        <div className='grid gap-6'>
+          <FieldGroup
+            label='Email'
             name='email'
-            type='email'
-            placeholder='Your email address'
-            value={form.data.email_changed}
             error={form.errors.email_changed}
-            onChange={(e) => form.setData('email_changed', e.target.value)}
-          />
-        </FieldGroup>
-      </div>
-      <Button type='submit' size='sm' loading={form.processing}>
-        Change email
-      </Button>
-    </form>
+            description='Changing your email will require you to confirm the new email address. Please check your inbox for a confirmation link after submitting the form.'
+          >
+            <TextInput
+              name='email'
+              type='email'
+              placeholder='Your email address'
+              value={form.data.email_changed}
+              error={form.errors.email_changed}
+              onChange={(e) => form.setData('email_changed', e.target.value)}
+            />
+          </FieldGroup>
+        </div>
+        <Button type='submit' size='sm' loading={form.processing}>
+          Change email
+        </Button>
+      </form>
+    </div>
   )
 }
