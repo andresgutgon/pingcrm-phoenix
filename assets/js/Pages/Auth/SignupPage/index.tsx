@@ -142,11 +142,7 @@ export default function SignupPage() {
             </div>
           </div>
           <div className='flex items-center justify-end px-10 py-4 bg-gray-100'>
-            <Button
-              type='submit'
-              loading={processing}
-              className='btn-indigo'
-            >
+            <Button type='submit' loading={processing} className='btn-indigo'>
               Create Account
             </Button>
           </div>
