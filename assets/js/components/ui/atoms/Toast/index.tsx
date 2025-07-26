@@ -1,22 +1,14 @@
-import { useTheme } from 'next-themes'
-import { CSSProperties } from 'react'
-import { Toaster as Sonner, ToasterProps } from 'sonner'
+import { toast as sonnerToast } from 'sonner'
+import { type ToastProps, Toast } from './Primitives'
 
-export function Toaster({ ...props }: ToasterProps) {
-  const { theme = 'system' } = useTheme()
-
-  return (
-    <Sonner
-      theme={theme as ToasterProps['theme']}
-      className='toaster group'
-      style={
-        {
-          '--normal-bg': 'var(--popover)',
-          '--normal-text': 'var(--popover-foreground)',
-          '--normal-border': 'var(--border)',
-        } as CSSProperties
-      }
-      {...props}
+export function showToast(toast: Omit<ToastProps, 'id'>) {
+  return sonnerToast.custom((id) => (
+    <Toast
+      id={id}
+      title={toast.title}
+      description={toast.description}
+      button={toast.button}
     />
-  )
+  ))
 }
+

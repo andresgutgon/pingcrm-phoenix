@@ -1,17 +1,27 @@
+import { ReactNode } from 'react'
 import { Head } from '@inertiajs/react'
+import { ThemeProvider } from 'next-themes'
 import MainMenu from '@/components/Menu/MainMenu'
-import FlashMessages from '@/components/Messages/FlashMessages'
 import { TopHeader } from '@/components/Header/TopHeader'
 import { SubHeader } from '@/components/Header/SubHeader'
+import { Button } from '@/components/ui/atoms/Button'
+import { showToast } from '@/components/ui/atoms/Toast'
+import { Toaster } from '@/components/ui/atoms/Toast/Primitives'
 
-interface MainLayoutProps {
+export default function MainLayout({
+  title,
+  children,
+}: {
   title?: string
-  children: React.ReactNode
-}
-
-export default function MainLayout({ title, children }: MainLayoutProps) {
+  children: ReactNode
+}) {
   return (
-    <>
+    <ThemeProvider
+      attribute='class'
+      defaultTheme='system'
+      enableSystem
+      disableTransitionOnChange
+    >
       <Head title={title} />
       <div className='flex flex-col'>
         <div className='flex flex-col h-screen'>
@@ -31,12 +41,29 @@ export default function MainLayout({ title, children }: MainLayoutProps) {
               className='w-full px-4 py-8 overflow-hidden overflow-y-auto md:p-12 flex flex-col gap-y-8'
               scroll-region='true'
             >
+              <Button
+                onClick={() => {
+                  showToast({
+                    title: 'This is a headless toast',
+                    description:
+                      'You have full control of styles and jsx, while still having the animations.',
+                    button: {
+                      label: 'Action',
+                      onClick: () => {
+                        console.log('CLICK on Toast Action')
+                      },
+                    },
+                  })
+                }}
+              >
+                Render toast
+              </Button>
               {children}
-              <FlashMessages />
+              <Toaster position='bottom-right' />
             </div>
           </div>
         </div>
       </div>
-    </>
+    </ThemeProvider>
   )
 }

@@ -1,3 +1,5 @@
+import { usePage } from '@inertiajs/react'
+
 export interface Organization {
   id: number
   name: string
@@ -48,6 +50,7 @@ export interface User {
   default_account_id?: number
 }
 
+type Errors = ReturnType<typeof usePage>['props']['errors']
 export type ConcretePageProps = Record<string, unknown>
 export type PageProps<T extends ConcretePageProps = ConcretePageProps> = T & {
   ssr?: boolean
@@ -58,6 +61,7 @@ export type PageProps<T extends ConcretePageProps = ConcretePageProps> = T & {
     accounts: Account[]
     role: 'admin' | 'member'
   }
+  errors: Errors
   flash: {
     success: string | null
     error: string | null

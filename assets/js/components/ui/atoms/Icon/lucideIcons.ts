@@ -1,6 +1,9 @@
 export type { LucideProps } from 'lucide-react'
 export const LUCIDE_IMPORTS = {
   x: () => import('lucide-react').then((m) => ({ default: m.XIcon })),
+  info: () => import('lucide-react').then((m) => ({ default: m.InfoIcon })),
+  xCircle: () =>
+    import('lucide-react').then((m) => ({ default: m.XCircleIcon })),
   checkCircle: () =>
     import('lucide-react').then((m) => ({ default: m.CheckCircle2Icon })),
   alertCircle: () =>

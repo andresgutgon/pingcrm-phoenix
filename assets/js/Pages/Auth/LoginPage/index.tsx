@@ -5,7 +5,6 @@ import Logo from '@/components/Logo'
 import TextInput from '@/components/Form/TextInput'
 import FieldGroup from '@/components/Form/FieldGroup'
 import { CheckboxInput } from '@/components/Form/CheckboxInput'
-import FlashedMessages from '@/components/Messages/FlashMessages'
 import { login } from '@/actions/Auth/SessionsController'
 import { signup } from '@/actions/Auth/SignupsController'
 import { forgotPassword } from '@/actions/Auth/ResetPasswordController'
@@ -37,7 +36,6 @@ export default function LoginPage() {
           className='block w-full max-w-xs mx-auto text-white fill-current'
           height={50}
         />
-        <FlashedMessages />
         <form
           onSubmit={handleSubmit}
           className='overflow-hidden bg-white rounded-lg shadow-xl '
