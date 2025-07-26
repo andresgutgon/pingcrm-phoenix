@@ -1,11 +1,10 @@
 import { FormEvent } from 'react'
 import { useForm, usePage } from '@inertiajs/react'
-import LoadingButton from '@/components/Button/LoadingButton'
 import TextInput from '@/components/Form/TextInput'
 import FieldGroup from '@/components/Form/FieldGroup'
 import { updateProfile } from '@/actions/ProfileController'
+import { Button } from '@/components/ui/atoms/Button'
 import { PageProps } from '@/types'
-import Alert from '@/components/Alert'
 
 export default function EditProfile() {
   const {
@@ -28,12 +27,6 @@ export default function EditProfile() {
       onSubmit={handleSubmit}
       className='rounded-lg border border-gray-200 p-2 space-y-3'
     >
-      {user.email_changed ? (
-        <Alert
-          variant='warning'
-          message={`Pending email change to ${user.email_changed}.`}
-        />
-      ) : null}
       <div className='grid gap-6'>
         <FieldGroup label='Name' name='name' error={form.errors.first_name}>
           <TextInput
@@ -60,13 +53,9 @@ export default function EditProfile() {
           />
         </FieldGroup>
       </div>
-      <LoadingButton
-        type='submit'
-        loading={form.processing}
-        className='w-full btn-indigo'
-      >
+      <Button type='submit' loading={form.processing}>
         Update profile
-      </LoadingButton>
+      </Button>
     </form>
   )
 }

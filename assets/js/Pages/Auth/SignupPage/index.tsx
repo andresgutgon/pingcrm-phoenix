@@ -2,11 +2,11 @@ import { FormEvent } from 'react'
 import { Head } from '@inertiajs/react'
 import { useForm } from '@inertiajs/react'
 import Logo from '@/components/Logo'
-import LoadingButton from '@/components/Button/LoadingButton'
 import TextInput from '@/components/Form/TextInput'
 import FieldGroup from '@/components/Form/FieldGroup'
 import FlashedMessages from '@/components/Messages/FlashMessages'
 import { signupCreate } from '@/actions/Auth/SignupsController'
+import { Button } from '@/components/ui/atoms/Button'
 
 type SignupFormData = {
   account: {
@@ -142,13 +142,9 @@ export default function SignupPage() {
             </div>
           </div>
           <div className='flex items-center justify-end px-10 py-4 bg-gray-100'>
-            <LoadingButton
-              type='submit'
-              loading={processing}
-              className='btn-indigo'
-            >
+            <Button type='submit' loading={processing} className='btn-indigo'>
               Create Account
-            </LoadingButton>
+            </Button>
           </div>
         </form>
       </div>

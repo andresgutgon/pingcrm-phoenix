@@ -1,11 +1,11 @@
 import { FormEvent } from 'react'
 import { useForm, usePage } from '@inertiajs/react'
-import LoadingButton from '@/components/Button/LoadingButton'
+import { Alert } from '@/components/ui/atoms/Alert'
+import { Button } from '@/components/ui/atoms/Button'
 import TextInput from '@/components/Form/TextInput'
 import FieldGroup from '@/components/Form/FieldGroup'
 import { updateEmail } from '@/actions/ProfileController'
 import { PageProps } from '@/types'
-import Alert from '@/components/Alert'
 
 export default function ChangeEmail() {
   const {
@@ -24,40 +24,38 @@ export default function ChangeEmail() {
   }
 
   return (
-    <form
-      onSubmit={handleSubmit}
-      className='rounded-lg border border-gray-200 p-2 space-y-3'
-    >
+    <div className='flex flex-col gap-y-4'>
       {user.email_changed ? (
         <Alert
           variant='warning'
-          message={`Pending email change to ${user.email_changed}.`}
+          title={`Pending email change to ${user.email_changed}.`}
         />
       ) : null}
-      <div className='grid gap-6'>
-        <FieldGroup
-          label='Email'
-          name='email'
-          error={form.errors.email_changed}
-          description='Changing your email will require you to confirm the new email address. Please check your inbox for a confirmation link after submitting the form.'
-        >
-          <TextInput
-            name='email'
-            type='email'
-            placeholder='Your email address'
-            value={form.data.email_changed}
-            error={form.errors.email_changed}
-            onChange={(e) => form.setData('email_changed', e.target.value)}
-          />
-        </FieldGroup>
-      </div>
-      <LoadingButton
-        type='submit'
-        loading={form.processing}
-        className='w-full btn-indigo'
+      <form
+        onSubmit={handleSubmit}
+        className='rounded-lg border border-gray-200 p-2 space-y-3'
       >
-        Change email
-      </LoadingButton>
-    </form>
+        <div className='grid gap-6'>
+          <FieldGroup
+            label='Email'
+            name='email'
+            error={form.errors.email_changed}
+            description='Changing your email will require you to confirm the new email address. Please check your inbox for a confirmation link after submitting the form.'
+          >
+            <TextInput
+              name='email'
+              type='email'
+              placeholder='Your email address'
+              value={form.data.email_changed}
+              error={form.errors.email_changed}
+              onChange={(e) => form.setData('email_changed', e.target.value)}
+            />
+          </FieldGroup>
+        </div>
+        <Button type='submit' size='sm' loading={form.processing}>
+          Change email
+        </Button>
+      </form>
+    </div>
   )
 }
