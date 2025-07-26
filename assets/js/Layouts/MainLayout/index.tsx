@@ -31,8 +31,8 @@ export default function MainLayout({ title, children }: MainLayoutProps) {
               className='w-full px-4 py-8 overflow-hidden overflow-y-auto md:p-12 flex flex-col gap-y-8'
               scroll-region='true'
             >
-              <FlashMessages />
               {children}
+              <FlashMessages />
             </div>
           </div>
         </div>

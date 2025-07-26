@@ -2,6 +2,8 @@ import { useState, useEffect, useMemo } from 'react'
 import { usePage } from '@inertiajs/react'
 import { PageProps } from '@/types'
 import { Alert, AlertVariant } from '@/components/ui/atoms/Alert'
+import { Toaster } from '@/components/ui/atoms/Toast'
+import { Icon } from '@/components/ui/atoms/Icon'
 
 type Errors = ReturnType<typeof usePage>['props']['errors']
 
@@ -44,12 +46,5 @@ export default function FlashedMessages() {
 
   if (!alert || !visible) return null
 
-  return (
-    <Alert
-      dataTestRef='flash-message'
-      variant={alert.variant}
-      title={alert.message}
-      onClose={() => setVisible(false)}
-    />
-  )
+  return <Toaster position='bottom-right' />
 }
