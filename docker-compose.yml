@@ -1,12 +1,66 @@
 services:
+  traefik:
+    image: traefik:v3.0
+    command:
+      - --entrypoints.web.address=:80
+      - --entrypoints.websecure.address=:443
+      - --entrypoints.web.http.redirections.entrypoint.to=websecure
+      - --entrypoints.web.http.redirections.entrypoint.scheme=https
+      - --api.insecure=true
+      - --providers.docker=true
+      - --providers.file.filename=/etc/traefik/dynamic.yml
+      - --providers.file.watch=true
+    ports:
+      - "80:80"
+      - "443:443"
+      - "8080:8080"
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - ./docker/dev-certificates:/certs
+      - ./docker/dev-certificates/dynamic.yml:/etc/traefik/dynamic.yml
+    env_file:
+      - .env
+    networks:
+      - pingcrm_network
+
   web:
     build:
       context: .
       dockerfile: docker/Dockerfile
       target: dev
     ports:
-      - "4004:4004"
+      - "${PORT}"
       - "5173:5173"
+    expose:
+      - "4004" # Internal port for Traefik
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.services.web.loadbalancer.server.port=4004"
+      - "traefik.http.services.vite.loadbalancer.server.port=5173"
+
+      # Phoenix site: pingcrm.test
+      - "traefik.http.routers.site.rule=Host(`${MAIN_DOMAIN}`)"
+      - "traefik.http.routers.site.entrypoints=websecure"
+      - "traefik.http.routers.site.service=web"
+      - "traefik.http.routers.site.tls=true"
+
+      # Phoenix app: app.pingcrm.test
+      - "traefik.http.routers.app.rule=Host(`${APP_DOMAIN}`)"
+      - "traefik.http.routers.app.entrypoints=websecure"
+      - "traefik.http.routers.app.service=web"
+      - "traefik.http.routers.app.tls=true"
+
+      # Vite service
+      - "traefik.http.services.vite.loadbalancer.server.port=5173"
+      - "traefik.http.services.vite.loadbalancer.server.scheme=http"
+      - "traefik.http.services.vite.loadbalancer.passhostheader=true"
+
+      # Vite router
+      - "traefik.http.routers.vite.rule=Host(`vite.${MAIN_DOMAIN}`)"
+      - "traefik.http.routers.vite.entrypoints=websecure"
+      - "traefik.http.routers.vite.service=vite"
+      - "traefik.http.routers.vite.tls=true"
+
     volumes:
       - .:/pingcrm
       - ./deps:/pingcrm/deps
@@ -16,21 +70,14 @@ services:
     depends_on:
       - db
       - mailpit
+    env_file:
+      - .env
     environment:
+      - MIX_ENV=dev
       - CHOKIDAR_USEPOLLING=true # Fix for file watching in Docker
       - MAILPIT_SMTP_HOST=pingcrm_mailpit
       - MAILPIT_SMTP_PORT=1025
-      - PORT=4004
       - ERL_AFLAGS=-kernel shell_history enabled -kernel shell_history_path '"/root/.iex_history"'
-
-
-    # require IEx
-    # In the line you want to stop:
-    # IEx.pry()
-    #
-    # docker-compose run --service-ports web
-    # Uncomment this line:
-    # command: iex -S mix phx.server
 
     stdin_open: true
     tty: true
@@ -50,7 +97,6 @@ services:
     networks:
       - pingcrm_network
 
-  # Trap emails on development
   mailpit:
     image: axllent/mailpit
     container_name: pingcrm_mailpit
@@ -59,8 +105,8 @@ services:
       - 8025:8025
     networks:
       - pingcrm_network
+
 volumes:
-  # Having this volume keep inside node_modules independent of the host
   node_modules_container:
 
 networks:

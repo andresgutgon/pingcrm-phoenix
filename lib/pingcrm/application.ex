@@ -18,6 +18,7 @@ defmodule Pingcrm.Application do
       {Vitex,
        dev_mode: dev_mode or dev_test_mode,
        endpoint: PingcrmWeb.Endpoint,
+       vite_host: "https://#{System.get_env("VITE_HOST")}",
        js_framework: :react,
        manifest_name: "vite_manifest"},
       {Inertia.SSR, Application.fetch_env!(:pingcrm, Inertia.SSR)}

@@ -1,5 +1,14 @@
 import Config
 
+main_host = System.get_env("MAIN_DOMAIN")
+app_host = System.get_env("APP_DOMAIN")
+
+config :pingcrm, PingcrmWeb,
+  main_host: main_host,
+  app_host: app_host,
+  site_url: "http://#{main_host}",
+  app_url: "http://#{app_host}"
+
 config :pingcrm, :scopes,
   user: [
     default: true,

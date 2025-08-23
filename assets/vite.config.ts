@@ -9,6 +9,29 @@ const input: Record<string, string> = isSSR
   ? { ssr: './js/ssr.tsx' }
   : { app: './js/app.tsx' }
 
+/**
+ * Vite runs under Traefik in development inside Docker.
+ */
+function buildDevServerUrl(isDev: boolean) {
+  if (!isDev) return undefined
+
+  return {
+    host: true, // listen on all interfaces inside Docker
+    port: 5173,
+    hmr: {
+      protocol: 'wss',
+      host: process.env.VITE_HOST,
+    },
+    cors: {
+      origin: [
+        `https://${process.env.MAIN_DOMAIN}`,
+        `https://${process.env.APP_DOMAIN}`,
+      ],
+      credentials: true,
+    },
+  }
+}
+
 export default defineConfig(({ mode }: ConfigEnv) => {
   const isProd = mode === 'production'
   const isDev = mode === 'development'
@@ -25,6 +48,7 @@ export default defineConfig(({ mode }: ConfigEnv) => {
         '@': resolve(__dirname, './js'),
       },
     },
+    server: buildDevServerUrl(isDev),
     build: {
       target: 'esnext',
       sourcemap: isDev && !isSSR,

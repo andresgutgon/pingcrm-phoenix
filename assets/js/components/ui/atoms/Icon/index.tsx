@@ -23,7 +23,7 @@ export type IconProps = LucideProps & {
   color?: TextColor
   darkColor?: DarkTextColor
   opacity?: Opacity
-  size?: 'xsmall' | 'small' | 'normal'
+  size?: 'xsmall' | 'small' | 'normal' | 'large' | 'xlarge'
 }
 
 const getSize = (size: IconProps['size']) =>
@@ -31,6 +31,8 @@ const getSize = (size: IconProps['size']) =>
     'w-2 h-2': size === 'xsmall',
     'w-4 h-4': size === 'small',
     'w-6 h-6': size === 'normal',
+    'w-8 h-8': size === 'large',
+    'w-10 h-10': size === 'xlarge',
   })
 
 const lazyIcons: Partial<

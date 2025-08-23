@@ -1,5 +1,6 @@
 defmodule PingcrmWeb.Endpoint do
   use Phoenix.Endpoint, otp_app: :pingcrm
+  alias Pingcrm.Storage.Config, as: Storage
 
   # The session will be stored in the cookie and signed,
   # this means its contents can be read but not tampered with.
@@ -20,6 +21,13 @@ defmodule PingcrmWeb.Endpoint do
     from: :pingcrm,
     gzip: false,
     only: PingcrmWeb.static_paths()
+
+  if Storage.disk?() do
+    plug Plug.Static,
+      at: Storage.storage_path(),
+      from: {Storage, :storage_root, []},
+      gzip: false
+  end
 
   # Code reloading can be explicitly enabled under the
   # :code_reloader configuration of your endpoint.

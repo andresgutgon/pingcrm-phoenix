@@ -226,7 +226,7 @@ defmodule PingcrmWeb.UserAuth do
           user: UserPresenter.serialize(user),
           account: account,
           role: role,
-          accounts: accounts
+          accounts: accounts,
         })
 
       user && is_nil(user.confirmed_at) ->

@@ -45,6 +45,7 @@ export interface Account {
 
 export interface User {
   id: number
+  uuid: string
   name: string
   first_name: string
   last_name: string
@@ -63,6 +64,10 @@ export type ConcretePageProps = Record<string, unknown>
 export type PageProps<T extends ConcretePageProps = ConcretePageProps> = T & {
   ssr?: boolean
   currentPath: string
+  main_host: string
+  app_host: string
+  site_url: string
+  app_url: string
   auth: {
     user: User
     account: Account
@@ -77,3 +82,17 @@ export type PageProps<T extends ConcretePageProps = ConcretePageProps> = T & {
     warning: string | null
   }
 }
+
+/**
+ * Uploaders defined on the Elixir backend
+ * This has to be a module inside lib/pingcrm/uploaders like
+ * so:
+ *   defmodule PingCRM.Uploaders.Avatar do
+ *     # ...
+ *   end
+ *
+ *  This string will be conerted from 'avatar' to 'Avatar' or if
+ *  it has underscores lie `company_logo` to `CompanyLogo`
+ *  If it does not exits an error will be thrown
+ */
+export type AvailableUploaders = 'avatar'
