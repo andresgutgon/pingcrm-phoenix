@@ -8,7 +8,6 @@ defmodule Pingcrm.Config.Uploads do
   def configure do
     env = Application.get_env(:pingcrm, :env)
     prod_mode = Application.get_env(:pingcrm, :prod_mode)
-    dev_mode = Application.get_env(:pingcrm, :dev_mode)
     test_dev_mode = Application.get_env(:pingcrm, :test_dev_mode)
 
     endpoint_url = Application.get_env(:pingcrm, PingcrmWeb.Endpoint)[:url]
@@ -32,13 +31,13 @@ defmodule Pingcrm.Config.Uploads do
           ]
         ]
 
-      dev_mode or test_dev_mode or true ->
+      true ->
         [
           waffle: [
             storage: Waffle.Storage.Local,
             asset_host:
               if test_dev_mode and System.get_env("CI") == "true" do
-                "http://example.test"
+                "http://assets.example.test"
               else
                 assets_host
               end

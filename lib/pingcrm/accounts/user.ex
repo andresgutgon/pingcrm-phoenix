@@ -6,6 +6,7 @@ defmodule Pingcrm.Accounts.User do
 
   use Ecto.Schema
   alias Pingcrm.Accounts.{Account, Membership}
+  # alias Pingcrm.AvatarUploader
   alias Pingcrm.Repo
 
   schema "users" do
