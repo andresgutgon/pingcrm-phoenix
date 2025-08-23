@@ -32,7 +32,6 @@ export default function EditProfile() {
   return (
     <Form onSubmit={handleSubmit}>
       <Input
-        autoFocus
         name='name'
         label='Your name'
         type='text'
