@@ -4,8 +4,7 @@ import { StrictMode } from 'react'
 import { createRoot, hydrateRoot } from 'react-dom/client'
 import axios from 'axios'
 import { createInertiaApp } from '@inertiajs/react'
-
-import { resolvePage } from './utils/pageHelpers'
+import { resolvePage } from '@/lib/pageHelpers'
 
 axios.defaults.xsrfHeaderName = 'x-csrf-token'
 

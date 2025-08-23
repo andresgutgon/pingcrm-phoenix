@@ -16,6 +16,10 @@ defmodule Pingcrm.Accounts.Auth do
       Repo.transaction(fn ->
         {:ok, account} = Repo.insert(Account.changeset(%Account{}, account_attrs))
 
+        user_attrs =
+          user_attrs
+          |> Map.put("default_account_id", account.id)
+
         {:ok, user} =
           Repo.insert(
             User.registration_changeset(%User{}, user_attrs,

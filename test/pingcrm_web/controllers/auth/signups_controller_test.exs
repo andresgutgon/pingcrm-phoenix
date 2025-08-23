@@ -16,7 +16,7 @@ defmodule PingcrmWeb.Auth.SignupsControllerTest do
     test "redirects if already logged in", %{conn: conn} do
       conn = conn |> log_in_user(account_owner().user) |> get(~p"/signup")
 
-      assert redirected_to(conn) == ~p"/"
+      assert redirected_to(conn) == ~p"/dashboard"
     end
   end
 
@@ -32,7 +32,7 @@ defmodule PingcrmWeb.Auth.SignupsControllerTest do
 
       conn = get(recycle(conn), ~p"/confirmation-sent?email=#{email}")
       response = html_response(conn, 200)
-      assert response =~ "Email sent to #{email}"
+      assert response =~ "We sent you a confirmation email to <strong>#{email}</strong>"
     end
 
     test "sends confirmation email", %{conn: conn} do
@@ -78,6 +78,22 @@ defmodule PingcrmWeb.Auth.SignupsControllerTest do
       membership = hd(user.memberships)
       assert membership.role == "admin"
       assert membership.account_id == hd(user.accounts).id
+    end
+
+    test "Set account as default account", %{conn: conn} do
+      email = unique_user_email()
+      params = valid_user_attributes(%{user: %{email: email}})
+      post(conn, ~p"/signup", params)
+
+      user =
+        Repo.one!(
+          from u in User,
+            where: u.email == ^email and is_nil(u.confirmed_at)
+        )
+        |> Repo.preload([:accounts, :memberships])
+
+      account = hd(user.accounts)
+      assert user.default_account_id == account.id
     end
 
     test "data is valid or display errors", %{conn: conn} do

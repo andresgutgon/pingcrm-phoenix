@@ -40,7 +40,7 @@ defmodule PingcrmWeb.Auth.ConfirmationsControllerTest do
     test "sends confirmation email for valid unconfirmed user", %{conn: conn, user: user} do
       conn = post(conn, ~p"/confirm", %{"email" => user.email})
 
-      assert redirected_to(conn) == ~p"/"
+      assert redirected_to(conn) == ~p"/login"
       assert Flash.get(conn.assigns.flash, :info) =~ "If your email is in our system"
 
       user_token = Repo.get_by(UserToken, user_id: user.id, context: "confirm")
@@ -59,7 +59,7 @@ defmodule PingcrmWeb.Auth.ConfirmationsControllerTest do
       Repo.update!(User.confirm_changeset(user))
 
       conn = post(conn, ~p"/confirm", %{"email" => user.email})
-      assert redirected_to(conn) == ~p"/"
+      assert redirected_to(conn) == ~p"/login"
 
       assert Flash.get(conn.assigns.flash, :info) =~ "If your email is in our system"
       refute Repo.get_by(UserToken, user_id: user.id, context: "confirm")
@@ -69,7 +69,7 @@ defmodule PingcrmWeb.Auth.ConfirmationsControllerTest do
 
     test "does not send confirmation email for non-existent email", %{conn: conn} do
       conn = post(conn, ~p"/confirm", %{"email" => "nonexistent@example.com"})
-      assert redirected_to(conn) == ~p"/"
+      assert redirected_to(conn) == ~p"/login"
 
       assert Flash.get(conn.assigns.flash, :info) =~ "If your email is in our system"
       assert Repo.all(UserToken) == []
@@ -121,7 +121,7 @@ defmodule PingcrmWeb.Auth.ConfirmationsControllerTest do
 
       conn = post(conn, ~p"/confirm/#{token}")
 
-      assert redirected_to(conn) == ~p"/"
+      assert redirected_to(conn) == ~p"/dashboard"
       assert Flash.get(conn.assigns.flash, :info) =~ "User confirmed successfully"
 
       confirmed_user = Accounts.get_user!(user.id)
@@ -129,7 +129,8 @@ defmodule PingcrmWeb.Auth.ConfirmationsControllerTest do
 
       refute Repo.get_by(UserToken, user_id: user.id, context: "confirm")
 
-      refute get_session(conn, :user_token)
+      # After confirmation, user should be logged in
+      assert get_session(conn, :user_token)
     end
 
     test "handles expired/invalid token gracefully", %{conn: conn} do
@@ -217,7 +218,7 @@ defmodule PingcrmWeb.Auth.ConfirmationsControllerTest do
 
       # But the hashed version should verify correctly
       conn = post(conn, ~p"/confirm/#{token}")
-      assert redirected_to(conn) == ~p"/"
+      assert redirected_to(conn) == ~p"/dashboard"
       assert Flash.get(conn.assigns.flash, :info) =~ "User confirmed successfully"
     end
 

@@ -35,25 +35,47 @@ defmodule PingcrmWeb.Router do
   end
 
   scope "/", PingcrmWeb do
-    pipe_through [:browser, :require_confirmed_user]
+    pipe_through [:browser]
+    get "/", HomeController, :show, as: :public_home
+  end
 
-    get "/", DashboardController, :index, as: :home
-    get "/profile", ProfileController, :show, as: :my_profile
-    patch "/profile", ProfileController, :update, as: :update_profile
-    patch "/profile/password", ProfileController, :update_password
-    patch "/profile/email", ProfileController, :update_email
-    post "/profile/change_account/:id", ProfileController, :change_account
-    patch "/profile/set_default_account/:account_id", ProfileController, :set_default_account
+  scope "/", PingcrmWeb do
+    pipe_through [:browser, :require_confirmed_user]
 
     get "/confirm-email/:token", Auth.ConfirmEmailController, :edit
     patch "/confirm-email/:token", Auth.ConfirmEmailController, :update, as: :confirm_email_change
 
-    # TODO: Implement for real
-    get "/organizations", DashboardController, :index, as: :organizations
-    get "/contacts", DashboardController, :index, as: :contacts
-    get "/reports", DashboardController, :index, as: :reports
-
     delete "/logout", Auth.SessionsController, :delete
+  end
+
+  scope "/profile", PingcrmWeb.Profile do
+    pipe_through [:browser, :require_confirmed_user]
+
+    get "/", ProfileController, :show, as: :my_profile
+    patch "/", ProfileController, :update, as: :update_profile
+    patch "/password", ProfileController, :update_password
+    patch "/email", ProfileController, :update_email
+    post "/change_account/:id", ProfileController, :change_account
+    patch "/set_default_account/:account_id", ProfileController, :set_default_account
+  end
+
+  scope "/dashboard", PingcrmWeb.Dashboard do
+    pipe_through [:browser, :require_confirmed_user]
+
+    get "/", DashboardIndexController, :index, as: :dashboard
+
+    # TODO: Implement for real.
+    get "/organizations", DashboardIndexController, :index, as: :organizations
+    get "/contacts", DashboardIndexController, :index, as: :contacts
+    get "/reports", DashboardIndexController, :index, as: :reports
+  end
+
+  scope "/account", PingcrmWeb.Account do
+    pipe_through [:browser, :require_confirmed_user]
+
+    get "/", SettingsController, :show, as: :account
+    get "/team", TeamController, :show, as: :team_page
+    get "/billing", BillingController, :show, as: :billing_page
   end
 
   scope "/", PingcrmWeb.Auth do

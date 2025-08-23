@@ -2,7 +2,7 @@ import { buildUrl, type RouteQueryOptions, type RouteDefinition, type RouteDefin
 
 /**
  * @see PingcrmWeb.Auth.ConfirmationsController::confirm_user
- * @see lib/pingcrm_web/controllers/auth/confirmations_controller.ex:41
+ * @see lib/pingcrm_web/controllers/auth/confirmations_controller.ex:42
  * @route /confirm/:token
 */
 
@@ -32,7 +32,7 @@ confirmUser.post = (args: { token: string | number } | [string | number] | strin
 
 /**
  * @see PingcrmWeb.Auth.ConfirmationsController::confirmation_sent
- * @see lib/pingcrm_web/controllers/auth/confirmations_controller.ex:6
+ * @see lib/pingcrm_web/controllers/auth/confirmations_controller.ex:7
  * @route /confirmation-sent
 */
 
@@ -61,7 +61,7 @@ confirmationSent.get = (options?: RouteQueryOptions): RouteDefinition<'get'> => 
 
 /**
  * @see PingcrmWeb.Auth.ConfirmationsController::create
- * @see lib/pingcrm_web/controllers/auth/confirmations_controller.ex:18
+ * @see lib/pingcrm_web/controllers/auth/confirmations_controller.ex:19
  * @route /confirm
 */
 
@@ -90,7 +90,7 @@ resendConfirmation.post = (options?: RouteQueryOptions): RouteDefinition<'post'>
 
 /**
  * @see PingcrmWeb.Auth.ConfirmationsController::edit
- * @see lib/pingcrm_web/controllers/auth/confirmations_controller.ex:35
+ * @see lib/pingcrm_web/controllers/auth/confirmations_controller.ex:36
  * @route /confirm/:token
 */
 
@@ -120,7 +120,7 @@ edit.get = (args: { token: string | number } | [string | number] | string | numb
 
 /**
  * @see PingcrmWeb.Auth.ConfirmationsController::new
- * @see lib/pingcrm_web/controllers/auth/confirmations_controller.ex:14
+ * @see lib/pingcrm_web/controllers/auth/confirmations_controller.ex:15
  * @route /confirm
 */
 

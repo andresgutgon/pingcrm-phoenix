@@ -22,14 +22,14 @@ defmodule PingcrmWeb.Auth.SessionsControllerTest do
         })
 
       assert get_session(conn, :user_token)
-      assert redirected_to(conn) == ~p"/"
+      assert redirected_to(conn) == ~p"/dashboard"
 
       # Now do a logged in request and assert on the menu
-      conn = get(conn, ~p"/")
+      conn = get(conn, ~p"/dashboard")
       response = html_response(conn, 200)
       assert response =~ user.email
-      assert response =~ "My Profile"
-      assert response =~ "Logout"
+      assert response =~ "Dashboard"
+      assert response =~ "Organizations"
     end
 
     test "logs the user in with remember me", %{conn: conn, user: user} do
@@ -41,11 +41,11 @@ defmodule PingcrmWeb.Auth.SessionsControllerTest do
         })
 
       assert conn.resp_cookies["_pingcrm_web_user_remember_me"]
-      assert redirected_to(conn) == ~p"/"
+      assert redirected_to(conn) == ~p"/dashboard"
     end
 
     test "logs the user in with return to", %{conn: conn, user: user} do
-      conn = get(conn, "/")
+      conn = get(conn, "/dashboard")
       assert redirected_to(conn) == "/login"
 
       conn =
@@ -76,18 +76,10 @@ defmodule PingcrmWeb.Auth.SessionsControllerTest do
   describe "DELETE /logout" do
     test "logs the user out", %{conn: conn, user: user} do
       conn = conn |> log_in_user(user) |> delete(~p"/logout")
-      assert "/" = redirected_to(conn, 302)
-
-      # First redirect: to "/"
-      conn = get(recycle(conn), ~p"/")
       assert "/login" = redirected_to(conn, 302)
 
-      conn = get(recycle(conn), ~p"/login")
-      html = html_response(conn, 200)
-      {:ok, document} = Floki.parse_document(html)
-      [flash_div] = Floki.find(document, "[data-test='flash-message']")
-      flash_text = Floki.text(flash_div)
-      assert flash_text =~ "Logged out successfully."
+      # Check that the flash message was set
+      assert Phoenix.Flash.get(conn.assigns.flash, :info) =~ "Logged out successfully"
       refute get_session(conn, :user_token)
     end
 

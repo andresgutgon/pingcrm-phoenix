@@ -11,7 +11,7 @@ defmodule PingcrmWeb.ProfileControllerTest do
     test "renders profile page for authenticated user", %{conn: conn} do
       conn = conn |> log_in_user(account_owner().user) |> get(~p"/profile")
       response = html_response(conn, 200)
-      assert response =~ "My profile"
+      assert response =~ "Profile Settings"
     end
 
     test "redirects to login if user not authenticated", %{conn: conn} do

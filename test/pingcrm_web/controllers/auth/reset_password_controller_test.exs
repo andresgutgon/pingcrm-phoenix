@@ -15,15 +15,81 @@ defmodule Pingcrm.Auth.ResetPasswordControllerTest do
       response = html_response(conn, 200)
       assert response =~ "Forgot your password?"
     end
+
+    test "passes email as inertia prop when provided as query parameter", %{conn: conn} do
+      email = "test@example.com"
+      conn = get(conn, ~p"/reset_password?email=#{email}")
+
+      # Check that the response is successful
+      assert html_response(conn, 200)
+
+      # Check that the email is passed as an Inertia prop
+      assert inertia_props(conn)[:email] == email
+    end
+
+    test "does not pass email prop when email parameter is empty", %{conn: conn} do
+      conn = get(conn, ~p"/reset_password?email=")
+
+      assert html_response(conn, 200)
+      refute Map.has_key?(inertia_props(conn), :email)
+    end
+
+    test "does not pass email prop when email parameter is not provided", %{conn: conn} do
+      conn = get(conn, ~p"/reset_password")
+
+      assert html_response(conn, 200)
+      refute Map.has_key?(inertia_props(conn), :email)
+    end
+
+    test "does not pass email prop when email format is invalid", %{conn: conn} do
+      invalid_emails = [
+        "invalid-email",
+        "@example.com",
+        "test@",
+        "test @example.com",
+        "test@ example.com",
+        "",
+        "   ",
+        "test.example.com"
+      ]
+
+      for invalid_email <- invalid_emails do
+        conn = get(conn, ~p"/reset_password?email=#{invalid_email}")
+
+        assert html_response(conn, 200)
+
+        refute Map.has_key?(inertia_props(conn), :email),
+               "Expected invalid email '#{invalid_email}' to not be passed as prop"
+      end
+    end
+
+    test "passes email prop only for valid email formats", %{conn: conn} do
+      valid_emails = [
+        "test@example.com",
+        "user@domain.org",
+        "firstname.lastname@company.co.uk",
+        "test+tag@gmail.com",
+        "123@456.789"
+      ]
+
+      for valid_email <- valid_emails do
+        conn = get(conn, ~p"/reset_password?email=#{valid_email}")
+
+        assert html_response(conn, 200)
+
+        assert inertia_props(conn)[:email] == valid_email,
+               "Expected valid email '#{valid_email}' to be passed as prop"
+      end
+    end
   end
 
   describe "POST /reset_password" do
     @tag :capture_log
     test "sends a new reset password token", %{conn: conn, user: user} do
       conn = post(conn, ~p"/reset_password", %{"email" => user.email})
-      assert redirected_to(conn) == ~p"/"
+      assert redirected_to(conn) == ~p"/login"
 
-      assert Phoenix.Flash.get(conn.assigns.flash, :info) =~
+      assert Phoenix.Flash.get(conn.assigns.flash, :success) =~
                "If your email is in our system"
 
       assert Repo.get_by!(Accounts.UserToken, user_id: user.id).context == "reset_password"
@@ -32,9 +98,9 @@ defmodule Pingcrm.Auth.ResetPasswordControllerTest do
     test "does not send reset password token if email is invalid", %{conn: conn} do
       conn = post(conn, ~p"/reset_password", %{"email" => "unknown@example.com"})
 
-      assert redirected_to(conn) == ~p"/"
+      assert redirected_to(conn) == ~p"/login"
 
-      assert Phoenix.Flash.get(conn.assigns.flash, :info) =~
+      assert Phoenix.Flash.get(conn.assigns.flash, :success) =~
                "If your email is in our system"
 
       assert Repo.all(Accounts.UserToken) == []
@@ -53,12 +119,12 @@ defmodule Pingcrm.Auth.ResetPasswordControllerTest do
 
     test "renders reset password", %{conn: conn, token: token} do
       conn = get(conn, ~p"/reset_password/#{token}")
-      assert html_response(conn, 200) =~ "Reset password"
+      assert html_response(conn, 200) =~ "Change your password"
     end
 
     test "does not render reset password with invalid token", %{conn: conn} do
       conn = get(conn, ~p"/reset_password/oops")
-      assert redirected_to(conn) == ~p"/"
+      assert redirected_to(conn) == ~p"/login"
 
       assert Phoenix.Flash.get(conn.assigns.flash, :error) =~
                "Reset password link is invalid or it has expired"
@@ -85,7 +151,7 @@ defmodule Pingcrm.Auth.ResetPasswordControllerTest do
       assert redirected_to(conn) == ~p"/login"
       refute get_session(conn, :user_token)
 
-      assert Phoenix.Flash.get(conn.assigns.flash, :info) =~
+      assert Phoenix.Flash.get(conn.assigns.flash, :success) =~
                "Password reset successfully"
 
       assert Accounts.get_user_by_email_and_password(user.email, valid_user_password())
@@ -130,7 +196,7 @@ defmodule Pingcrm.Auth.ResetPasswordControllerTest do
 
     test "does not reset password with invalid token", %{conn: conn} do
       conn = put(conn, ~p"/reset_password/oops")
-      assert redirected_to(conn) == ~p"/"
+      assert redirected_to(conn) == ~p"/login"
 
       assert Phoenix.Flash.get(conn.assigns.flash, :error) =~
                "Reset password link is invalid or it has expired"

@@ -33,7 +33,14 @@ defmodule Pingcrm.Accounts.User do
 
   def registration_changeset(user, attrs, opts \\ []) do
     user
-    |> cast(attrs, [:email, :first_name, :last_name, :password, :password_confirmation])
+    |> cast(attrs, [
+      :email,
+      :first_name,
+      :last_name,
+      :password,
+      :password_confirmation,
+      :default_account_id
+    ])
     |> validate_required([:email, :first_name, :last_name, :password])
     |> validate_password_confirmation(opts)
     |> unique_constraint(:email, name: :users_email_index)

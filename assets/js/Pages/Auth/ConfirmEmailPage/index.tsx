@@ -1,12 +1,13 @@
-import { FormEvent } from 'react'
-import { Head, useForm, usePage } from '@inertiajs/react'
-import Logo from '@/components/Logo'
-import LoadingButton from '@/components/Button/LoadingButton'
-import FlashedMessages from '@/components/Messages/FlashMessages'
+import { FormEvent, ReactNode } from 'react'
+import { useForm, usePage } from '@inertiajs/react'
 import { confirmEmailChange } from '@/actions/Auth/ConfirmEmailController'
 import { PageProps } from '@/types'
+import { Button } from '@/components/ui/atoms/Button'
+import AuthLayout from '@/Layouts/AuthLayout'
+import { Form } from '@/components/ui/atoms/Form'
+import { Text } from '@/components/ui/atoms/Text'
 
-export default function ConfirmEmailPage({ token }: { token: string }) {
+function ConfirmEmailPage({ token }: { token: string }) {
   const {
     auth: { user },
   } = usePage<PageProps>().props
@@ -18,41 +19,32 @@ export default function ConfirmEmailPage({ token }: { token: string }) {
   }
 
   return (
-    <div className='flex items-center justify-center min-h-screen p-6 bg-indigo-800'>
-      <Head title='Resend confirmation' />
-      <div className='w-full max-w-sm flex flex-col gap-y-8'>
-        <Logo
-          className='block w-full max-w-xs mx-auto text-white fill-current'
-          height={50}
-        />
-        <FlashedMessages />
-        <form
-          action={confirmEmailChange(token).url}
-          onSubmit={handleSubmit}
-          className='overflow-hidden bg-white rounded-lg shadow-xl '
-        >
-          <div className='px-10 py-12'>
-            <h1 className='text-3xl font-bold text-center'>
-              Confirm your email change
-            </h1>
-            <p className='text-gray-500 text-center mt-2 mb-8'>
-              We'll send a password reset link to your inbox Current email:{' '}
-              <strong>{user.email}</strong> will be changed to{' '}
-              <strong>{user.email_changed}</strong>.
-            </p>
-            <div className='w-24 mx-auto mt-6 mb-10 border-b-2' />
-          </div>
-          <div className='flex flex-col gap-y-2 items-center justify-end px-10 py-4 bg-gray-100'>
-            <LoadingButton
-              type='submit'
-              loading={form.processing}
-              className='btn-indigo'
-            >
-              Confirm
-            </LoadingButton>
-          </div>
-        </form>
-      </div>
-    </div>
+    <Form action={confirmEmailChange(token).url} onSubmit={handleSubmit}>
+      <Text.H5 asChild display='block'>
+        <p>
+          Your current email <strong>{user.email}</strong> will be changed to{' '}
+          <strong>{user.email_changed}</strong>.
+        </p>
+      </Text.H5>
+      <Button fullWidth type='submit' loading={form.processing}>
+        Confirm
+      </Button>
+    </Form>
   )
 }
+
+ConfirmEmailPage.layout = (children: ReactNode) => (
+  <AuthLayout
+    showToS
+    title='Confirm your email change'
+    card={{
+      title: 'Confirm your email change',
+      description:
+        'Please confirm your email change to continue using our services.',
+    }}
+  >
+    {children}
+  </AuthLayout>
+)
+
+export default ConfirmEmailPage
