@@ -5,8 +5,10 @@ defmodule Pingcrm.Accounts.User do
   import Ecto.Changeset
 
   use Ecto.Schema
+  use Waffle.Ecto.Schema # File storage third party abstraction
+
   alias Pingcrm.Accounts.{Account, Membership}
-  # alias Pingcrm.AvatarUploader
+  alias Pingcrm.Uploaders.Avatar
   alias Pingcrm.Repo
 
   schema "users" do
@@ -15,6 +17,7 @@ defmodule Pingcrm.Accounts.User do
     field :email_changed, :string
     field :first_name, :string
     field :last_name, :string
+    field :avatar, Avatar.Type
 
     # Auth
     field :password, :string, virtual: true, redact: true
