@@ -40,6 +40,7 @@ export const LUCIDE_IMPORTS = {
   plus: () => import('lucide-react').then((m) => ({ default: m.PlusIcon })),
   settings: () =>
     import('lucide-react').then((m) => ({ default: m.Settings2Icon })),
+  fileUp: () => import('lucide-react').then((m) => ({ default: m.FileUpIcon })),
 }
 
 export type LucideIconName = keyof typeof LUCIDE_IMPORTS
