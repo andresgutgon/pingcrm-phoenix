@@ -75,6 +75,7 @@ defmodule Pingcrm.Accounts.User do
   def profile_changed_changeset(user, attrs, _opts \\ []) do
     user
     |> cast(attrs, [:first_name, :last_name])
+    |> cast_attachments(attrs, [:avatar])
     |> validate_required([:first_name, :last_name])
   end
 

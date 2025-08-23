@@ -6,19 +6,26 @@ import { PageProps } from '@/types'
 import { Form } from '@/components/ui/atoms/Form'
 import { Input } from '@/components/ui/atoms/Input'
 
+type UpdateProfileInput = {
+  first_name: string
+  last_name: string
+  avatar?: string
+}
 export default function EditProfile() {
   const {
     auth: { user },
   } = usePage<PageProps>().props
-  const form = useForm<{ first_name: string; last_name: string }>({
+  const form = useForm<UpdateProfileInput>({
     first_name: user.first_name,
     last_name: user.last_name,
+    avatar: user.avatar,
   })
 
   function handleSubmit(e: FormEvent<HTMLFormElement>) {
     e.preventDefault()
     form.submit(updateProfile(), {
       preserveScroll: true,
+      forceFormData: true,
     })
   }
 

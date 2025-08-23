@@ -2,6 +2,7 @@ defmodule Pingcrm.Accounts.Presenter do
   @moduledoc false
 
   alias Pingcrm.Accounts.{Account, User}
+  alias Pingcrm.Uploaders.Avatar
 
   def serialize(%User{} = user) do
     %{
@@ -10,6 +11,7 @@ defmodule Pingcrm.Accounts.Presenter do
       first_name: user.first_name,
       last_name: user.last_name,
       email: user.email,
+      avatar: Avatar.url({user.avatar, user}, :thumb),
       email_changed: user.email_changed,
       confirmed_at: user.confirmed_at,
       authenticated_at: user.authenticated_at,
