@@ -53,6 +53,9 @@ export function DropzoneInput({
       const file = files?.[0]
       if (!file) return
 
+      // TODO: Optimistic file size check. Pass from the backend.
+      // See how to do it with direct uploads.
+      // Implement multiple file uploads.
       if (maxFileSize && file.size > maxFileSize) {
         if (ref.current) ref.current.value = ''
         onFileSizeError?.({
