@@ -54,13 +54,16 @@ function AvatarFallback({
   rounded = 'normal',
   children,
   bgColor = 'backgroundMuted',
-  color = 'foregroundMuted',
+  color = 'foreground',
+  size = 'normal',
   ...props
 }: ComponentProps<typeof AvatarPrimitive.Fallback> & {
   bgColor?: BackgroundColor
   color?: TextColor
   rounded?: AvatarRootProps['rounded']
+  size?: AvatarRootProps['size']
 }) {
+  const TextComp = size === 'preview' ? Text.H3 : Text.H5
   return (
     <AvatarPrimitive.Fallback
       data-slot='avatar-fallback'
@@ -74,7 +77,7 @@ function AvatarFallback({
       )}
       {...props}
     >
-      <Text.H5 color={color}>{children}</Text.H5>
+      <TextComp color={color}>{children}</TextComp>
     </AvatarPrimitive.Fallback>
   )
 }

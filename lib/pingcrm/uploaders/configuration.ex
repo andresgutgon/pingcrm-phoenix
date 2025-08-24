@@ -5,6 +5,16 @@ defmodule Pingcrm.Uploaders.Configuration do
   In development and test environments, files are stored locally.
   """
 
+  @uploads_dir "uploads"
+
+  def storage_path do
+    "/#{@uploads_dir}"
+  end
+
+  def storage_root do
+    Path.join(:code.priv_dir(:pingcrm), @uploads_dir)
+  end
+
   @doc """
   Configures the uploaders based on the environment.
   This function checks the environment and sets the appropriate storage
@@ -19,9 +29,7 @@ defmodule Pingcrm.Uploaders.Configuration do
     scheme = System.get_env("PHX_SCHEME", "http")
     host = System.get_env("PHX_HOST", "localhost")
     port = String.to_integer(System.get_env("PORT", "4004"))
-    assets_host = System.get_env("ASSETS_HOST") || "#{scheme}://#{host}:#{port}/uploads"
-
-    IO.puts("Assets host: #{assets_host}")
+    assets_host = System.get_env("ASSETS_HOST") || "#{scheme}://#{host}:#{port}/#{@uploads_dir}"
 
     cond do
       prod_mode ->
@@ -42,9 +50,10 @@ defmodule Pingcrm.Uploaders.Configuration do
         [
           waffle: [
             storage: Waffle.Storage.Local,
+            storage_dir_prefix: Application.get_env(:pingcrm, :storage_root),
             asset_host:
               if test_dev_mode and System.get_env("CI") == "true" do
-                "http://assets.example.test"
+                "http://assets.example.test/#{@uploads_dir}"
               else
                 assets_host
               end

@@ -5,6 +5,7 @@ import {
   AvatarRootProps,
 } from '@/components/ui/atoms/Avatar/Primitives'
 import { BackgroundColor, TextColor } from '@/components/ui/tokens/colors'
+import { useCallback, useState } from 'react'
 
 function Avatar({
   src,
@@ -25,14 +26,29 @@ function Avatar({
   rounded?: AvatarRootProps['rounded']
   borderColor?: AvatarRootProps['borderColor']
 }) {
+  const [loaded, setLoaded] = useState(false)
+  const onLoad = useCallback(() => {
+    setLoaded(true)
+  }, [setLoaded])
+  const onError = useCallback(() => {
+    setLoaded(false)
+  }, [setLoaded])
   return (
     <AvatarRoot size={size} rounded={rounded} borderColor={borderColor}>
-      <AvatarImage src={src} alt={altText} />
-      {fallback ? (
+      {src ? (
+        <AvatarImage
+          src={src}
+          alt={altText}
+          onLoad={onLoad}
+          onError={onError}
+        />
+      ) : null}
+      {!loaded && fallback ? (
         <AvatarFallback
           rounded={rounded}
           bgColor={fallback.bgColor}
           color={fallback.color}
+          size={size}
         >
           {fallback.text}
         </AvatarFallback>

@@ -15,9 +15,11 @@ import { cn } from '@/lib/utils'
 
 function AvatartPreview({
   avatar,
+  initials,
   alt,
 }: {
   avatar: string | File
+  initials: string
   alt: string
 }) {
   const src = avatar
@@ -33,6 +35,11 @@ function AvatartPreview({
       rounded='full'
       src={src}
       altText={alt}
+      fallback={{
+        text: initials,
+        bgColor: 'primary',
+        color: 'white',
+      }}
     />
   )
 }
@@ -60,7 +67,6 @@ export default function EditProfile() {
     })
   }
 
-  console.log("AVATAR_ERROR", form.errors.avatar)
   return (
     <Form onSubmit={handleSubmit}>
       <div className='grid gap-6 @xl/tab-content:grid-cols-2 @xl/tab-content:items-start'>
@@ -107,7 +113,11 @@ export default function EditProfile() {
             {({ placeholder, isDragging }) => (
               <div className='min-h-44 flex items-center justify-center w-full'>
                 {form.data.avatar ? (
-                  <AvatartPreview avatar={form.data.avatar} alt='Your avatar' />
+                  <AvatartPreview
+                    avatar={form.data.avatar}
+                    initials={user.initials}
+                    alt={`${user.name} avatar`}
+                  />
                 ) : (
                   <div className='max-w-52'>
                     <Text.H5

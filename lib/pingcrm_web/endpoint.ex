@@ -24,11 +24,9 @@ defmodule PingcrmWeb.Endpoint do
   prod_mode = Application.compile_env(:pingcrm, :prod_mode, false)
 
   if prod_mode != true do
-    storage_root = Application.compile_env(:pingcrm, :storage_root)
-
     plug Plug.Static,
-      at: "/uploads",
-      from: storage_root,
+      at: Pingcrm.Uploaders.Configuration.storage_path(),
+      from: Pingcrm.Uploaders.Configuration.storage_root(),
       gzip: false
   end
 
