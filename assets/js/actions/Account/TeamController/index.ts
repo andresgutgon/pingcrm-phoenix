@@ -2,7 +2,6 @@ import { buildUrl, type RouteQueryOptions, type RouteDefinition, type RouteDefin
 
 /**
  * @see PingcrmWeb.Account.TeamController::show
- * @see lib/pingcrm_web/controllers/account/team_controller.ex:4
  * @route /account/team
 */
 

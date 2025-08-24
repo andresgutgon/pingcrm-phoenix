@@ -2,7 +2,6 @@ import { buildUrl, type RouteQueryOptions, type RouteDefinition, type RouteDefin
 
 /**
  * @see PingcrmWeb.Auth.ResetPasswordController::create
- * @see lib/pingcrm_web/controllers/auth/reset_password_controler.ex:15
  * @route /reset_password
 */
 
@@ -31,7 +30,6 @@ sendResetPasswordInstructions.post = (options?: RouteQueryOptions): RouteDefinit
 
 /**
  * @see PingcrmWeb.Auth.ResetPasswordController::edit
- * @see lib/pingcrm_web/controllers/auth/reset_password_controler.ex:31
  * @route /reset_password/:token
 */
 
@@ -61,7 +59,6 @@ edit.get = (args: { token: string | number } | [string | number] | string | numb
 
 /**
  * @see PingcrmWeb.Auth.ResetPasswordController::new
- * @see lib/pingcrm_web/controllers/auth/reset_password_controler.ex:9
  * @route /reset_password
 */
 
@@ -90,7 +87,6 @@ forgotPassword.get = (options?: RouteQueryOptions): RouteDefinition<'get'> => ({
 
 /**
  * @see PingcrmWeb.Auth.ResetPasswordController::update
- * @see lib/pingcrm_web/controllers/auth/reset_password_controler.ex:39
  * @route /reset_password/:token
 */
 

@@ -2,7 +2,6 @@ import { buildUrl, type RouteQueryOptions, type RouteDefinition, type RouteDefin
 
 /**
  * @see PingcrmWeb.HomeController::show
- * @see lib/pingcrm_web/controllers/home_controller.ex:4
  * @route /
 */
 

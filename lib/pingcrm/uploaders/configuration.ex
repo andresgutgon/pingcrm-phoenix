@@ -32,9 +32,6 @@ defmodule Pingcrm.Uploaders.Configuration do
 
       true ->
         [
-          pingcrm: [
-            storage_root: "priv/uploads"
-          ],
           waffle: [
             storage: Waffle.Storage.Local,
             asset_host:

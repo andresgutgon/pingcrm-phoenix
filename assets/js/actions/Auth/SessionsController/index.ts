@@ -2,7 +2,6 @@ import { buildUrl, type RouteQueryOptions, type RouteDefinition, type RouteDefin
 
 /**
  * @see PingcrmWeb.Auth.SessionsController::create
- * @see lib/pingcrm_web/controllers/auth/sessions_controller.ex:11
  * @route /login
 */
 
@@ -31,7 +30,6 @@ create.post = (options?: RouteQueryOptions): RouteDefinition<'post'> => ({
 
 /**
  * @see PingcrmWeb.Auth.SessionsController::delete
- * @see lib/pingcrm_web/controllers/auth/sessions_controller.ex:23
  * @route /logout
 */
 
@@ -60,7 +58,6 @@ deleteMethod.delete = (options?: RouteQueryOptions): RouteDefinition<'delete'> =
 
 /**
  * @see PingcrmWeb.Auth.SessionsController::new
- * @see lib/pingcrm_web/controllers/auth/sessions_controller.ex:7
  * @route /login
 */
 

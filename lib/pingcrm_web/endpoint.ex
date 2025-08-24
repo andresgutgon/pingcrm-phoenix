@@ -21,6 +21,17 @@ defmodule PingcrmWeb.Endpoint do
     gzip: false,
     only: PingcrmWeb.static_paths()
 
+  prod_mode = Application.compile_env(:pingcrm, :prod_mode, false)
+
+  if prod_mode != true do
+    storage_root = Application.compile_env(:pingcrm, :storage_root)
+
+    plug Plug.Static,
+      at: "/uploads",
+      from: storage_root,
+      gzip: false
+  end
+
   # Code reloading can be explicitly enabled under the
   # :code_reloader configuration of your endpoint.
   if code_reloading? do

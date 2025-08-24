@@ -2,7 +2,6 @@ import { buildUrl, type RouteQueryOptions, type RouteDefinition, type RouteDefin
 
 /**
  * @see PingcrmWeb.Profile.ProfileController::show
- * @see lib/pingcrm_web/controllers/profile/profile_controller.ex:10
  * @route /profile
 */
 
@@ -31,7 +30,6 @@ myProfile.get = (options?: RouteQueryOptions): RouteDefinition<'get'> => ({
 
 /**
  * @see PingcrmWeb.Profile.ProfileController::update
- * @see lib/pingcrm_web/controllers/profile/profile_controller.ex:15
  * @route /profile
 */
 
@@ -60,7 +58,6 @@ updateProfile.patch = (options?: RouteQueryOptions): RouteDefinition<'patch'> =>
 
 /**
  * @see PingcrmWeb.Profile.ProfileController::change_account
- * @see lib/pingcrm_web/controllers/profile/profile_controller.ex:61
  * @route /profile/change_account/:id
 */
 
@@ -90,7 +87,6 @@ changeAccount.post = (args: { id: string | number } | [string | number] | string
 
 /**
  * @see PingcrmWeb.Profile.ProfileController::set_default_account
- * @see lib/pingcrm_web/controllers/profile/profile_controller.ex:79
  * @route /profile/set_default_account/:account_id
 */
 
@@ -120,7 +116,6 @@ setDefaultAccount.patch = (args: { account_id: string | number } | [string | num
 
 /**
  * @see PingcrmWeb.Profile.ProfileController::update_email
- * @see lib/pingcrm_web/controllers/profile/profile_controller.ex:29
  * @route /profile/email
 */
 
@@ -149,7 +144,6 @@ updateEmail.patch = (options?: RouteQueryOptions): RouteDefinition<'patch'> => (
 
 /**
  * @see PingcrmWeb.Profile.ProfileController::update_password
- * @see lib/pingcrm_web/controllers/profile/profile_controller.ex:47
  * @route /profile/password
 */
 

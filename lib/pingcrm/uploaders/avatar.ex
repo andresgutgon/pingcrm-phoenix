@@ -47,9 +47,7 @@ defmodule Pingcrm.Uploaders.Avatar do
   # end
 
   def storage_dir(version, {file, scope}) do
-    storage_root = Application.get_env(:pingcrm, :storage_root)
-
-    "#{storage_root}/users/#{scope.id}/avatars/#{version}/#{file.file_name}"
+    "priv/uploads/users/#{scope.id}/avatars/#{version}"
   end
 
   # Specify custom headers for s3 objects

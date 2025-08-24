@@ -2,7 +2,6 @@ import { buildUrl, type RouteQueryOptions, type RouteDefinition, type RouteDefin
 
 /**
  * @see PingcrmWeb.Account.SettingsController::show
- * @see lib/pingcrm_web/controllers/account/settings_controller.ex:9
  * @route /account
 */
 

@@ -2,7 +2,6 @@ import { buildUrl, type RouteQueryOptions, type RouteDefinition, type RouteDefin
 
 /**
  * @see PingcrmWeb.Dashboard.DashboardIndexController::index
- * @see lib/pingcrm_web/controllers/dashboard/dashboard_index_controller.ex:4
  * @route /dashboard
 */
 
@@ -31,7 +30,6 @@ dashboard.get = (options?: RouteQueryOptions): RouteDefinition<'get'> => ({
 
 /**
  * @see PingcrmWeb.Dashboard.DashboardIndexController::index
- * @see lib/pingcrm_web/controllers/dashboard/dashboard_index_controller.ex:4
  * @route /dashboard/contacts
 */
 
@@ -60,7 +58,6 @@ contacts.get = (options?: RouteQueryOptions): RouteDefinition<'get'> => ({
 
 /**
  * @see PingcrmWeb.Dashboard.DashboardIndexController::index
- * @see lib/pingcrm_web/controllers/dashboard/dashboard_index_controller.ex:4
  * @route /dashboard/organizations
 */
 
@@ -89,7 +86,6 @@ organizations.get = (options?: RouteQueryOptions): RouteDefinition<'get'> => ({
 
 /**
  * @see PingcrmWeb.Dashboard.DashboardIndexController::index
- * @see lib/pingcrm_web/controllers/dashboard/dashboard_index_controller.ex:4
  * @route /dashboard/reports
 */
 

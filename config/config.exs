@@ -34,6 +34,7 @@ config :pingcrm, PingcrmWeb.Endpoint,
 # For production it's recommended to configure a different adapter
 # at the `config/runtime.exs`.
 config :pingcrm, Pingcrm.Mailer, adapter: Swoosh.Adapters.Local
+config :pingcrm, :storage_root, Path.expand("../priv/uploads", __DIR__)
 
 config :inertia,
   endpoint: PingcrmWeb.Endpoint,

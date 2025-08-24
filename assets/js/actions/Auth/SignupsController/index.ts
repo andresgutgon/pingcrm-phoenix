@@ -2,7 +2,6 @@ import { buildUrl, type RouteQueryOptions, type RouteDefinition, type RouteDefin
 
 /**
  * @see PingcrmWeb.Auth.SignupsController::create
- * @see lib/pingcrm_web/controllers/auth/signups_controller.ex:9
  * @route /signup
 */
 
@@ -31,7 +30,6 @@ signupCreate.post = (options?: RouteQueryOptions): RouteDefinition<'post'> => ({
 
 /**
  * @see PingcrmWeb.Auth.SignupsController::new
- * @see lib/pingcrm_web/controllers/auth/signups_controller.ex:5
  * @route /signup
 */
 

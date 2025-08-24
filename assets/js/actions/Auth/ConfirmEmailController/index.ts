@@ -2,7 +2,6 @@ import { buildUrl, type RouteQueryOptions, type RouteDefinition, type RouteDefin
 
 /**
  * @see PingcrmWeb.Auth.ConfirmEmailController::edit
- * @see lib/pingcrm_web/controllers/auth/confirm_email_controller.ex:6
  * @route /confirm-email/:token
 */
 
@@ -32,7 +31,6 @@ edit.get = (args: { token: string | number } | [string | number] | string | numb
 
 /**
  * @see PingcrmWeb.Auth.ConfirmEmailController::update
- * @see lib/pingcrm_web/controllers/auth/confirm_email_controller.ex:12
  * @route /confirm-email/:token
 */
 

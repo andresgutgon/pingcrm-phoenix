@@ -14,6 +14,7 @@ app-*.tar
 npm-debug.log
 /assets/node_modules/
 priv/node_modules
+priv/uploads
 
 .pnpm-store/
 .DS_Store
