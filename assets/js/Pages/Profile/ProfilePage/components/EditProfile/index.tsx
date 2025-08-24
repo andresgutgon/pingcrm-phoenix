@@ -60,6 +60,7 @@ export default function EditProfile() {
     })
   }
 
+  console.log("AVATAR_ERROR", form.errors.avatar)
   return (
     <Form onSubmit={handleSubmit}>
       <div className='grid gap-6 @xl/tab-content:grid-cols-2 @xl/tab-content:items-start'>
@@ -100,7 +101,6 @@ export default function EditProfile() {
             placeholder='Drag and drop your avatar here, or click to select a file'
             onChange={(files) => {
               const avatarFile = files?.[0]
-              console.log('AVATAR_FILE', avatarFile)
               form.setData('avatar', avatarFile)
             }}
           >

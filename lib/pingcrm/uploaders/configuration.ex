@@ -1,4 +1,4 @@
-defmodule Pingcrm.Config.Uploads do
+defmodule Pingcrm.Uploaders.Configuration do
   @moduledoc """
   Configuration for file uploads in Pingcrm.
 
@@ -6,9 +6,8 @@ defmodule Pingcrm.Config.Uploads do
   In development and test environments, files are stored locally.
   """
   def configure do
-    env = Application.get_env(:pingcrm, :env)
     prod_mode = Application.get_env(:pingcrm, :prod_mode)
-    test_dev_mode = Application.get_env(:pingcrm, :test_dev_mode)
+    test_dev_mode = Application.get_env(:pingcrm, :test_dev_mode) || false
 
     endpoint_url = Application.get_env(:pingcrm, PingcrmWeb.Endpoint)[:url]
 
@@ -33,6 +32,9 @@ defmodule Pingcrm.Config.Uploads do
 
       true ->
         [
+          pingcrm: [
+            storage_root: "priv/uploads"
+          ],
           waffle: [
             storage: Waffle.Storage.Local,
             asset_host:

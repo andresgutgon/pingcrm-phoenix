@@ -59,10 +59,14 @@ defmodule Pingcrm.MixProject do
       {:floki, ">= 0.34.0", only: :test},
       {:waffle, "~> 1.1"},
       {:waffle_ecto, "~> 0.0.12"},
-      {:ex_aws, "~> 2.1.2"}, # S3 compatible storage
-      {:ex_aws_s3, "~> 2.0"}, # S3 compatible storage
-      {:hackney, "~> 1.9"}, # S3 compatible storage
-      {:sweet_xml, "~> 0.6"}, # S3 compatible storage
+      # S3 compatible storage
+      {:ex_aws, "~> 2.1.2"},
+      # S3 compatible storage
+      {:ex_aws_s3, "~> 2.0"},
+      # S3 compatible storage
+      {:hackney, "~> 1.9"},
+      # S3 compatible storage
+      {:sweet_xml, "~> 0.6"},
       {:mix_test_watch, "~> 1.0", only: [:dev, :test], runtime: false},
       {:wayfinder_ex, "~> 0.1.5"},
       {

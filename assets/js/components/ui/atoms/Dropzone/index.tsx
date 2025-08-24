@@ -43,8 +43,9 @@ export const Dropzone = forwardRef<HTMLInputElement, DropzoneProps>(
           Array.from(e.dataTransfer.files).some(
             (file) => !accept.split(',').find((a) => file.name.endsWith(a)),
           )
-        )
+        ) {
           return
+        }
 
         onChange?.(e.dataTransfer.files)
 

@@ -36,6 +36,11 @@ config :pingcrm, Inertia.SSR,
   ssr_adapter: Vitex.inertia_ssr_adapter(dev_mode: dev_mode or test_dev_mode),
   esm: true
 
+# Uploads configuration
+for {app, configuration} <- Pingcrm.Uploaders.Configuration.configure() do
+  config app, configuration
+end
+
 if env == :prod do
   database_url =
     System.get_env("DATABASE_URL") ||
@@ -82,14 +87,9 @@ if env == :prod do
       # See the documentation on https://hexdocs.pm/bandit/Bandit.html#t:options/0
       # for details about using IPv6 vs IPv4 and loopback vs public addresses.
       ip: {0, 0, 0, 0, 0, 0, 0, 0},
-      port: endpoint_url[:port],
+      port: endpoint_url[:port]
     ],
     secret_key_base: secret_key_base
-
-  # Uploads configuration
-  for {app, configuration} <- Pingcrm.Config.Uploads.configure() do
-    config app, configuration
-  end
 
   # ## SSL Support
   #

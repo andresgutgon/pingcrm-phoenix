@@ -5,7 +5,8 @@ defmodule Pingcrm.Accounts.User do
   import Ecto.Changeset
 
   use Ecto.Schema
-  use Waffle.Ecto.Schema # File storage third party abstraction
+  # File storage third party abstraction
+  use Waffle.Ecto.Schema
 
   alias Pingcrm.Accounts.{Account, Membership}
   alias Pingcrm.Uploaders.Avatar
