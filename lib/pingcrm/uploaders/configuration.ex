@@ -1,9 +1,25 @@
 defmodule Pingcrm.Uploaders.Configuration do
   @moduledoc """
   Configuration for file uploads in Pingcrm.
-
   In production, files are stored in an S3 bucket compatible storage.
   In development and test environments, files are stored locally.
+  """
+
+  @doc """
+  Configuration for file uploads in Pingcrm. This use the configuration for storage_root
+  In production, files are stored in an S3 bucket compatible storage.
+  """
+  def build_storage_dir(path) do
+    storage_root = Application.get_env(:pingcrm, :storage_root)
+    Path.join([storage_root, path])
+  end
+
+  @doc """
+  Configures the uploaders based on the environment.
+  This function checks the environment and sets the appropriate storage
+  configuration for Waffle and ExAws.
+  It uses the `prod_mode` and `test_dev_mode` flags to determine the environment.
+  It returns a keyword list with the configuration for Waffle and ExAws.
   """
   def configure do
     prod_mode = Application.get_env(:pingcrm, :prod_mode)
