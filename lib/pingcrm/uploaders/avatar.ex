@@ -1,7 +1,6 @@
 defmodule Pingcrm.Uploaders.Avatar do
   use Waffle.Definition
   use Waffle.Ecto.Definition
-  alias Pingcrm.Uploaders.Configuration
 
   @versions [:original, :thumb]
 
@@ -48,7 +47,7 @@ defmodule Pingcrm.Uploaders.Avatar do
   # end
 
   def storage_dir(version, {_file, scope}) do
-    Configuration.build_storage_dir("users/#{scope.id}/avatars/#{version}")
+    "users/#{scope.id}/avatars/#{version}"
   end
 
   # Specify custom headers for s3 objects

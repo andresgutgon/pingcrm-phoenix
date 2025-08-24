@@ -6,15 +6,6 @@ defmodule Pingcrm.Uploaders.Configuration do
   """
 
   @doc """
-  Configuration for file uploads in Pingcrm. This use the configuration for storage_root
-  In production, files are stored in an S3 bucket compatible storage.
-  """
-  def build_storage_dir(path) do
-    storage_root = Application.get_env(:pingcrm, :storage_root)
-    Path.join([storage_root, path])
-  end
-
-  @doc """
   Configures the uploaders based on the environment.
   This function checks the environment and sets the appropriate storage
   configuration for Waffle and ExAws.
@@ -25,11 +16,12 @@ defmodule Pingcrm.Uploaders.Configuration do
     prod_mode = Application.get_env(:pingcrm, :prod_mode)
     test_dev_mode = Application.get_env(:pingcrm, :test_dev_mode) || false
 
-    endpoint_url = Application.get_env(:pingcrm, PingcrmWeb.Endpoint)[:url]
+    scheme = System.get_env("PHX_SCHEME", "http")
+    host = System.get_env("PHX_HOST", "localhost")
+    port = String.to_integer(System.get_env("PORT", "4004"))
+    assets_host = System.get_env("ASSETS_HOST") || "#{scheme}://#{host}:#{port}/uploads"
 
-    assets_host =
-      System.get_env("ASSETS_HOST") ||
-        "#{endpoint_url[:scheme]}://#{endpoint_url[:host]}:#{endpoint_url[:port]}"
+    IO.puts("Assets host: #{assets_host}")
 
     cond do
       prod_mode ->
