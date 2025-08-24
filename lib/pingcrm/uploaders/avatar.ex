@@ -7,7 +7,7 @@ defmodule Pingcrm.Uploaders.Avatar do
   def validate({file, _}) do
     file_extension = file.file_name |> Path.extname() |> String.downcase()
 
-    case Enum.member?(~w(.jpg .jpeg .gif .png), file_extension) do
+    case Enum.member?(~w(.jpg .jpeg .png .webp), file_extension) do
       true -> :ok
       false -> {:error, "invalid file type"}
     end

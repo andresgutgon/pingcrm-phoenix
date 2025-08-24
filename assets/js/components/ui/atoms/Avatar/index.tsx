@@ -12,8 +12,9 @@ function Avatar({
   fallback,
   size = 'normal',
   rounded = 'normal',
+  borderColor,
 }: {
-  src?: string
+  src?: string | undefined
   altText: string
   fallback?: {
     text: string
@@ -22,9 +23,10 @@ function Avatar({
   }
   size?: AvatarRootProps['size']
   rounded?: AvatarRootProps['rounded']
+  borderColor?: AvatarRootProps['borderColor']
 }) {
   return (
-    <AvatarRoot size={size} rounded={rounded}>
+    <AvatarRoot size={size} rounded={rounded} borderColor={borderColor}>
       <AvatarImage src={src} alt={altText} />
       {fallback ? (
         <AvatarFallback

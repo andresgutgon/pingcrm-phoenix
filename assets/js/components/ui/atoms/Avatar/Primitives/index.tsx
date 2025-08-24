@@ -7,24 +7,30 @@ import {
   BackgroundColor,
   colors,
   TextColor,
+  BorderColor,
 } from '@/components/ui/tokens/colors'
 
 export type AvatarRootProps = ComponentProps<typeof AvatarPrimitive.Root> & {
-  size?: 'normal'
+  size?: 'normal' | 'preview'
   rounded?: 'normal' | 'full'
+  borderColor?: BorderColor
 }
 function AvatarRoot({
   size = 'normal',
   rounded = 'normal',
+  borderColor,
   ...props
 }: AvatarRootProps) {
+  const border = borderColor ? colors.borderColors[borderColor] : undefined
   return (
     <AvatarPrimitive.Root
       data-slot='avatar'
-      className={cn('relative flex shrink-0 overflow-hidden', {
+      className={cn('relative flex shrink-0 overflow-hidden', border, {
         'h-8 w-8 size-8': size === 'normal',
+        'h-32 w-32 size-32': size === 'preview',
         'rounded-full': rounded === 'full',
         'rounded-lg': rounded === 'normal',
+        border: borderColor !== undefined,
       })}
       {...props}
     />
@@ -38,7 +44,7 @@ function AvatarImage({
   return (
     <AvatarPrimitive.Image
       data-slot='avatar-image'
-      className={cn('aspect-square size-full', className)}
+      className={cn('aspect-square size-full object-cover', className)}
       {...props}
     />
   )
