@@ -86,7 +86,6 @@ async function makeRequestWithProgress({
           })
         }
 
-        // Track progress
         xhr.upload.onprogress = (event) => {
           if (event.lengthComputable) {
             const progress = Math.round((event.loaded / event.total) * 100)

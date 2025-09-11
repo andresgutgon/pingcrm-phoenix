@@ -190,8 +190,6 @@ export default function EditProfile() {
                       alt={`${user.name} avatar`}
                       isUploading={uploadStatus === 'uploading'}
                       progress={progress}
-                      // isUploading
-                      // progress={40}
                     />
                   </>
                 ) : (

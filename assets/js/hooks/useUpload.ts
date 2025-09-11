@@ -187,6 +187,7 @@ export function useUpload<
               setUploadStatus('completed')
             }
 
+            setProgress(0) // Reset progress to reset animation
             setUploadStatus('validating')
             /* console.log('SIGNER DATA', { url, key }) */
 
@@ -198,7 +199,6 @@ export function useUpload<
 
             // TODO: After this, user should call form.submit() to validate and assign
             // The validation phase will be handled by the backend endpoint
-            setProgress(100)
           } finally {
             // Always clean up the abort controller
             abortControllerRef.current = null

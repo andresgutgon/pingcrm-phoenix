@@ -32,14 +32,10 @@ function ProgressRing({
   const jsSize = JS_SIZE[size]
   const stroke = 4
   const viewBoxSize = jsSize + stroke / 2
-
-  // expand svg so stroke isn't clipped
-  const radius = jsSize / 2 - stroke / 2 // <-- shrink radius so stroke fits inside
+  const radius = jsSize / 2 - stroke / 2
   const circumference = 2 * Math.PI * radius
   const offset = circumference - (progress / 100) * circumference
-
   const center = jsSize / 2
-
   return (
     <>
       <svg
