@@ -50,7 +50,7 @@ export function useUpload<
 >(
   props: UseUploadProps<TForm, Field, TUploader, TUploaderArgs>,
 ): MultipartUploadReturn | DirectUploadReturn {
-  const { form, field, onRemoveAttachment, onUploadError, mode } = props
+  const { form, field, onUploadError, mode } = props
   const [preview, setPreview] = useState<string | undefined>(
     (form.data[field] as string) ?? undefined,
   )
@@ -83,83 +83,88 @@ export function useUpload<
       // TODO:: Implement uploadType: 'image' | 'video' | 'audio' | 'file'
       // Not all needs a preview
       setPreview(URL.createObjectURL(file))
+      if (mode === 'multipart_form') return
 
       setUploadStatus('uploading')
       setProgress(0)
       cancelUpload()
 
       startTransition(async () => {
-        if (mode === 'multipart_form') {
-          safeAssign(file)
-          setPreview(URL.createObjectURL(file))
-        } else {
-          abortControllerRef.current = new AbortController()
-          const signal = abortControllerRef.current.signal
+        safeAssign(file)
+        setPreview(URL.createObjectURL(file))
+        abortControllerRef.current = new AbortController()
+        const signal = abortControllerRef.current.signal
 
-          try {
-            const signUrl = props.signUrlBuilder(props.uploaderArgs).url
-            const signResult = await makeJsonRequest<SignerResult>({
-              url: signUrl,
-              options: {
-                method: 'POST',
-                body: JSON.stringify({
-                  filename: file.name,
-                  content_type: file.type,
-                }),
-              },
-              signal,
-            })
+        try {
+          const signUrl = props.signUrlBuilder(props.uploaderArgs).url
+          const signResult = await makeJsonRequest<SignerResult>({
+            url: signUrl,
+            options: {
+              method: 'POST',
+              body: JSON.stringify({
+                filename: file.name,
+                content_type: file.type,
+              }),
+            },
+            signal,
+          })
 
-            if (!signResult.ok) {
-              const error = signResult.error as Error
-              setProgress(0)
-              setUploadStatus('error')
-              onUploadError?.(error)
-              setPreview(undefined)
-              return
-            }
-
-            const { url, key } = signResult.unwrap()
-            const uploadResult = await makeRequest({
-              url,
-              options: {
-                method: 'PUT',
-                headers: {
-                  'Content-Type': file.type,
-                },
-                body: file,
-              },
-              signal,
-              onUploadProgress: (uploadProgress) => {
-                setProgress(uploadProgress)
-              },
-            })
-
-            if (uploadResult.error) {
-              if (uploadResult.error instanceof AbortError) {
-                setUploadStatus('canceled')
-                setPreview(undefined)
-                safeAssign(undefined)
-                return
-              }
-
-              const error = uploadResult.error as Error
-
-              setUploadStatus('error')
-              onUploadError?.(error)
-              setPreview(undefined)
-              return
-            } else {
-              setUploadStatus('completed')
-            }
-
-            setProgress(0) // Reset progress to reset animation
-            setUploadStatus('validating')
-            console.log('SIGNER DATA', { url, key })
-          } finally {
-            // Always clean up the abort controller
-            abortControllerRef.current = null
+          if (!signResult.ok) {
+            const error = signResult.error as Error
+            setProgress(0)
+            setUploadStatus('error')
+            onUploadError?.(error)
+            setPreview(undefined)
+            return
           }
+
+          const { url, key } = signResult.unwrap()
+          const uploadResult = await makeRequest({
+            url,
+            options: {
+              method: 'PUT',
+              headers: {
+                'Content-Type': file.type,
+              },
+              body: file,
+            },
+            signal,
+            onUploadProgress: (uploadProgress) => {
+              setProgress(uploadProgress)
+            },
+          })
+
+          if (uploadResult.error) {
+            if (uploadResult.error instanceof AbortError) {
+              setUploadStatus('canceled')
+              setPreview(undefined)
+              safeAssign(undefined)
+              return
+            }
+
+            const error = uploadResult.error as Error
+
+            setUploadStatus('error')
+            onUploadError?.(error)
+            setPreview(undefined)
+            return
+          } else {
+            setUploadStatus('completed')
+          }
+
+          setProgress(0) // Reset progress to reset animation
+          setUploadStatus('storing')
+          const storeUrl = props.storeUrlBuilder(props.uploaderArgs).url
+          await makeJsonRequest({
+            url: storeUrl,
+            options: {
+              method: 'POST',
+              body: JSON.stringify({ key }),
+            },
+          })
+        } finally {
+          // Always clean up the abort controller
+          abortControllerRef.current = null
         }
       })
     },
@@ -169,12 +174,7 @@ export function useUpload<
   const handleRemove = useCallback(() => {
     cancelUpload()
     setPreview(undefined)
-    safeAssign(undefined)
-
-    if (form.data[field] && onRemoveAttachment) {
-      onRemoveAttachment()
-    }
-  }, [form, field, cancelUpload, safeAssign, onRemoveAttachment])
+  }, [cancelUpload])
 
   useEffect(() => {
     return () => {

@@ -10,7 +10,6 @@ type BaseProps<
 > = {
   form: InertiaFormProps<TForm>
   field: Field
-  onRemoveAttachment?: () => void
   onUploadError?: (error: Error) => void
 }
 
@@ -43,7 +42,7 @@ export type SignerResult = { url: string; key: string }
 
 export type UploadStatus =
   | 'uploading'
-  | 'validating'
+  | 'storing'
   | 'completed'
   | 'canceled'
   | 'error'

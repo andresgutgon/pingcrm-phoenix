@@ -95,18 +95,9 @@ export default function EditProfile() {
     mode: 'direct_upload',
     form: profileForm,
     field: 'avatar',
-    uploaderArgs: {
-      uploader: 'avatar',
-      entity_id: user.id,
-    },
+    uploaderArgs: { uploader: 'avatar', entity_id: user.id },
     signUrlBuilder: sign,
     storeUrlBuilder: store,
-    onRemoveAttachment: () => {
-      // TODO: Make a custom avatar form
-      profileForm.submit(deleteAvatar(), {
-        preserveScroll: true,
-      })
-    },
     onUploadError: (error) => {
       showToast({
         title: 'Error uploading avatar',
@@ -115,6 +106,12 @@ export default function EditProfile() {
       })
     },
   })
+  const onRemove = useCallback(() => {
+    handleRemove()
+    profileForm.submit(deleteAvatar(), {
+      preserveScroll: true,
+    })
+  }, [handleRemove, profileForm])
 
   const handleSubmit = useCallback(
     (e: FormEvent<HTMLFormElement>) => {
@@ -182,7 +179,7 @@ export default function EditProfile() {
             multiple={false}
             placeholder='Click or drag and drop your avatar here'
             onChange={handleUpload}
-            onRemove={handleRemove}
+            onRemove={onRemove}
           >
             {({ placeholder, isDragging }) => (
               <div className='relative min-h-52 flex items-center justify-center w-full'>
