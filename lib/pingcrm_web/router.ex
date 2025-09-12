@@ -72,7 +72,8 @@ defmodule PingcrmWeb.Router do
     end
 
     scope "/direct_uploads" do
-      post "/:uploader/sign", DirectUploadsController, :sign
+      post "/:uploader/:entity_id/sign", DirectUploadsController, :sign
+      post "/:uploader/:entity_id/store", DirectUploadsController, :store
     end
 
     scope "/profile", Profile do

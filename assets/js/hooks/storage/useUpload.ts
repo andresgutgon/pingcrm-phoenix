@@ -1,73 +1,25 @@
-import { useCallback, useMemo, useState, useRef, useTransition } from 'react'
 import {
-  FormDataConvertible,
-  FormDataKeys,
-  FormDataValues,
-} from '@inertiajs/core'
-import { InertiaFormProps } from '@inertiajs/react'
-import { RouteDefinition } from '@/wayfinder'
+  useCallback,
+  useMemo,
+  useState,
+  useRef,
+  useTransition,
+  useEffect,
+} from 'react'
+import { FormDataKeys, FormDataValues } from '@inertiajs/core'
 import { AbortError, makeJsonRequest, makeRequest } from '@/lib/makeFetch'
-
-type FormDataType = Record<string, FormDataConvertible>
-
-type BaseProps<
-  TForm extends FormDataType,
-  Field extends FormDataKeys<TForm>,
-> = {
-  form: InertiaFormProps<TForm>
-  field: Field
-  onRemoveAttachment?: () => void
-  onError?: (error: Error) => void
-}
-
-type MultipartFormProps<
-  TForm extends FormDataType,
-  Field extends FormDataKeys<TForm>,
-> = BaseProps<TForm, Field> & {
-  mode: 'multipart_form'
-}
-
-type DirectUploadProps<
-  TForm extends FormDataType,
-  Field extends FormDataKeys<TForm>,
-  TUploader extends string,
-> = BaseProps<TForm, Field> & {
-  mode: 'direct_upload'
-  uploader: TUploader
-  signUrlBuilder: (uploader: TUploader) => RouteDefinition<'post'>
-}
-
-type SignerResult = { url: string; key: string }
-
-type UploadStatus =
-  | 'uploading'
-  | 'validating'
-  | 'completed'
-  | 'canceled'
-  | 'error'
-
-type BaseUploadReturn = {
-  handleUpload: (files: FileList | null) => void
-  handleRemove: () => void
-  preview: string | undefined
-  setPreview: (preview: string | undefined) => void
-}
-
-type MultipartUploadReturn = BaseUploadReturn
-type DirectUploadReturn = BaseUploadReturn & {
-  progress: number
-  uploadStatus: UploadStatus | null
-  isPending: boolean
-  cancelUpload: () => void
-}
-
-export type UseUploadProps<
-  TForm extends FormDataType,
-  Field extends FormDataKeys<TForm>,
-  TUploader extends string,
-> =
-  | MultipartFormProps<TForm, Field>
-  | DirectUploadProps<TForm, Field, TUploader>
+import {
+  FormDataType,
+  MultipartFormProps,
+  MultipartUploadReturn,
+  UploaderGeneric,
+  UploaderArguments,
+  DirectUploadProps,
+  DirectUploadReturn,
+  UseUploadProps,
+  UploadStatus,
+  SignerResult,
+} from './types'
 
 // Function overloads for proper typing
 export function useUpload<
@@ -78,17 +30,27 @@ export function useUpload<
 export function useUpload<
   TForm extends FormDataType,
   Field extends FormDataKeys<TForm>,
-  TUploader extends string,
->(props: DirectUploadProps<TForm, Field, TUploader>): DirectUploadReturn
+  TUploader extends UploaderGeneric,
+  TUploaderArgs extends
+  UploaderArguments<TUploader> = UploaderArguments<TUploader>,
+>(
+  props: DirectUploadProps<TForm, Field, TUploader, TUploaderArgs>,
+): DirectUploadReturn
 
+/**
+ * FIXME: Inertia.js form should not be part of this hook
+ * We should let the user manage this and expose callbacks
+ */
 export function useUpload<
   TForm extends FormDataType,
   Field extends FormDataKeys<TForm>,
-  TUploader extends string,
+  TUploader extends UploaderGeneric,
+  TUploaderArgs extends
+  UploaderArguments<TUploader> = UploaderArguments<TUploader>,
 >(
-  props: UseUploadProps<TForm, Field, TUploader>,
+  props: UseUploadProps<TForm, Field, TUploader, TUploaderArgs>,
 ): MultipartUploadReturn | DirectUploadReturn {
-  const { form, field, onRemoveAttachment, onError, mode } = props
+  const { form, field, onRemoveAttachment, onUploadError, mode } = props
   const [preview, setPreview] = useState<string | undefined>(
     (form.data[field] as string) ?? undefined,
   )
@@ -115,7 +77,11 @@ export function useUpload<
     (files: FileList | null) => {
       if (!files || files.length === 0) return
 
+      // TODO: Implement multi file handling
       const file = files[0]
+
+      // TODO:: Implement uploadType: 'image' | 'video' | 'audio' | 'file'
+      // Not all needs a preview
       setPreview(URL.createObjectURL(file))
 
       setUploadStatus('uploading')
@@ -131,7 +97,7 @@ export function useUpload<
           const signal = abortControllerRef.current.signal
 
           try {
-            const signUrl = props.signUrlBuilder(props.uploader).url
+            const signUrl = props.signUrlBuilder(props.uploaderArgs).url
             const signResult = await makeJsonRequest<SignerResult>({
               url: signUrl,
               options: {
@@ -148,7 +114,7 @@ export function useUpload<
               const error = signResult.error as Error
               setProgress(0)
               setUploadStatus('error')
-              onError?.(error)
+              onUploadError?.(error)
               setPreview(undefined)
               return
             }
@@ -180,7 +146,7 @@ export function useUpload<
               const error = uploadResult.error as Error
 
               setUploadStatus('error')
-              onError?.(error)
+              onUploadError?.(error)
               setPreview(undefined)
               return
             } else {
@@ -189,16 +155,7 @@ export function useUpload<
 
             setProgress(0) // Reset progress to reset animation
             setUploadStatus('validating')
-            /* console.log('SIGNER DATA', { url, key }) */
-
-            // DO the backend abstraction here.
-            // This can not be just like this
-            // We need to really verify the backend validations
-            // are enforced; Mimetype, size, etc.
-            safeAssign(key)
-
-            // TODO: After this, user should call form.submit() to validate and assign
-            // The validation phase will be handled by the backend endpoint
+            console.log('SIGNER DATA', { url, key })
           } finally {
             // Always clean up the abort controller
             abortControllerRef.current = null
@@ -206,7 +163,7 @@ export function useUpload<
         }
       })
     },
-    [mode, props, safeAssign, onError, cancelUpload, startTransition],
+    [mode, props, safeAssign, onUploadError, cancelUpload, startTransition],
   )
 
   const handleRemove = useCallback(() => {
@@ -219,6 +176,13 @@ export function useUpload<
     }
   }, [form, field, cancelUpload, safeAssign, onRemoveAttachment])
 
+  useEffect(() => {
+    return () => {
+      // On unmount, cancel any ongoing upload
+      cancelUpload()
+    }
+  }, [cancelUpload])
+
   return useMemo(() => {
     const baseReturn = {
       handleUpload,
@@ -227,20 +191,19 @@ export function useUpload<
       setPreview,
     }
 
-    // Only include progress, uploadStatus, isPending, and cancelUpload for direct_upload mode
-    if (mode === 'direct_upload') {
-      return {
-        ...baseReturn,
-        progress,
-        uploadStatus,
-        isPending,
-        cancelUpload,
-      }
-    }
+    if (mode === 'multipart_form') return baseReturn
 
-    return baseReturn
+    return {
+      ...baseReturn,
+      progress,
+      uploadStatus,
+      isPending,
+      cancelUpload,
+    }
   }, [
     handleUpload,
+    // FIXME: Move this out of here
+    // Removing the attachment is not uploader responsability
     handleRemove,
     preview,
     setPreview,

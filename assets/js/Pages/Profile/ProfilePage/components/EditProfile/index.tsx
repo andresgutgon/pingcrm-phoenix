@@ -15,8 +15,8 @@ import { Text } from '@/components/ui/atoms/Text'
 import { Avatar } from '@/components/ui/atoms/Avatar'
 import { DropzoneInput } from '@/components/ui/atoms/DropzoneInput'
 import { cn } from '@/lib/utils'
-import { useUpload } from '@/hooks/useUpload'
-import { sign } from '@/actions/DirectUploadsController'
+import { useUpload } from '@/hooks/storage/useUpload'
+import { sign, store } from '@/actions/DirectUploadsController'
 import { showToast } from '@/components/ui/atoms/Toast'
 import { AvatarRoot } from '@/components/ui/atoms/Avatar/Primitives'
 import { Icon } from '@/components/ui/atoms/Icon'
@@ -95,15 +95,19 @@ export default function EditProfile() {
     mode: 'direct_upload',
     form: profileForm,
     field: 'avatar',
-    uploader: 'avatar',
+    uploaderArgs: {
+      uploader: 'avatar',
+      entity_id: user.id,
+    },
     signUrlBuilder: sign,
+    storeUrlBuilder: store,
     onRemoveAttachment: () => {
       // TODO: Make a custom avatar form
       profileForm.submit(deleteAvatar(), {
         preserveScroll: true,
       })
     },
-    onError: (error) => {
+    onUploadError: (error) => {
       showToast({
         title: 'Error uploading avatar',
         variant: 'destructive',

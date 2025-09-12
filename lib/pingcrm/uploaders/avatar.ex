@@ -1,17 +1,43 @@
 defmodule Pingcrm.Uploaders.Avatar do
   use Waffle.Definition
   use Waffle.Ecto.Definition
+
+  alias Pingcrm.Repo
+  alias Pingcrm.Accounts.{User, Scope}
   alias Pingcrm.Storage.Utils
-  alias Pingcrm.Accounts.Scope
 
   @behaviour Pingcrm.Storage.DirectUploads.Behaviour
+
   @versions [:original, :thumb]
 
   @impl true
-  def authorize(%Scope{}), do: :ok
+  def load_entity(id) do
+    case Repo.get(User, id) do
+      nil -> {:error, "User not found"}
+      user -> {:ok, user}
+    end
+  end
+
+  @impl true
+  def authorize(%Scope{user: current}, %User{id: user_id}) do
+    if current.id == user_id do
+      :ok
+    else
+      {:error, "You can't update another user's avatar"}
+    end
+  end
+
+  @impl true
+  def persist(%User{} = user, key) do
+    user
+    |> Ecto.Changeset.change(%{avatar: key})
+    |> Repo.update()
+  end
 
   @impl true
   def scope(%Scope{user: %{uuid: uuid}}), do: %{uuid: uuid}
+
+  ## === Waffle callbacks ===
 
   def storage_dir(version, {_file, scope}) do
     "users/#{scope.uuid}/avatars/#{version}"
@@ -32,9 +58,10 @@ defmodule Pingcrm.Uploaders.Avatar do
     {:convert, "-strip -thumbnail 200x200^ -gravity center -extent 200x200 -format png", :png}
   end
 
-  # Not working on development. Maybe with a real assets host in production
-  # In development image is never cached because signed url is different each time (time parameter change)
   def s3_object_headers(_version, {file, _scope}) do
-    [cache_control: "public, max-age=31536000", content_type: MIME.from_path(file.file_name)]
+    [
+      cache_control: "public, max-age=31536000",
+      content_type: MIME.from_path(file.file_name)
+    ]
   end
 end
