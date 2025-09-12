@@ -2,7 +2,7 @@ import { buildUrl, type RouteQueryOptions, type RouteDefinition, type RouteDefin
 
 /**
  * @see PingcrmWeb.DirectUploadsController::sign
- * @see lib/pingcrm_web/controllers/direct_uploads_controller.ex:5
+ * @see lib/pingcrm_web/controllers/direct_uploads_controller.ex:11
  * @route /direct_uploads/:uploader/:entity_id/sign
 */
 
@@ -32,7 +32,7 @@ sign.post = (args: { uploader: string | number, entity_id: string | number } | [
 
 /**
  * @see PingcrmWeb.DirectUploadsController::store
- * @see lib/pingcrm_web/controllers/direct_uploads_controller.ex:30
+ * @see lib/pingcrm_web/controllers/direct_uploads_controller.ex:36
  * @route /direct_uploads/:uploader/:entity_id/store
 */
 

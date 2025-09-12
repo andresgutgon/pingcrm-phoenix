@@ -17,6 +17,9 @@ defmodule Pingcrm.Uploaders.Avatar do
   def field, do: :avatar
 
   @impl true
+  def entity_pk, do: :id
+
+  @impl true
   def get_file(%User{avatar: avatar}), do: avatar.file_name
   def get_file(_), do: nil
 
