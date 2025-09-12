@@ -17,7 +17,7 @@ defmodule Pingcrm.Accounts.Presenter do
       # cache headers ok but the query params change all the time so never is cached in the browser disk.
       # In production with a real domain assets.pingcrm.com in front of R2 it should work.
       # Signing it necessary because the bucket is private.
-      avatar: Avatar.url({user.avatar, user}, :thumb, signed: true, expires_in: 86_400), # 24 hours
+      avatar: Avatar.url({user.avatar, user}, :original, signed: true, expires_in: 86_400), # 24 hours
       email_changed: user.email_changed,
       confirmed_at: user.confirmed_at,
       authenticated_at: user.authenticated_at,

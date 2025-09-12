@@ -19,6 +19,7 @@ defmodule Pingcrm.Accounts.User do
     field :first_name, :string
     field :last_name, :string
     field :avatar, Avatar.Type
+
     # FAKE Until I migrate to UUIDs
     field :uuid, :string, virtual: true
 

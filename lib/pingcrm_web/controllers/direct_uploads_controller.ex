@@ -1,6 +1,12 @@
 defmodule PingcrmWeb.DirectUploadsController do
   use PingcrmWeb, :controller
-  alias Pingcrm.Storage.DirectUploads.{Signer, Resolver}
+
+  alias Pingcrm.Storage.DirectUploads.{
+    Signer,
+    Resolver,
+    Behaviour,
+    ProcessUploadJob
+  }
 
   def sign(conn, %{
         "uploader" => uploader_str,
@@ -37,13 +43,14 @@ defmodule PingcrmWeb.DirectUploadsController do
     with {:ok, uploader} <- Resolver.resolve(uploader_str),
          {:ok, entity} <- uploader.load_entity(entity_id),
          :ok <- uploader.authorize(scope, entity),
-         {:ok, entity} <- uploader.persist(entity, key) do
-      # enqueue a job for async variant generation
-      # %{id: entity.id}
-      # |> Map.put("uploader", uploader_str)
-      # |> Map.put("key", key)
-      # |> GenerateVariants.new()
-      # |> Oban.insert!()
+         {:ok, {entity, old_file}} <- Behaviour.persist(uploader, entity, key) do
+
+      # ProcessUploadJob.enqueue(%{
+      #   "uploader" => uploader_str,
+      #   "entity_id" => entity.id,
+      #   "key" => key,
+      #   "old_file" => old_file
+      # })
 
       json(conn, %{ok: true})
     else

@@ -39,9 +39,9 @@ defmodule Pingcrm.MixProject do
       # Core dependencies
       {:bcrypt_elixir, "~> 3.0"},
       {:phoenix, "~> 1.8.0-rc.3", override: true},
-      {:phoenix_ecto, "~> 4.6"},
+      {:phoenix_ecto, "~> 4.6.5"},
       {:phoenix_html, "~> 4.2.1"},
-      {:ecto_sql, "~> 3.12"},
+      {:ecto_sql, "~> 3.13.2"},
       {:postgrex, ">= 0.0.0"},
       {:swoosh, "~> 1.5"},
       {:gen_smtp, "~> 1.2"},

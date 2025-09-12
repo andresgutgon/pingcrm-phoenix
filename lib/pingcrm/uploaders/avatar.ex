@@ -11,6 +11,16 @@ defmodule Pingcrm.Uploaders.Avatar do
   @versions [:original, :thumb]
 
   @impl true
+  def scope(%Scope{user: %{uuid: uuid}}), do: %{uuid: uuid}
+
+  @impl true
+  def field, do: :avatar
+
+  @impl true
+  def get_file(%User{avatar: avatar}), do: avatar.file_name
+  def get_file(_), do: nil
+
+  @impl true
   def load_entity(id) do
     case Repo.get(User, id) do
       nil -> {:error, "User not found"}
@@ -26,18 +36,6 @@ defmodule Pingcrm.Uploaders.Avatar do
       {:error, "You can't update another user's avatar"}
     end
   end
-
-  @impl true
-  def persist(%User{} = user, key) do
-    user
-    |> Ecto.Changeset.change(%{avatar: key})
-    |> Repo.update()
-  end
-
-  @impl true
-  def scope(%Scope{user: %{uuid: uuid}}), do: %{uuid: uuid}
-
-  ## === Waffle callbacks ===
 
   def storage_dir(version, {_file, scope}) do
     "users/#{scope.uuid}/avatars/#{version}"
