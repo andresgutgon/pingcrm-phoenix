@@ -30,6 +30,13 @@ defmodule Pingcrm.Accounts do
     |> Repo.update()
   end
 
+  # FIXME: Add tests
+  def set_admin(user, value \\ true) do
+    user
+    |> Ecto.Changeset.change(admin?: value)
+    |> Repo.update()
+  end
+
   def has_account?(%User{id: user_id}, account_id)
       when is_binary(account_id) or is_integer(account_id) do
     query =

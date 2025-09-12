@@ -29,6 +29,7 @@ config :pingcrm,
 config :pingcrm, PingcrmWeb.Endpoint,
   url: [host: "localhost"],
   adapter: Bandit.PhoenixAdapter,
+  live_view: [signing_salt: "GGRLSIXzkIq1zB1C"],
   render_errors: [
     formats: [html: PingcrmWeb.ErrorHTML, json: PingcrmWeb.ErrorJSON],
     layout: false
@@ -56,7 +57,7 @@ config :inertia,
 config :wayfinder_ex,
   otp_app: :pingcrm,
   router: PingcrmWeb.Router,
-  ignore_paths: ["^/backoffice"]
+  ignore_paths: ["^/oban-queues"]
 
 # Configures Elixir's Logger
 config :logger, :console,
@@ -64,6 +65,11 @@ config :logger, :console,
   metadata: [:request_id]
 
 config :phoenix, :json_library, Jason
+
+config :pingcrm, Oban,
+  engine: Oban.Engines.Basic,
+  queues: [default: 10],
+  repo: Pingcrm.Repo
 
 # Import environment specific config. This must remain at the bottom
 # of this file so it overrides the configuration defined above.

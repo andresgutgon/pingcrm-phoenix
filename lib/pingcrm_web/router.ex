@@ -5,6 +5,8 @@ defmodule PingcrmWeb.Router do
   use PingcrmWeb, :router
   use Wayfinder.PhoenixRouter
 
+  import Oban.Web.Router
+
   @main_domain Application.compile_env!(:pingcrm, PingcrmWeb)[:main_domain]
   @app_domain Application.compile_env!(:pingcrm, PingcrmWeb)[:app_domain]
 
@@ -54,11 +56,12 @@ defmodule PingcrmWeb.Router do
 
     get "/reset_password/:token", ResetPasswordController, :edit
     put "/reset_password/:token", ResetPasswordController, :update
-
   end
 
   scope "/", PingcrmWeb, host: @app_domain do
     pipe_through [:browser, :require_confirmed_user]
+
+    oban_dashboard("/oban-queues", resolver: PingcrmWeb.ObanResolver)
 
     scope "/", Auth do
       get "/confirm-email/:token", ConfirmEmailController, :edit

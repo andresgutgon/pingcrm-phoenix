@@ -29,6 +29,7 @@ defmodule Pingcrm.Accounts.User do
     field :password_confirmation, :string, virtual: true, redact: true
     field :confirmed_at, :utc_datetime
     field :authenticated_at, :utc_datetime, virtual: true
+    field :admin?, :boolean, default: false
 
     # Relations
     has_many :memberships, Membership

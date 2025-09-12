@@ -12,6 +12,13 @@ defmodule PingcrmWeb.Endpoint do
     same_site: "Lax"
   ]
 
+  # Used by Oban dashboard
+  socket(
+    "/live",
+    Phoenix.LiveView.Socket,
+    websocket: [connect_info: [session: @session_options]]
+  )
+
   # Serve at "/" the static files from "priv/static" directory.
   #
   # You should set gzip to true if you are running phx.digest

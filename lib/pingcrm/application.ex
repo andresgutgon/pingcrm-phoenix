@@ -15,6 +15,7 @@ defmodule Pingcrm.Application do
       {Phoenix.PubSub, name: Pingcrm.PubSub},
       {Finch, name: Pingcrm.Finch},
       PingcrmWeb.Endpoint,
+      {Oban, Application.fetch_env!(:pingcrm, Oban)},
       {Vitex,
        dev_mode: dev_mode or dev_test_mode,
        endpoint: PingcrmWeb.Endpoint,
@@ -33,8 +34,7 @@ defmodule Pingcrm.Application do
 
     # See https://hexdocs.pm/elixir/Supervisor.html
     # for other strategies and supported options
-    opts = [strategy: :one_for_one, name: Pingcrm.Supervisor]
-    Supervisor.start_link(children, opts)
+    Supervisor.start_link(children, strategy: :one_for_one, name: Pingcrm.Supervisor)
   end
 
   # Tell Phoenix to update the endpoint configuration
