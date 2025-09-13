@@ -32,7 +32,7 @@ export function useUpload<
   Field extends FormDataKeys<TForm>,
   TUploader extends UploaderGeneric,
   TUploaderArgs extends
-  UploaderArguments<TUploader> = UploaderArguments<TUploader>,
+    UploaderArguments<TUploader> = UploaderArguments<TUploader>,
 >(
   props: DirectUploadProps<TForm, Field, TUploader, TUploaderArgs>,
 ): DirectUploadReturn
@@ -46,7 +46,7 @@ export function useUpload<
   Field extends FormDataKeys<TForm>,
   TUploader extends UploaderGeneric,
   TUploaderArgs extends
-  UploaderArguments<TUploader> = UploaderArguments<TUploader>,
+    UploaderArguments<TUploader> = UploaderArguments<TUploader>,
 >(
   props: UseUploadProps<TForm, Field, TUploader, TUploaderArgs>,
 ): MultipartUploadReturn | DirectUploadReturn {

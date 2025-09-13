@@ -28,6 +28,7 @@ services:
       context: .
       dockerfile: docker/Dockerfile
       target: dev
+    command: iex -S mix phx.server
     ports:
       - "${PORT}"
       - "5173:5173"

@@ -15,7 +15,11 @@ import { MenuOption } from '@/components/ui/atoms/Dropdown/types'
 import { deleteMethod } from '@/actions/Auth/SessionsController'
 import { myProfile } from '@/actions/Profile/ProfileController'
 
-function UserProfile({ user: { name, email, initials, avatar } }: { user: User }) {
+function UserProfile({
+  user: { name, email, initials, avatar },
+}: {
+  user: User
+}) {
   return (
     <>
       <Avatar

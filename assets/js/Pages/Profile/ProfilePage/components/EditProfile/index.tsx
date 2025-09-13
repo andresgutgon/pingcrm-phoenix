@@ -20,6 +20,7 @@ import { sign, store } from '@/actions/DirectUploadsController'
 import { showToast } from '@/components/ui/atoms/Toast'
 import { AvatarRoot } from '@/components/ui/atoms/Avatar/Primitives'
 import { Icon } from '@/components/ui/atoms/Icon'
+import { useChannel } from '@/Providers/WebsocketsProvider/useChannel'
 
 function AvatartPreview({
   src,
@@ -55,7 +56,7 @@ function AvatartPreview({
 type UpdateProfileInput = {
   first_name: string
   last_name: string
-  avatar?: string | File
+  avatar_medium?: string | File
 }
 
 export default function EditProfile() {
@@ -66,21 +67,8 @@ export default function EditProfile() {
   const profileForm = useForm<UpdateProfileInput>({
     first_name: user.first_name,
     last_name: user.last_name,
-    avatar: user.avatar ?? '',
+    avatar_medium: user.avatar_medium ?? '',
   })
-
-  // TODO: Revert to mutlipart_form when
-  // when direct upload is implemented for company logo
-  // const { setPreview, preview, handleUpload } = useUpload({
-  //   mode: 'multipart_form',
-  //   form: profileForm, // If avatar was uploaded in a multipart_form
-  //   field: 'avatar',
-  //   onRemoveAttachment: () => {
-  //     form.submit(deleteAvatar(), {
-  //       preserveScroll: true,
-  //     })
-  //   },
-  // })
 
   const {
     progress,
@@ -91,10 +79,10 @@ export default function EditProfile() {
     handleUpload,
     handleRemove,
     cancelUpload,
-  } = useUpload<UpdateProfileInput, 'avatar', AvailableUploaders>({
+  } = useUpload<UpdateProfileInput, 'avatar_medium', AvailableUploaders>({
     mode: 'direct_upload',
     form: profileForm,
-    field: 'avatar',
+    field: 'avatar_medium',
     uploaderArgs: { uploader: 'avatar', entity_id: user.id },
     signUrlBuilder: sign,
     storeUrlBuilder: store,
@@ -106,6 +94,15 @@ export default function EditProfile() {
       })
     },
   })
+
+  useChannel({
+    channel: 'storage:direct_upload',
+    topic: `avatar:user:${user.id}`,
+    onUploaderStatusChanged: (event) => {
+      console.log('Received event', event)
+    },
+  })
+
   const onRemove = useCallback(() => {
     handleRemove()
     profileForm.submit(deleteAvatar(), {
@@ -170,11 +167,11 @@ export default function EditProfile() {
           <DropzoneInput
             name='avatar'
             defaultFilename={
-              typeof profileForm.data.avatar === 'string'
-                ? profileForm.data.avatar
+              typeof profileForm.data.avatar_medium === 'string'
+                ? profileForm.data.avatar_medium
                 : undefined
             }
-            error={profileForm.errors.avatar}
+            error={profileForm.errors.avatar_medium}
             accept='.jpg,.jpeg,.png,.webp'
             multiple={false}
             placeholder='Click or drag and drop your avatar here'

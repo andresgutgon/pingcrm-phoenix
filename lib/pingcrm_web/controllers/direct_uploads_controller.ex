@@ -4,9 +4,10 @@ defmodule PingcrmWeb.DirectUploadsController do
   alias Pingcrm.Storage.DirectUploads.{
     Signer,
     Resolver,
-    Behaviour,
-    ProcessUploadJob
+    Behaviour
   }
+
+  alias Pingcrm.Storage.ProcessUploadJob
 
   def sign(conn, %{
         "uploader" => uploader_str,
@@ -17,12 +18,15 @@ defmodule PingcrmWeb.DirectUploadsController do
     scope = conn.assigns.current_scope
 
     with {:ok, uploader} <- Resolver.resolve(uploader_str),
-         {:ok, user} <- uploader.load_entity(entity_id),
-         :ok <- uploader.authorize(scope, user) do
+         {:ok, entity} <- uploader.load_entity(entity_id),
+         :ok <- uploader.authorize(scope, entity) do
+      # FIXME: Remove this shit. Convert user pk to uuid
+      entity = %{entity | uuid: Integer.to_string(entity.id)}
+
       result =
         Signer.presign(uploader, :original,
           filename: filename,
-          scope: uploader.scope(scope),
+          scope: uploader.scope(entity),
           query_params: [{"Content-Type", type}]
         )
 
@@ -43,13 +47,12 @@ defmodule PingcrmWeb.DirectUploadsController do
     with {:ok, uploader} <- Resolver.resolve(uploader_str),
          {:ok, entity} <- uploader.load_entity(entity_id),
          :ok <- uploader.authorize(scope, entity),
-         {:ok, {entity, old_file}} <- Behaviour.persist(uploader, entity, key) do
-
+         {:ok, {old_filename}} <- Behaviour.start_upload(uploader, entity) do
       # ProcessUploadJob.enqueue(%{
       #   "uploader" => uploader_str,
       #   "entity_id" => entity.id,
       #   "key" => key,
-      #   "old_file" => old_file
+      #   "old_filename" => old_filename
       # })
 
       json(conn, %{ok: true})

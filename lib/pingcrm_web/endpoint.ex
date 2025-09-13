@@ -19,6 +19,11 @@ defmodule PingcrmWeb.Endpoint do
     websocket: [connect_info: [session: @session_options]]
   )
 
+  socket "/socket", PingcrmWeb.Socket,
+    websocket: true,
+    longpoll: false,
+    auth_token: true
+
   # Serve at "/" the static files from "priv/static" directory.
   #
   # You should set gzip to true if you are running phx.digest

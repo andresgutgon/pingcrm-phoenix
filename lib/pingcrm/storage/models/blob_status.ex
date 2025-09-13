@@ -8,18 +8,46 @@ defmodule Pingcrm.Storage.Models.BlobStatus do
   use Ecto.Schema
   import Ecto.Changeset
 
+  @moduledoc """
+  Public API for managing blob statuses.
+
+  Provides simple functions to mark uploads as processing, ready, or failed.
+  Also broadcasts status changes via websockets.
+  """
   schema "storage_blob_statuses" do
     field :entity_type, :string
     field :entity_id, :string
     field :status, Ecto.Enum, values: [:ready, :processing, :failed]
-    field :message, :string
-
+    field :payload, :map
     timestamps()
   end
 
-  def changeset(status, attrs) do
+  def processing_changeset(status, progress) when is_integer(progress) and progress >= 0 do
     status
-    |> cast(attrs, [:entity_type, :entity_id, :status, :message])
-    |> validate_required([:entity_type, :entity_id, :status])
+    |> cast(%{status: :processing, payload: %{progress: progress}}, [:status, :payload])
+    |> validate_required([:status, :payload])
+  end
+
+  def ready_changeset(status, entity_id, entity_type, field, entity_data) do
+    status
+    |> cast(
+      %{
+        status: :ready,
+        payload: %{
+          entity_id: entity_id,
+          entity_type: entity_type,
+          field: Atom.to_string(field),
+          entity_data: entity_data
+        }
+      },
+      [:status, :payload]
+    )
+    |> validate_required([:status, :payload])
+  end
+
+  def failed_changeset(status, error) when is_binary(error) do
+    status
+    |> cast(%{status: :failed, payload: %{error: error}}, [:status, :payload])
+    |> validate_required([:status, :payload])
   end
 end

@@ -6,22 +6,21 @@ defmodule Pingcrm.Uploaders.Avatar do
   alias Pingcrm.Accounts.{User, Scope}
   alias Pingcrm.Storage.Utils
 
-  @behaviour Pingcrm.Storage.DirectUploads.Behaviour
-
-  @versions [:original, :thumb]
+  use Pingcrm.Storage.DirectUploads.Behaviour
+  alias Pingcrm.Uploaders.Avatar
 
   @impl true
-  def scope(%Scope{user: %{uuid: uuid}}), do: %{uuid: uuid}
+  def scope(%User{uuid: uuid}), do: %{uuid: uuid}
 
   @impl true
   def field, do: :avatar
 
   @impl true
-  def entity_pk, do: :id
+  def entity_pk, do: :uuid
 
   @impl true
-  def get_file(%User{avatar: avatar}), do: avatar.file_name
-  def get_file(_), do: nil
+  def get_filename(%User{avatar: avatar}), do: avatar.file_name
+  def get_filename(_), do: nil
 
   @impl true
   def load_entity(id) do
@@ -40,6 +39,29 @@ defmodule Pingcrm.Uploaders.Avatar do
     end
   end
 
+  @impl true
+  def updated_entity_data(user) do
+    %{
+      avatar:
+        Avatar.url(
+          {user.avatar, user},
+          :thumb,
+          signed: true,
+          expires_in: 86_400
+        ),
+      avatar_medium:
+        Avatar.url(
+          {user.avatar, user},
+          :medium,
+          signed: true,
+          expires_in: 86_400
+        )
+    }
+  end
+
+  # Waffle configuration
+  @versions [:original, :thumb, :medium]
+
   def storage_dir(version, {_file, scope}) do
     "users/#{scope.uuid}/avatars/#{version}"
   end
@@ -55,8 +77,12 @@ defmodule Pingcrm.Uploaders.Avatar do
     )
   end
 
-  def transform(:thumb, _) do
+  def transform(:medium, _) do
     {:convert, "-strip -thumbnail 200x200^ -gravity center -extent 200x200 -format png", :png}
+  end
+
+  def transform(:thumb, _) do
+    {:convert, "-strip -thumbnail 50x50^ -gravity center -extent 50x50 -format png", :png}
   end
 
   def s3_object_headers(_version, {file, _scope}) do

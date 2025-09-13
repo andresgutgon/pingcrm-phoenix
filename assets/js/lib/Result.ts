@@ -1,7 +1,7 @@
 export class Ok<V> {
   public readonly error: undefined = undefined
 
-  constructor(public readonly value: V) { }
+  constructor(public readonly value: V) {}
 
   public bind<T>(fn: (value: V) => T): T {
     return fn(this.value)
@@ -20,7 +20,7 @@ export class Ok<V> {
 export class ErrorResult<E extends Error> {
   public readonly value: undefined = undefined
 
-  constructor(public readonly error: E) { }
+  constructor(public readonly error: E) {}
 
   public bind(): ErrorResult<E> {
     return this
@@ -41,7 +41,7 @@ export type TypedResult<V = undefined, E extends Error = Error> =
   | ErrorResult<E>
 
 export class Result {
-  private constructor() { }
+  private constructor() {}
 
   public static ok<V>(value: V): Ok<V> {
     return new Ok(value)

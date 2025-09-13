@@ -73,51 +73,47 @@ async function makeRequestWithProgress({
       throw new Error('Body must be a File or Blob when tracking progress')
     }
 
-    return await new Promise<TypedResult<Response, Error>>(
-      (resolve) => {
-        const xhr = new XMLHttpRequest()
-        xhr.open(options.method || 'PUT', url)
+    return await new Promise<TypedResult<Response, Error>>((resolve) => {
+      const xhr = new XMLHttpRequest()
+      xhr.open(options.method || 'PUT', url)
 
-        if (options.headers) {
-          Object.entries(options.headers).forEach(([key, value]) => {
-            if (typeof value === 'string') {
-              xhr.setRequestHeader(key, value)
-            }
-          })
-        }
-
-        xhr.upload.onprogress = (event) => {
-          if (event.lengthComputable) {
-            const progress = Math.round((event.loaded / event.total) * 100)
-            onUploadProgress(progress)
+      if (options.headers) {
+        Object.entries(options.headers).forEach(([key, value]) => {
+          if (typeof value === 'string') {
+            xhr.setRequestHeader(key, value)
           }
-        }
+        })
+      }
 
-        xhr.onload = () => {
-          if (xhr.status >= 200 && xhr.status < 300) {
-            resolve(
-              Result.ok(new Response(xhr.response, { status: xhr.status })),
-            )
-          } else {
-            resolve(Result.error(new Error(`HTTP error! status: ${xhr.status}`)))
-          }
+      xhr.upload.onprogress = (event) => {
+        if (event.lengthComputable) {
+          const progress = Math.round((event.loaded / event.total) * 100)
+          onUploadProgress(progress)
         }
+      }
 
-        xhr.onerror = () => {
-          resolve(Result.error(new Error('Network error during upload')))
+      xhr.onload = () => {
+        if (xhr.status >= 200 && xhr.status < 300) {
+          resolve(Result.ok(new Response(xhr.response, { status: xhr.status })))
+        } else {
+          resolve(Result.error(new Error(`HTTP error! status: ${xhr.status}`)))
         }
+      }
 
-        // Handle aborts
-        if (signal) {
-          signal.addEventListener('abort', () => {
-            xhr.abort()
-            resolve(Result.error(new AbortError('Upload aborted')))
-          })
-        }
+      xhr.onerror = () => {
+        resolve(Result.error(new Error('Network error during upload')))
+      }
 
-        xhr.send(body)
-      },
-    )
+      // Handle aborts
+      if (signal) {
+        signal.addEventListener('abort', () => {
+          xhr.abort()
+          resolve(Result.error(new AbortError('Upload aborted')))
+        })
+      }
+
+      xhr.send(body)
+    })
   } catch (error) {
     return Result.error(
       error instanceof Error ? error : new Error(String(error)),

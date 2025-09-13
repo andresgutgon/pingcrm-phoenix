@@ -52,6 +52,7 @@ export interface User {
   initials: string
   email: string
   avatar?: string
+  avatar_medium?: string
   email_changed?: string
   confirmed_at: string
   authenticated_at: string
@@ -73,6 +74,7 @@ export type PageProps<T extends ConcretePageProps = ConcretePageProps> = T & {
     account: Account
     accounts: Account[]
     role: 'admin' | 'member'
+    socket_token: string
   }
   errors: Errors
   flash: {

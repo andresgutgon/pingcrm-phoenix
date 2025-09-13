@@ -65,6 +65,9 @@ importers:
       next-themes:
         specifier: ^0.4.6
         version: 0.4.6(react-dom@19.0.0(react@19.0.0))(react@19.0.0)
+      phoenix:
+        specifier: ^1.8.1
+        version: 1.8.1
       react:
         specifier: ^19.0.0
         version: 19.0.0
@@ -2224,6 +2227,9 @@ packages:
   pathval@2.0.0:
     resolution: {integrity: sha512-vE7JKRyES09KiunauX7nd2Q9/L7lhok4smP9RZTDeD4MVs72Dp2qNFVz39Nz5a0FVEW0BJR6C0DYrq6unoziZA==}
     engines: {node: '>= 14.16'}
+
+  phoenix@1.8.1:
+    resolution: {integrity: sha512-7i2a5f5y0Qhzi2g/+iuaGr4TzRt5ucqI0JeV2Q9K0swqY8L2C7CLR66RcGCpcQKGOY73B5GLKMYEl13o/9l/Cg==}
 
   picocolors@1.1.1:
     resolution: {integrity: sha512-xceH2snhtb5M9liqDsmEw56le376mTZkEX/jEb/RxNFyegNul7eNslCXP9FDj/Lcu0X8KEyMceP2ntpaHrDEVA==}
@@ -4642,6 +4648,8 @@ snapshots:
   pathe@1.1.2: {}
 
   pathval@2.0.0: {}
+
+  phoenix@1.8.1: {}
 
   picocolors@1.1.1: {}
 

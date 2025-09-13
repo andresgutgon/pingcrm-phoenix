@@ -7,7 +7,8 @@ defmodule Pingcrm.Repo.Migrations.AddStorageBlobStatusesTable do
       # always stored as text
       add :entity_id, :string, null: false
       add :status, :string, null: false
-      add :message, :text
+      add :payload, :jsonb
+
 
       timestamps()
     end
