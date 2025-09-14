@@ -31,6 +31,8 @@ defmodule Pingcrm.Storage.DirectUploads.Behaviour do
 
   defmacro __using__(_) do
     quote do
+      @behaviour Pingcrm.Storage.DirectUploads.Behaviour
+
       @spec broadcast_topic(struct()) :: String.t()
       def broadcast_topic(%{__meta__: %Ecto.Schema.Metadata{}} = entity) do
         name = uploader_name()

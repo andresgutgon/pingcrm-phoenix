@@ -20,9 +20,6 @@ defmodule PingcrmWeb.DirectUploadsController do
     with {:ok, uploader} <- Resolver.resolve(uploader_str),
          {:ok, entity} <- uploader.load_entity(entity_id),
          :ok <- uploader.authorize(scope, entity) do
-      # FIXME: Remove this shit. Convert user pk to uuid
-      entity = %{entity | uuid: Integer.to_string(entity.id)}
-
       result =
         Signer.presign(uploader, :original,
           filename: filename,
@@ -48,12 +45,12 @@ defmodule PingcrmWeb.DirectUploadsController do
          {:ok, entity} <- uploader.load_entity(entity_id),
          :ok <- uploader.authorize(scope, entity),
          {:ok, {old_filename}} <- Behaviour.start_upload(uploader, entity) do
-      # ProcessUploadJob.enqueue(%{
-      #   "uploader" => uploader_str,
-      #   "entity_id" => entity.id,
-      #   "key" => key,
-      #   "old_filename" => old_filename
-      # })
+      ProcessUploadJob.enqueue(%{
+        "uploader" => uploader_str,
+        "entity_id" => entity.id,
+        "key" => key,
+        "old_filename" => old_filename
+      })
 
       json(conn, %{ok: true})
     else

@@ -25,8 +25,13 @@ defmodule Pingcrm.Uploaders.Avatar do
   @impl true
   def load_entity(id) do
     case Repo.get(User, id) do
-      nil -> {:error, "User not found"}
-      user -> {:ok, user}
+      nil ->
+        {:error, "User not found"}
+
+      user ->
+        # FIXME: Remove this shit. Convert user pk to uuid
+        user = %{user | uuid: Integer.to_string(user.id)}
+        {:ok, user}
     end
   end
 

@@ -38,7 +38,19 @@ export async function makeRequest({
     })
 
     if (!response.ok) {
-      throw new Error(`HTTP error! status: ${response.status}`)
+      // Try to read JSON body for `error`
+      let errorMessage = `HTTP error! status: ${response.status}`
+      try {
+        const body = await response.json()
+
+        if (body?.error) {
+          errorMessage = body.error
+        }
+      } catch {
+        // swallow JSON parse errors, keep default
+      }
+
+      return Result.error(new Error(errorMessage))
     }
 
     return Result.ok(response)
@@ -136,6 +148,20 @@ export async function makeJsonRequest<T = unknown>({
 
     if (!response.ok) {
       return Result.error(response.error || new Error('Unknown error'))
+    }
+    if (!response.ok) {
+      // Try to read JSON body for `error`
+      let errorMessage = `HTTP error! status: ${response.status}`
+      try {
+        const body = await response.unwrap().json()
+        if (body?.error) {
+          errorMessage = body.error
+        }
+      } catch {
+        // swallow JSON parse errors, keep default
+      }
+
+      return Result.error(new Error(errorMessage))
     }
 
     const data = await response.unwrap().json()

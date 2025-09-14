@@ -87,6 +87,7 @@ export default function EditProfile() {
     signUrlBuilder: sign,
     storeUrlBuilder: store,
     onUploadError: (error) => {
+      console.log("ERROR", error)
       showToast({
         title: 'Error uploading avatar',
         variant: 'destructive',

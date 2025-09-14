@@ -103,7 +103,6 @@ defmodule Pingcrm.Storage.UploaderStatus do
          %{__meta__: %Ecto.Schema.Metadata{}} = entity
        ) do
     event_data = broadcast_event_data(blob_status)
-    dbg(event_data)
 
     Endpoint.broadcast(
       uploader.broadcast_topic(entity),

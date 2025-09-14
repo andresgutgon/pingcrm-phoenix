@@ -49,78 +49,120 @@ defmodule Pingcrm.Storage.ProcessUploadJob do
     {:ok, uploader} = Resolver.resolve(uploader_str)
     {:ok, entity} = uploader.load_entity(entity_id)
 
-    # FIXME: Remove this shit. Convert user pk to uuid
-    entity = %{entity | uuid: Integer.to_string(entity.id)}
-
     filename = get_filename_from_key(key)
 
+    # FIXME: This signing URL does not work.
+    # Region `auto` fails inside the worker. But works in the browser?
+    # Also anyway if this is a HUUUUGE file it will timeout.
+    # TODO: Implement with ex_aws or maybe waffle expose `.get`
     url =
-      uploader.url({filename, uploader.scope(entity)}, :original, signed: true, expires_in: 60)
-
-    dbg("Entity: #{inspect(entity.uuid)}")
-    dbg("Old filename: #{inspect(old_filename)}")
-    dbg("New filename: #{inspect(filename)}")
-    dbg("Scope: #{inspect(uploader.scope(entity))}")
-    dbg("URL: #{inspect(url)}")
+      uploader.url(
+        {filename, uploader.scope(entity)},
+        :original,
+        signed: true,
+        expires_in: 60
+      )
 
     try do
-      case uploader.store({url, uploader.scope(entity)}) do
-        {:ok, filename} ->
-          field = uploader.field()
-          now = DateTime.utc_now() |> DateTime.truncate(:second)
+      case get_file(uploader, filename, entity) do
+        {:ok, tmp_path} ->
+          dbg("Temp path: #{inspect(tmp_path)}")
 
-          case Repo.transact(fn repo ->
-                 with {:ok, _s} <- UploaderStatus.ready(uploader, entity),
-                      {:ok, entity_updated} <-
-                        repo.update(
-                          Ecto.Changeset.change(entity, %{
-                            field => %{file_name: filename, updated_at: now}
-                          })
-                        ) do
-                   {:ok, entity_updated}
-                 end
-               end) do
-            {:ok, entity_updated} ->
-              if old_filename do
-                uploader.delete({old_filename, entity_updated})
+          case uploader.store({tmp_path, uploader.scope(entity)}) do
+            {:ok, filename} ->
+              field = uploader.field()
+              now = DateTime.utc_now() |> DateTime.truncate(:second)
+
+              case Repo.transact(fn repo ->
+                     with {:ok, _s} <- UploaderStatus.ready(uploader, entity),
+                          {:ok, entity_updated} <-
+                            repo.update(
+                              Ecto.Changeset.change(entity, %{
+                                field => %{file_name: filename, updated_at: now}
+                              })
+                            ) do
+                       {:ok, entity_updated}
+                     end
+                   end) do
+                {:ok, entity_updated} ->
+                  if old_filename do
+                    uploader.delete({old_filename, entity_updated})
+                  end
+
+                  File.rm(tmp_path)
+
+                  {:ok, entity_updated}
+
+                {:error, reason} ->
+                  case reason do
+                    %Ecto.Changeset{} ->
+                      # Permanent like the entity was deleted
+                      # Or the entity is in bad state and validation fails
+                      UploaderStatus.fail(
+                        uploader,
+                        entity,
+                        "DB update failed: #{inspect(reason.errors)}"
+                      )
+
+                      :discard
+
+                    _ ->
+                      # Transient → oban will retry
+                      {:error, reason}
+                  end
               end
 
-              {:ok, entity_updated}
+            {:error, :waffle_hackney_error = reason} ->
+              dbg(reason)
+              # Probably transient → let Oban retry
+              {:error, :waffle_hackney_error}
 
             {:error, reason} ->
-              case reason do
-                %Ecto.Changeset{} ->
-                  # Permanent like the entity was deleted
-                  # Or the entity is in bad state and validation fails
-                  UploaderStatus.fail(
-                    uploader,
-                    entity,
-                    "DB update failed: #{inspect(reason.errors)}"
-                  )
-
-                  :discard
-
-                _ ->
-                  # Transient → oban will retry
-                  {:error, reason}
-              end
+              # Permanent → notify + discard
+              UploaderStatus.fail(uploader, entity, "Upload failed: #{inspect(reason)}")
+              :discard
           end
 
-        {:error, :waffle_hackney_error = reason} ->
-          dbg(reason)
-          # Probably transient → let Oban retry
-          {:error, :waffle_hackney_error}
-
-        {:error, reason} ->
-          # Permanent → notify + discard
-          UploaderStatus.fail(uploader, entity, "Upload failed: #{inspect(reason)}")
-          :discard
+        {:error, reason, tmp_path} ->
+          File.rm(tmp_path)
+          {:error, reason}
       end
     rescue
       e ->
         reason = Exception.message(e)
         # Propagate the error to Oban for retries
         reraise e, __STACKTRACE__
+    end
+  end
+
+  defp get_file(uploader, filename, entity) do
+    s3_bucket = uploader.bucket()
+
+    destination_dir =
+      uploader.storage_dir(
+        :original,
+        {filename, uploader.scope(entity)}
+      )
+
+    s3_key = Path.join(destination_dir, filename)
+
+    tmp_path = Path.join([System.tmp_dir!(), filename])
+
+    # {:ok, %{headers: headers}} =
+    #   ExAws.S3.head_object(s3_bucket, s3_key)
+    #   |> ExAws.request()
+    #
+    # meta = headers |> Enum.into(%{})
+    #
+    # size = String.to_integer(meta["content-length"])
+    # mimetype = meta["content-type"]
+    #
+    # dbg(size, label: "File size (bytes)")
+    # dbg(mimetype, label: "MIME type")
+
+    case ExAws.S3.download_file(s3_bucket, s3_key, tmp_path) |> ExAws.request() do
+      {:ok, _} -> {:ok, tmp_path}
+      {:error, reason} -> {:error, reason, tmp_path}
     end
   end
 

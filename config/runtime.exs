@@ -15,6 +15,10 @@ if System.get_env("PHX_SERVER") do
   config :pingcrm, PingcrmWeb.Endpoint, server: true
 end
 
+config :pingcrm, Oban,
+  repo: Pingcrm.Repo,
+  queues: [media: 10]
+
 config :pingcrm, Inertia.SSR,
   path: Path.join([Application.app_dir(:pingcrm), "priv", "ssr-js"]),
   ssr_adapter: Vitex.inertia_ssr_adapter(dev_mode: dev_mode or test_dev_mode),
