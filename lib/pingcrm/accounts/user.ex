@@ -5,7 +5,11 @@ defmodule Pingcrm.Accounts.User do
   import Ecto.Changeset
 
   use Ecto.Schema
+  # File storage third party abstraction
+  use Waffle.Ecto.Schema
+
   alias Pingcrm.Accounts.{Account, Membership}
+  alias Pingcrm.Uploaders.Avatar
   alias Pingcrm.Repo
 
   schema "users" do
@@ -14,6 +18,10 @@ defmodule Pingcrm.Accounts.User do
     field :email_changed, :string
     field :first_name, :string
     field :last_name, :string
+    field :avatar, Avatar.Type
+
+    # FAKE Until I migrate to UUIDs
+    field :uuid, :string, virtual: true
 
     # Auth
     field :password, :string, virtual: true, redact: true
@@ -22,6 +30,7 @@ defmodule Pingcrm.Accounts.User do
     field :password_confirmation, :string, virtual: true, redact: true
     field :confirmed_at, :utc_datetime
     field :authenticated_at, :utc_datetime, virtual: true
+    field :admin?, :boolean, default: false
 
     # Relations
     has_many :memberships, Membership
@@ -71,6 +80,7 @@ defmodule Pingcrm.Accounts.User do
   def profile_changed_changeset(user, attrs, _opts \\ []) do
     user
     |> cast(attrs, [:first_name, :last_name])
+    |> cast_attachments(attrs, [:avatar])
     |> validate_required([:first_name, :last_name])
   end
 

@@ -1,5 +1,6 @@
 defmodule PingcrmWeb.Endpoint do
   use Phoenix.Endpoint, otp_app: :pingcrm
+  alias Pingcrm.Storage.Config, as: Storage
 
   # The session will be stored in the cookie and signed,
   # this means its contents can be read but not tampered with.
@@ -11,6 +12,18 @@ defmodule PingcrmWeb.Endpoint do
     same_site: "Lax"
   ]
 
+  # Used by Oban dashboard
+  socket(
+    "/live",
+    Phoenix.LiveView.Socket,
+    websocket: [connect_info: [session: @session_options]]
+  )
+
+  socket "/socket", PingcrmWeb.Socket,
+    websocket: true,
+    longpoll: false,
+    auth_token: true
+
   # Serve at "/" the static files from "priv/static" directory.
   #
   # You should set gzip to true if you are running phx.digest
@@ -20,6 +33,13 @@ defmodule PingcrmWeb.Endpoint do
     from: :pingcrm,
     gzip: false,
     only: PingcrmWeb.static_paths()
+
+  if Storage.disk?() do
+    plug Plug.Static,
+      at: Storage.storage_path(),
+      from: {Storage, :storage_root, []},
+      gzip: false
+  end
 
   # Code reloading can be explicitly enabled under the
   # :code_reloader configuration of your endpoint.

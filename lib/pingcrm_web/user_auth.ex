@@ -10,6 +10,7 @@ defmodule PingcrmWeb.UserAuth do
   alias Pingcrm.Accounts
   alias Pingcrm.Accounts.Presenter, as: UserPresenter
   alias Pingcrm.Accounts.Scope
+  alias PingcrmWeb.Socket, as: WebsocketsToken
 
   @max_cookie_age_in_days 14
   @remember_me_cookie "_pingcrm_web_user_remember_me"
@@ -226,6 +227,12 @@ defmodule PingcrmWeb.UserAuth do
           user: UserPresenter.serialize(user),
           account: account,
           role: role,
+          socket_token:
+            WebsocketsToken.build_token(
+              conn,
+              user,
+              account.id
+            ),
           accounts: accounts
         })
 

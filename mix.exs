@@ -36,11 +36,12 @@ defmodule Pingcrm.MixProject do
 
   defp deps do
     [
+      # Core dependencies
       {:bcrypt_elixir, "~> 3.0"},
       {:phoenix, "~> 1.8.0-rc.3", override: true},
-      {:phoenix_ecto, "~> 4.6"},
+      {:phoenix_ecto, "~> 4.6.5"},
       {:phoenix_html, "~> 4.2.1"},
-      {:ecto_sql, "~> 3.12"},
+      {:ecto_sql, "~> 3.13.2"},
       {:postgrex, ">= 0.0.0"},
       {:swoosh, "~> 1.5"},
       {:gen_smtp, "~> 1.2"},
@@ -51,20 +52,37 @@ defmodule Pingcrm.MixProject do
       {:jason, "~> 1.2"},
       {:dns_cluster, "~> 0.1.1"},
       {:bandit, "~> 1.5"},
+      {:oban, "~> 2.19"},
+      {:oban_web, "~> 2.11"},
+
+      # AI dependencies
       {:tidewave, "~> 0.2", only: :dev},
+
+      # Development and test dependencies
       {:credo, "~> 1.7", only: [:dev, :test], runtime: false},
       {:dialyxir, "~> 1.3", only: [:dev], runtime: false},
       {:ex_machina, "~> 2.8.0", only: :test},
       {:faker, "~> 0.17", only: :test},
       {:floki, ">= 0.34.0", only: :test},
       {:mix_test_watch, "~> 1.0", only: [:dev, :test], runtime: false},
+
+      # UI dependencies
       {:wayfinder_ex, "~> 0.1.5"},
       {
         :inertia,
         git: "https://github.com/andresgutgon/inertia-phoenix.git",
         branch: "feature/inertia-vitejs-integration"
       },
-      {:vitex, git: "https://github.com/andresgutgon/vitex.git", branch: "main"}
+      {:vitex, git: "https://github.com/andresgutgon/vitex.git", branch: "main"},
+
+      # Storage dependencies
+      {:waffle, "~> 1.1"},
+      {:waffle_ecto, "~> 0.0.12"},
+      {:ex_aws, "~> 2.1.2"},
+      {:ex_aws_s3, "~> 2.0"},
+      {:aws_signature, "~> 0.4.0"},
+      {:hackney, "~> 1.9"},
+      {:sweet_xml, "~> 0.6"}
     ]
   end
 

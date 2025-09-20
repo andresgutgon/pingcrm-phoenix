@@ -49,12 +49,18 @@ defmodule Pingcrm.Accounts.UserToken do
      }}
   end
 
+  # TODO: Remove this maybe_put_uuid when uuid is real
   def verify_session_token_query(token) do
     query =
       from token in by_token_and_context_query(token, "session"),
         join: user in assoc(token, :user),
         where: token.inserted_at > ago(@session_validity_in_days, "day"),
-        select: {%{user | authenticated_at: token.authenticated_at}, token.inserted_at}
+        select:
+          {%{
+             user
+             | authenticated_at: token.authenticated_at,
+               uuid: fragment("CAST(? AS text)", user.id)
+           }, token.inserted_at}
 
     {:ok, query}
   end

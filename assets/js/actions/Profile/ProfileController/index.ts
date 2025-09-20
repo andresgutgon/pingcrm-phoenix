@@ -60,7 +60,7 @@ updateProfile.patch = (options?: RouteQueryOptions): RouteDefinition<'patch'> =>
 
 /**
  * @see PingcrmWeb.Profile.ProfileController::change_account
- * @see lib/pingcrm_web/controllers/profile/profile_controller.ex:61
+ * @see lib/pingcrm_web/controllers/profile/profile_controller.ex:60
  * @route /profile/change_account/:id
 */
 
@@ -89,8 +89,37 @@ changeAccount.post = (args: { id: string | number } | [string | number] | string
 })
 
 /**
+ * @see PingcrmWeb.Profile.ProfileController::delete_avatar
+ * @see lib/pingcrm_web/controllers/profile/profile_controller.ex:93
+ * @route /profile/avatar
+*/
+
+export const deleteAvatar = (options?: RouteQueryOptions): RouteDefinition<'delete'> => ({
+  url: deleteAvatar.url(options).path,
+  method: 'delete',
+})
+
+deleteAvatar.definition = {
+  methods: ["delete"],
+  url: '/profile/avatar',
+  parameters: {}
+} satisfies RouteDefinitionWithParameters<['delete']>
+
+deleteAvatar.url = (options?: RouteQueryOptions): WayfinderUrl => {
+  return buildUrl({
+    definition: deleteAvatar.definition,
+    options
+  })
+}
+
+deleteAvatar.delete = (options?: RouteQueryOptions): RouteDefinition<'delete'> => ({
+  url: deleteAvatar.url(options).path,
+  method: 'delete',
+})
+
+/**
  * @see PingcrmWeb.Profile.ProfileController::set_default_account
- * @see lib/pingcrm_web/controllers/profile/profile_controller.ex:79
+ * @see lib/pingcrm_web/controllers/profile/profile_controller.ex:78
  * @route /profile/set_default_account/:account_id
 */
 
@@ -120,7 +149,7 @@ setDefaultAccount.patch = (args: { account_id: string | number } | [string | num
 
 /**
  * @see PingcrmWeb.Profile.ProfileController::update_email
- * @see lib/pingcrm_web/controllers/profile/profile_controller.ex:29
+ * @see lib/pingcrm_web/controllers/profile/profile_controller.ex:28
  * @route /profile/email
 */
 
@@ -149,7 +178,7 @@ updateEmail.patch = (options?: RouteQueryOptions): RouteDefinition<'patch'> => (
 
 /**
  * @see PingcrmWeb.Profile.ProfileController::update_password
- * @see lib/pingcrm_web/controllers/profile/profile_controller.ex:47
+ * @see lib/pingcrm_web/controllers/profile/profile_controller.ex:46
  * @route /profile/password
 */
 
@@ -177,6 +206,6 @@ updatePassword.patch = (options?: RouteQueryOptions): RouteDefinition<'patch'> =
 })
 
 
-const ProfileController = { myProfile, updateProfile, changeAccount, setDefaultAccount, updateEmail, updatePassword }
+const ProfileController = { myProfile, updateProfile, changeAccount, deleteAvatar, setDefaultAccount, updateEmail, updatePassword }
 
 export default ProfileController

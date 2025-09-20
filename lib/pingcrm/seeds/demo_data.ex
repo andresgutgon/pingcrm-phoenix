@@ -7,25 +7,25 @@ defmodule Pingcrm.Seeds.DemoData do
 
     {account, user} =
       create_account_and_confirm(
-        %{name: "Acme Corporation"},
+        %{"name" => "Acme Corporation"},
         %{
-          first_name: "John",
-          last_name: "Doe",
-          email: "johndoe@example.com",
-          password: "secret",
-          password_confirmation: "secret"
+          "first_name" => "John",
+          "last_name" => "Doe",
+          "email" => "johndoe@example.com",
+          "password" => "secret",
+          "password_confirmation" => "secret"
         }
       )
 
     {second_account, _su} =
       create_account_and_confirm(
-        %{name: "Apple Inc."},
+        %{"name" => "Apple Inc."},
         %{
-          first_name: "Tim",
-          last_name: "Cooking",
-          email: "tim@apple.com",
-          password: "secret",
-          password_confirmation: "secret"
+          "first_name" => "Tim",
+          "last_name" => "Cooking",
+          "email" => "tim@apple.com",
+          "password" => "secret",
+          "password_confirmation" => "secret"
         }
       )
 
@@ -37,11 +37,11 @@ defmodule Pingcrm.Seeds.DemoData do
           %User{}
           |> User.registration_changeset(
             %{
-              first_name: "User#{i}",
-              last_name: "Example",
-              email: "user#{i}@example.com",
-              password: "password",
-              password_confirmation: "password"
+              "first_name" => "User#{i}",
+              "last_name" => "Example",
+              "email" => "user#{i}@example.com",
+              "password" => "password",
+              "password_confirmation" => "password"
             },
             validate_password: false
           )
@@ -63,7 +63,7 @@ defmodule Pingcrm.Seeds.DemoData do
   defp create_account_and_confirm(account_attrs, user_attrs) do
     {:ok, {account, user}} =
       Auth.create_account(
-        %{account: account_attrs, user: user_attrs},
+        %{"account" => account_attrs, "user" => user_attrs},
         validate_password: false
       )
 

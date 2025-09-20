@@ -7,14 +7,33 @@ defmodule Pingcrm.Accounts do
   alias Pingcrm.Accounts.{Membership, User, UserToken}
 
   def update_profile(%User{} = user, params) do
-    user
-    |> User.profile_changed_changeset(params)
-    |> Repo.update()
+    old_avatar = user.avatar
+
+    case user
+         |> User.profile_changed_changeset(params)
+         |> Repo.update() do
+      {:ok, updated_user} ->
+        if params["avatar"] == nil and old_avatar do
+          maybe_delete_old_avatar(updated_user, user, params)
+        end
+
+        {:ok, updated_user}
+
+      error ->
+        error
+    end
   end
 
   def set_default_account(%User{} = user, account_id) do
     user
     |> User.default_account_changeset(%{default_account_id: account_id})
+    |> Repo.update()
+  end
+
+  # FIXME: Add tests
+  def set_admin(user, value \\ true) do
+    user
+    |> Ecto.Changeset.change(admin?: value)
     |> Repo.update()
   end
 
@@ -74,5 +93,45 @@ defmodule Pingcrm.Accounts do
   def delete_user_session_token(token) do
     Repo.delete_all(UserToken.by_token_and_context_query(token, "session"))
     :ok
+  end
+
+  defp maybe_delete_old_avatar(changeset, user, %{"avatar" => nil}) do
+    if user.avatar do
+      case Pingcrm.Uploaders.Avatar.delete({user.avatar, user}) do
+        :ok ->
+          maybe_delete_empty_dirs(user)
+          changeset
+
+        {:error, reason} ->
+          require Logger
+          Logger.warning("Failed to delete avatar #{user.avatar}: #{inspect(reason)}")
+          changeset
+      end
+    end
+
+    changeset
+  end
+
+  defp maybe_delete_old_avatar(changeset, _user, _), do: changeset
+
+  # TODO: DRY to reuse this pattern also with account logo
+  defp maybe_delete_empty_dirs(user) do
+    case Application.get_env(:waffle, :storage) do
+      Waffle.Storage.Local ->
+        root = Pingcrm.Storage.Config.storage_root()
+        avatar_dir = Path.join([root, "users/#{user.id}/avatars"])
+        user_dir = Path.join([root, "users/#{user.id}"])
+
+        File.rm_rf(avatar_dir)
+
+        case File.ls(user_dir) do
+          {:ok, []} -> File.rmdir(user_dir)
+          _ -> :ok
+        end
+
+      _ ->
+        # S3/R2 or other storage adapters → do nothing
+        :ok
+    end
   end
 end

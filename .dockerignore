@@ -20,6 +20,11 @@ erl_crash.dump
 /assets/node_modules/
 /priv/static/assets/
 /priv/static/cache_manifest.json
+/priv/uploads
+
+# dev SSL
+docker/dev-certificates/cert.pem
+docker/dev-certificates/key.pem
 
 _build
 deps
@@ -28,3 +33,8 @@ assets/node_modules
 priv/node_modules
 priv/static
 .env
+.env.local
+.env.development
+.env.development.local
+.env.test.local
+.env.production.local

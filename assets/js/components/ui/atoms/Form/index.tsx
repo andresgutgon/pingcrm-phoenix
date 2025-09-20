@@ -3,9 +3,14 @@ import { cn } from '@/lib/utils'
 
 type FormProps = HTMLAttributes<HTMLFormElement> & ComponentPropsWithRef<'form'>
 
+export const FORM_WRAPPER_VERTICAL_SPACE_CLASS = 'space-y-4'
 export function Form({ children, ref, className, ...props }: FormProps) {
   return (
-    <form ref={ref} className={cn('space-y-4', className)} {...props}>
+    <form
+      ref={ref}
+      className={cn(FORM_WRAPPER_VERTICAL_SPACE_CLASS, className)}
+      {...props}
+    >
       {children}
     </form>
   )
