@@ -27,3 +27,6 @@ docker/pgdata/
 *.*-E
 .dialyzer/
 fake_controllers
+
+docker/dev-certificates/key.pem
+docker/dev-certificates/cert.pem
