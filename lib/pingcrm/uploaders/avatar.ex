@@ -9,6 +9,9 @@ defmodule Pingcrm.Uploaders.Avatar do
   use Pingcrm.Storage.DirectUploads.Behaviour
   alias Pingcrm.Uploaders.Avatar
 
+  # Waffle configuration
+  @versions [:original, :thumb, :medium]
+
   @impl true
   def scope(%User{uuid: uuid}), do: %{uuid: uuid}
 
@@ -46,26 +49,11 @@ defmodule Pingcrm.Uploaders.Avatar do
 
   @impl true
   def updated_entity_data(user) do
-    %{
-      avatar:
-        Avatar.url(
-          {user.avatar, user},
-          :thumb,
-          signed: true,
-          expires_in: 86_400
-        ),
-      avatar_medium:
-        Avatar.url(
-          {user.avatar, user},
-          :medium,
-          signed: true,
-          expires_in: 86_400
-        )
-    }
+    @avatar_versions
+    |> Map.new(fn version ->
+      {:"avatar_#{version}", signed_avatar_url(user, version)}
+    end)
   end
-
-  # Waffle configuration
-  @versions [:original, :thumb, :medium]
 
   def storage_dir(version, {_file, scope}) do
     "users/#{scope.uuid}/avatars/#{version}"
@@ -95,5 +83,20 @@ defmodule Pingcrm.Uploaders.Avatar do
       cache_control: "public, max-age=31536000",
       content_type: MIME.from_path(file.file_name)
     ]
+  end
+
+  defp signed_avatar_url(user, version) do
+    case user.avatar do
+      nil ->
+        nil
+
+      avatar ->
+        Avatar.url(
+          {avatar, Avatar.scope(user)},
+          version,
+          signed: true,
+          expires_in: 86_400
+        )
+    end
   end
 end

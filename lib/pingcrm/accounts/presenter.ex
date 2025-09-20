@@ -18,7 +18,7 @@ defmodule Pingcrm.Accounts.Presenter do
       # In production with a real domain assets.pingcrm.com in front of R2 it should work.
       # Signing it necessary because the bucket is private.
       # 24 hours
-      avatar: Avatar.url({user.avatar, user}, :thumb, signed: true, expires_in: 86_400),
+      avatar_thumb: Avatar.url({user.avatar, user}, :thumb, signed: true, expires_in: 86_400),
       avatar_medium: Avatar.url({user.avatar, user}, :medium, signed: true, expires_in: 86_400),
       email_changed: user.email_changed,
       confirmed_at: user.confirmed_at,

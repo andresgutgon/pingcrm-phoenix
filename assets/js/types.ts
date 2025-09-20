@@ -51,7 +51,7 @@ export interface User {
   last_name: string
   initials: string
   email: string
-  avatar?: string
+  avatar_thumb?: string
   avatar_medium?: string
   email_changed?: string
   confirmed_at: string

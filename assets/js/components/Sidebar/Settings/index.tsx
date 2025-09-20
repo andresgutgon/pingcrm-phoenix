@@ -16,7 +16,7 @@ import { deleteMethod } from '@/actions/Auth/SessionsController'
 import { myProfile } from '@/actions/Profile/ProfileController'
 
 function UserProfile({
-  user: { name, email, initials, avatar },
+  user: { name, email, initials, avatar_thumb: avatar },
 }: {
   user: User
 }) {
