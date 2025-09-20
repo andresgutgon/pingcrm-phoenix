@@ -46,96 +46,99 @@ defmodule Pingcrm.Storage.ProcessUploadJob do
           "old_filename" => old_filename
         }
       }) do
-    {:ok, uploader} = Resolver.resolve(uploader_str)
-    {:ok, entity} = uploader.load_entity(entity_id)
+    with {:ok, uploader} <- Resolver.resolve(uploader_str),
+         {:ok, entity} <- uploader.load_entity(entity_id) do
+      try do
+        case get_file(uploader, key, entity) do
+          {:ok, tmp_path} ->
+            dbg("Temp path: #{inspect(tmp_path)}")
 
-    filename = get_filename_from_key(key)
+            case store_file(uploader, entity, tmp_path) do
+              {:ok, entity_updated} ->
+                clean_files(uploader, entity_updated, old_filename, tmp_path)
+                UploaderStatus.ready(uploader, entity_updated)
+                :ok
 
-    # FIXME: This signing URL does not work.
-    # Region `auto` fails inside the worker. But works in the browser?
-    # Also anyway if this is a HUUUUGE file it will timeout.
-    # TODO: Implement with ex_aws or maybe waffle expose `.get`
-    url =
-      uploader.url(
-        {filename, uploader.scope(entity)},
-        :original,
-        signed: true,
-        expires_in: 60
-      )
+              :discard ->
+                # Permanent failure, do not retry
+                raise Oban.JobError, reason: :discard
 
-    try do
-      case get_file(uploader, filename, entity) do
-        {:ok, tmp_path} ->
-          dbg("Temp path: #{inspect(tmp_path)}")
+              {:error, reason} ->
+                # Transient failure, propagate to Oban for retry
+                raise Oban.JobError, reason: reason
+            end
 
-          case uploader.store({tmp_path, uploader.scope(entity)}) do
-            {:ok, filename} ->
-              field = uploader.field()
-              now = DateTime.utc_now() |> DateTime.truncate(:second)
-
-              case Repo.transact(fn repo ->
-                     with {:ok, _s} <- UploaderStatus.ready(uploader, entity),
-                          {:ok, entity_updated} <-
-                            repo.update(
-                              Ecto.Changeset.change(entity, %{
-                                field => %{file_name: filename, updated_at: now}
-                              })
-                            ) do
-                       {:ok, entity_updated}
-                     end
-                   end) do
-                {:ok, entity_updated} ->
-                  if old_filename do
-                    uploader.delete({old_filename, entity_updated})
-                  end
-
-                  File.rm(tmp_path)
-
-                  {:ok, entity_updated}
-
-                {:error, reason} ->
-                  case reason do
-                    %Ecto.Changeset{} ->
-                      # Permanent like the entity was deleted
-                      # Or the entity is in bad state and validation fails
-                      UploaderStatus.fail(
-                        uploader,
-                        entity,
-                        "DB update failed: #{inspect(reason.errors)}"
-                      )
-
-                      :discard
-
-                    _ ->
-                      # Transient → oban will retry
-                      {:error, reason}
-                  end
-              end
-
-            {:error, :waffle_hackney_error = reason} ->
-              dbg(reason)
-              # Probably transient → let Oban retry
-              {:error, :waffle_hackney_error}
-
-            {:error, reason} ->
-              # Permanent → notify + discard
-              UploaderStatus.fail(uploader, entity, "Upload failed: #{inspect(reason)}")
-              :discard
-          end
-
-        {:error, reason, tmp_path} ->
-          File.rm(tmp_path)
-          {:error, reason}
+          {:error, reason, tmp_path} ->
+            File.rm(tmp_path)
+            {:error, reason}
+        end
+      rescue
+        e ->
+          # Propagate the error to Oban for retries
+          reraise e, __STACKTRACE__
       end
-    rescue
-      e ->
-        reason = Exception.message(e)
-        # Propagate the error to Oban for retries
-        reraise e, __STACKTRACE__
+    else
+      _ ->
+        # Without entity and uploader don't retry
+        raise Oban.JobError, reason: :discard
     end
   end
 
-  defp get_file(uploader, filename, entity) do
+  # This method:
+  # - Store the file using the uploader. All the versions
+  # - Save the filename in the entity
+  defp store_file(uploader, entity, tmp_path) do
+    case uploader.store({tmp_path, uploader.scope(entity)}) do
+      {:ok, filename} ->
+        field = uploader.field()
+        now = DateTime.utc_now() |> DateTime.truncate(:second)
+
+        case Repo.transact(fn repo ->
+               with {:ok, _s} <- UploaderStatus.ready(uploader, entity),
+                    {:ok, entity_updated} <-
+                      repo.update(
+                        Ecto.Changeset.change(entity, %{
+                          field => %{file_name: filename, updated_at: now}
+                        })
+                      ) do
+                 {:ok, entity_updated}
+               end
+             end) do
+          {:ok, entity_updated} ->
+            {:ok, entity_updated}
+
+          {:error, reason} ->
+            case reason do
+              %Ecto.Changeset{} ->
+                # Permanent like the entity was deleted
+                # Or the entity is in bad state and validation fails
+                UploaderStatus.fail(
+                  uploader,
+                  entity,
+                  "DB update failed: #{inspect(reason.errors)}"
+                )
+
+                :discard
+
+              _ ->
+                # Transient → oban will retry
+                {:error, reason}
+            end
+        end
+
+      {:error, :waffle_hackney_error = reason} ->
+        # Probably transient → let Oban retry
+        {:error, :waffle_hackney_error}
+
+      {:error, reason} ->
+        # Permanent → notify + discard
+        UploaderStatus.fail(uploader, entity, "Upload failed: #{inspect(reason)}")
+        :discard
+    end
+  end
+
+  defp get_file(uploader, key, entity) do
+    filename = get_filename_from_key(key)
     s3_bucket = uploader.bucket()
 
     destination_dir =
@@ -164,6 +167,13 @@ defmodule Pingcrm.Storage.ProcessUploadJob do
       {:ok, _} -> {:ok, tmp_path}
       {:error, reason} -> {:error, reason, tmp_path}
     end
+  end
+
+  defp clean_files(uploader, entity, old_filename, tmp_path) do
+    if old_filename do
+      uploader.delete({old_filename, entity})
+    end
+    File.rm(tmp_path)
   end
 
   defp get_filename_from_key(key) do
