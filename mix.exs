@@ -36,7 +36,6 @@ defmodule Pingcrm.MixProject do
 
   defp deps do
     [
-      {:storage, "== 0.1.0"},
       {:bcrypt_elixir, "~> 3.0"},
       {:phoenix, "~> 1.8.0-rc.3", override: true},
       {:phoenix_ecto, "~> 4.6"},
