@@ -36,6 +36,7 @@ defmodule Pingcrm.MixProject do
 
   defp deps do
     [
+      {:storage, "== 0.1.0"},
       {:bcrypt_elixir, "~> 3.0"},
       {:phoenix, "~> 1.8.0-rc.3", override: true},
       {:phoenix_ecto, "~> 4.6"},
@@ -64,7 +65,9 @@ defmodule Pingcrm.MixProject do
         git: "https://github.com/andresgutgon/inertia-phoenix.git",
         branch: "feature/inertia-vitejs-integration"
       },
-      {:vitex, git: "https://github.com/andresgutgon/vitex.git", branch: "main"}
+      {:vitex, git: "https://github.com/andresgutgon/vitex.git", branch: "main"},
+      {:igniter, "~> 0.6", only: :dev, runtime: false},
+      {:phoenix_contrib_storage, path: "/storage"}
     ]
   end
 

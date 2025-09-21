@@ -12,6 +12,7 @@ services:
       - ./deps:/pingcrm/deps
       - node_modules_container:/pingcrm/assets/node_modules
       - /Users/andres/code/opensource/inertia-phoenix:/inertia-phoenix
+      - /Users/andres/code/opensource/phoenix_contrib/storage:/storage
       - ~/.iex_history:/root/.iex_history
     depends_on:
       - db
