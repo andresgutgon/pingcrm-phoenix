@@ -2,7 +2,7 @@ import { buildUrl, type RouteQueryOptions, type RouteDefinition, type RouteDefin
 
 /**
  * @see PingcrmWeb.Account.BillingController::show
- * @see lib/pingcrm_web/controllers/account/billing_controller.ex:9
+ * @see lib/pingcrm_web/controllers/account/billing_controller.ex:13
  * @route /account/billing
 */
 

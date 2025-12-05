@@ -18,7 +18,7 @@ defmodule Pingcrm.Accounts.Auth do
 
         user_attrs =
           user_attrs
-          |> Map.put("default_account_id", account.id)
+          |> Map.put(:default_account_id, account.id)
 
         {:ok, user} =
           Repo.insert(
