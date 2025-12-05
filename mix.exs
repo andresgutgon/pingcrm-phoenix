@@ -20,7 +20,8 @@ defmodule Pingcrm.MixProject do
           "lib/mix/tasks/generate_controllers.task.ex",
           "lib/mix/tasks/profile.task.ex"
         ]
-      ]
+      ],
+      consolidate_protocols: Mix.env() != :dev
     ]
   end
 
@@ -36,6 +37,17 @@ defmodule Pingcrm.MixProject do
 
   defp deps do
     [
+      {:picosat_elixir, "~> 0.2"},
+      {:sourceror, "~> 1.8", only: [:dev, :test]},
+      {:oban, "~> 2.0"},
+      {:usage_rules, "~> 0.1", only: [:dev]},
+      {:oban_web, "~> 2.0"},
+      {:ash_oban, "~> 0.6"},
+      {:ash_authentication_phoenix, "~> 2.0"},
+      {:ash_authentication, "~> 4.0"},
+      {:ash_phoenix, "~> 2.0"},
+      {:ash_postgres, "~> 2.0"},
+      {:ash, "~> 3.0"},
       {:bcrypt_elixir, "~> 3.0"},
       {:phoenix, "~> 1.8.0-rc.3", override: true},
       {:phoenix_ecto, "~> 4.6"},
@@ -51,7 +63,7 @@ defmodule Pingcrm.MixProject do
       {:jason, "~> 1.2"},
       {:dns_cluster, "~> 0.1.1"},
       {:bandit, "~> 1.5"},
-      {:tidewave, "~> 0.2", only: :dev},
+      {:tidewave, "~> 0.5", only: [:dev]},
       {:credo, "~> 1.7", only: [:dev, :test], runtime: false},
       {:dialyxir, "~> 1.3", only: [:dev], runtime: false},
       {:ex_machina, "~> 2.8.0", only: :test},

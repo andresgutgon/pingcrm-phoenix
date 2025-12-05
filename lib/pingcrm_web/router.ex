@@ -17,6 +17,7 @@ defmodule PingcrmWeb.Router do
   #           end}
 
   import PingcrmWeb.UserAuth
+  import Oban.Web.Router
 
   pipeline :browser do
     plug :accepts, ["html"]
@@ -113,4 +114,13 @@ defmodule PingcrmWeb.Router do
   #     resources("/fake-controller-#{i}", controller)
   #   end
   # end
+
+  # Enable Oban Web dashboard in development
+  if Mix.env() == :dev do
+    scope "/dev" do
+      pipe_through :browser
+
+      oban_dashboard "/oban"
+    end
+  end
 end

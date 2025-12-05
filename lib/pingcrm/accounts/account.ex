@@ -1,24 +1,47 @@
 defmodule Pingcrm.Accounts.Account do
   @moduledoc false
-  use Ecto.Schema
-  import Ecto.Changeset
+  
+  use Ash.Resource,
+    otp_app: :pingcrm,
+    domain: Pingcrm.Accounts,
+    data_layer: AshPostgres.DataLayer
 
-  alias Pingcrm.Accounts.Membership
+  alias Pingcrm.Accounts.{Membership, User}
 
-  schema "accounts" do
-    field :name, :string
-
-    has_many :memberships, Membership
-    has_many :members, through: [:memberships, :user]
-
-    timestamps(type: :utc_datetime)
+  postgres do
+    table "accounts"
+    repo Pingcrm.Repo
   end
 
-  @doc false
-  def changeset(account, attrs) do
-    account
-    |> cast(attrs, [:name])
-    |> validate_required([:name])
-    |> validate_length(:name, min: 2)
+  attributes do
+    uuid_primary_key :id
+    attribute :name, :string, allow_nil?: false
+
+    timestamps()
+  end
+
+  relationships do
+    has_many :memberships, Membership
+    many_to_many :members, User do
+      through Membership
+      source_attribute_on_join_resource :account_id
+      destination_attribute_on_join_resource :user_id
+    end
+  end
+
+  actions do
+    defaults [:read, :destroy]
+    
+    create :create do
+      accept [:name]
+      validate present([:name])
+      validate string_length(:name, min: 2)
+    end
+
+    update :update do
+      accept [:name]
+      validate present([:name])
+      validate string_length(:name, min: 2)
+    end
   end
 end

@@ -1,41 +1,54 @@
 defmodule Pingcrm.Accounts.Membership do
-  use Ecto.Schema
-  import Ecto.Changeset
+  use Ash.Resource,
+    otp_app: :pingcrm,
+    domain: Pingcrm.Accounts,
+    data_layer: AshPostgres.DataLayer
 
-  alias Pingcrm.Repo
   alias Pingcrm.Accounts.{Account, User}
 
-  schema "memberships" do
-    belongs_to :user, User
-    belongs_to :account, Account
-    field :role, :string, default: "member"
-
-    timestamps(type: :utc_datetime)
+  postgres do
+    table "memberships"
+    repo Pingcrm.Repo
   end
 
-  @doc false
-  def changeset(membership, attrs) do
-    membership
-    |> cast(attrs, [:user_id, :account_id, :role])
-    |> validate_required([:user_id, :account_id, :role])
-    |> validate_inclusion(:role, ["member", "admin"])
-    |> unique_constraint([:user_id, :account_id])
+  attributes do
+    uuid_primary_key :id
+    attribute :role, :string, default: "member", allow_nil?: false
+
+    timestamps()
   end
 
-  def add_admin(user, account) do
-    add_membership(user, account, "admin")
+  relationships do
+    belongs_to :user, User, allow_nil?: false
+    belongs_to :account, Account, allow_nil?: false
   end
 
-  def add_member(user, account) do
-    add_membership(user, account, "member")
+  actions do
+    defaults [:read, :destroy]
+    
+    create :create do
+      accept [:user_id, :account_id, :role]
+      validate present([:user_id, :account_id, :role])
+      validate one_of(:role, ["member", "admin"])
+    end
+
+    create :add_admin do
+      accept [:user_id, :account_id]
+      change set_attribute(:role, "admin")
+    end
+
+    create :add_member do
+      accept [:user_id, :account_id]
+      change set_attribute(:role, "member")
+    end
+
+    update :update do
+      accept [:role]
+      validate one_of(:role, ["member", "admin"])
+    end
   end
 
-  defp add_membership(user, account, role) do
-    {:ok, membership} =
-      user
-      |> Ecto.build_assoc(:memberships, %{account_id: account.id, role: role})
-      |> Repo.insert()
-
-    membership
+  identities do
+    identity :user_account, [:user_id, :account_id]
   end
 end

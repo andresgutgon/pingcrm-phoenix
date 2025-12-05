@@ -1,6 +1,6 @@
 [
-  import_deps: [:ecto, :ecto_sql, :phoenix],
+  import_deps: [:ash, :reactor, :ecto, :ecto_sql, :phoenix],
   subdirectories: ["priv/*/migrations"],
-  plugins: [],
+  plugins: [Spark.Formatter],
   inputs: ["*.{heex,ex,exs}", "{config,lib,test}/**/*.{heex,ex,exs}", "priv/*/seeds.exs"]
 ]

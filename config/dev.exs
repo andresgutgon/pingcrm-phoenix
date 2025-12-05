@@ -1,5 +1,7 @@
 import Config
 
+config :ash, policies: [show_policy_breakdowns?: true]
+
 config :pingcrm, Pingcrm.Repo,
   username: "pingcrm",
   password: "secret",
