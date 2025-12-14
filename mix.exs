@@ -64,7 +64,9 @@ defmodule Pingcrm.MixProject do
         git: "https://github.com/andresgutgon/inertia-phoenix.git",
         branch: "feature/inertia-vitejs-integration"
       },
-      {:vitex, git: "https://github.com/andresgutgon/vitex.git", branch: "main"}
+      {:vitex, git: "https://github.com/andresgutgon/vitex.git", branch: "main"},
+      {:igniter, "~> 0.6", only: :dev, runtime: false},
+      {:phoenix_contrib_storage, path: "/storage"}
     ]
   end
 
