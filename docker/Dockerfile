@@ -10,6 +10,7 @@ FROM hexpm/elixir:${ELIXIR_VERSION}-erlang-${OTP_VERSION}-debian-${DEBIAN_VERSIO
 
 RUN apt-get update && \
     apt-get install -y build-essential git curl && \
+    apt-get install -y imagemagick && \
     apt-get clean && rm -rf /var/lib/apt/lists/*
 
 RUN mix local.hex --force && \
@@ -70,7 +71,6 @@ RUN pnpm install --prefix ./assets
 
 RUN mkdir config
 COPY config/config.exs config/prod.exs config/
-RUN mix clean
 RUN mix deps.compile
 
 COPY priv priv

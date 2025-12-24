@@ -16,7 +16,6 @@ defmodule PingcrmWeb.Profile.ProfileController do
     case Accounts.update_profile(conn.assigns.current_scope.user, params) do
       {:ok, _u} ->
         conn
-        |> put_flash(:info, "Profile updated")
         |> redirect(to: ~p"/profile")
 
       {:error, changeset} ->
@@ -88,6 +87,19 @@ defmodule PingcrmWeb.Profile.ProfileController do
         conn
         |> assign_errors(changeset)
         |> redirect(to: "/")
+    end
+  end
+
+  def delete_avatar(conn, _params) do
+    case Accounts.update_profile(conn.assigns.current_scope.user, %{"avatar" => nil}) do
+      {:ok, _user} ->
+        conn
+        |> redirect(to: ~p"/profile")
+
+      {:error, _changeset} ->
+        conn
+        |> put_flash(:error, "Could not remove avatar")
+        |> redirect(to: ~p"/profile")
     end
   end
 

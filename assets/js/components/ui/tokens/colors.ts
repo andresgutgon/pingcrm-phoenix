@@ -58,6 +58,9 @@ export const colors = {
   },
   borderColors: {
     border: 'border-border',
+    primary: 'border-primary',
+    foreground: 'border-foreground',
+    input: 'border-input',
     destructive: 'border-destructive-border',
     warning: 'border-warning-border',
     sidebar: 'border-sidebar',

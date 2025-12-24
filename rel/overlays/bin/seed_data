@@ -1,0 +1,6 @@
+#!/bin/sh
+set -e
+
+cd -P -- "$(dirname -- "$0")"
+
+exec ./pingcrm eval "Pingcrm.Release.seed_demo_data()"

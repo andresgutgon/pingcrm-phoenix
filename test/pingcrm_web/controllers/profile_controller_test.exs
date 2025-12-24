@@ -88,7 +88,6 @@ defmodule PingcrmWeb.ProfileControllerTest do
         })
 
       assert redirected_to(conn) == ~p"/profile"
-      assert Phoenix.Flash.get(conn.assigns.flash, :info) =~ "Profile updated"
 
       updated_user = Accounts.get_user!(user.id)
       assert updated_user.first_name == user.first_name
@@ -140,7 +139,6 @@ defmodule PingcrmWeb.ProfileControllerTest do
         })
 
       assert redirected_to(conn) == ~p"/profile"
-      assert Phoenix.Flash.get(conn.assigns.flash, :info) =~ "Profile updated"
 
       updated_user = Accounts.get_user!(user.id)
       assert updated_user.first_name == "  Jane  "

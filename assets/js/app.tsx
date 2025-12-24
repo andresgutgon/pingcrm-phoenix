@@ -5,25 +5,31 @@ import { createRoot, hydrateRoot } from 'react-dom/client'
 import axios from 'axios'
 import { createInertiaApp } from '@inertiajs/react'
 import { resolvePage } from '@/lib/pageHelpers'
+import { PageProps } from '@/types'
+import { WebsocketsProvider } from '@/Providers/WebsocketsProvider'
 
 axios.defaults.xsrfHeaderName = 'x-csrf-token'
 
 createInertiaApp({
   resolve: resolvePage,
   setup({ App, el, props }) {
-    if (props.initialPage.props.ssr) {
-      hydrateRoot(
-        el,
-        <StrictMode>
+    const {
+      ssr,
+      auth: { socket_token: authToken },
+    } = props.initialPage.props as PageProps
+
+    const app = (
+      <StrictMode>
+        <WebsocketsProvider authToken={authToken}>
           <App {...props} />
-        </StrictMode>,
-      )
+        </WebsocketsProvider>
+      </StrictMode>
+    )
+
+    if (ssr) {
+      hydrateRoot(el, app)
     } else {
-      createRoot(el).render(
-        <StrictMode>
-          <App {...props} />
-        </StrictMode>,
-      )
+      createRoot(el).render(app)
     }
   },
 })

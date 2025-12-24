@@ -6,6 +6,7 @@ import { Card } from '@/components/ui/atoms/Card'
 import { Text } from '@/components/ui/atoms/Text'
 import { signup } from '@/actions/Auth/SignupsController'
 import { login } from '@/actions/Auth/SessionsController'
+import { useHost } from '@/hooks/useHost'
 
 function AuthLink({ text, href }: { text: string; href: string }) {
   return (
@@ -39,15 +40,19 @@ function AuthLayout({
   showToS?: boolean
   children: ReactNode
 }) {
+  const { buildSiteUrl } = useHost()
   return (
     <MainLayout title={title}>
       <div className='bg-sidebar flex min-h-svh flex-col items-center justify-center gap-6 p-6 md:p-10'>
         <div className='flex w-full max-w-sm flex-col gap-6'>
-          <Link href='/' className='flex items-center gap-2 self-center'>
+          <a
+            href={buildSiteUrl()}
+            className='flex items-center gap-2 self-center'
+          >
             <div className='text-primary dark:text-foreground'>
               <Logo className='block fill-current w-32' />
             </div>
-          </Link>
+          </a>
           <div className='flex flex-col gap-6'>
             {card ? (
               <Card

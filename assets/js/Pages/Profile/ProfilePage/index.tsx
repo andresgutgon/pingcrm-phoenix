@@ -31,19 +31,17 @@ type TabValue = (typeof TABS)[keyof typeof TABS]
 function ProfilePage() {
   return (
     <div className='mx-auto pt-16 w-full @xl/appLayout:w-2/3'>
-      <div className='flex flex-col gap-y-4'>
-        <Tabs<TabValue> options={SECTIONS} defaultValue='editProfile'>
-          <Tabs.Content value='editProfile'>
-            <EditProfile />
-          </Tabs.Content>
-          <Tabs.Content value='changeEmail'>
-            <ChangeEmail />
-          </Tabs.Content>
-          <Tabs.Content value='changePassword'>
-            <ChangePassword />
-          </Tabs.Content>
-        </Tabs>
-      </div>
+      <Tabs<TabValue> options={SECTIONS} defaultValue='editProfile'>
+        <Tabs.Content value='editProfile'>
+          <EditProfile />
+        </Tabs.Content>
+        <Tabs.Content value='changeEmail'>
+          <ChangeEmail />
+        </Tabs.Content>
+        <Tabs.Content value='changePassword'>
+          <ChangePassword />
+        </Tabs.Content>
+      </Tabs>
     </div>
   )
 }

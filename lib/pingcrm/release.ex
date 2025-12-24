@@ -6,6 +6,16 @@ defmodule Pingcrm.Release do
   @app :pingcrm
 
   @doc """
+  Run the demo data seeding inside a release.
+  """
+  def seed_demo_data do
+    prepare_app()
+
+    Pingcrm.Seeds.DemoData.create()
+    IO.puts("✅ Demo data successfully seeded")
+  end
+
+  @doc """
   Print migration status for the given type: :default or :data.
   """
   def migration_status(type \\ :default) do
@@ -63,6 +73,11 @@ defmodule Pingcrm.Release do
   defp pad(content, size), do: to_string(content) |> String.pad_trailing(size)
 
   defp repos, do: Application.fetch_env!(@app, :ecto_repos)
+
+  defp prepare_app do
+    load_app()
+    Application.ensure_all_started(@app)
+  end
 
   defp load_app, do: Application.load(@app)
 end
